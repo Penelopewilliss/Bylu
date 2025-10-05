@@ -482,15 +482,33 @@ export default function WorkdayManagerScreen() {
   const resetWorkday = () => {
     Alert.alert(
       'Reset Workday',
-      'Are you sure you want to reset your workday schedule?',
+      'Are you sure you want to reset your workday schedule? This will clear all sessions and stop your current workday.',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
           text: 'Reset', 
           style: 'destructive',
           onPress: () => {
+            // Clear all sessions
             setSessions([]);
+            // Stop workday
             setWorkdayStarted(false);
+            // Clear any modal states
+            setEditModalVisible(false);
+            setAddSessionModalVisible(false);
+            setTimePickerVisible(false);
+            setSelectedSession(null);
+            // Clear edit form data
+            setEditTitle('');
+            setEditStartTime('');
+            setEditEndTime('');
+            // Clear new session form data
+            setNewSessionTitle('');
+            setNewSessionStartTime('');
+            setNewSessionEndTime('');
+            setNewSessionType('focus');
+            
+            Alert.alert('Success', 'Workday has been reset successfully!');
           }
         }
       ]
