@@ -32,6 +32,214 @@ interface TimeSlot {
   minute: number;
 }
 
+// Time Picker Modal Component
+interface TimePickerModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onTimeSelect: (time: string) => void;
+  initialTime?: string;
+  title: string;
+  colors: any;
+}
+
+const TimePickerModal: React.FC<TimePickerModalProps> = ({
+  visible,
+  onClose,
+  onTimeSelect,
+  initialTime = '09:00',
+  title,
+  colors
+}) => {
+  const [selectedHour, setSelectedHour] = useState(9);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+
+  useEffect(() => {
+    if (initialTime) {
+      const [hour, minute] = initialTime.split(':').map(Number);
+      setSelectedHour(hour);
+      setSelectedMinute(minute);
+    }
+  }, [initialTime]);
+
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const minutes = Array.from({ length: 60 }, (_, i) => i);
+
+  const renderScrollPicker = (
+    items: number[],
+    selectedValue: number,
+    onValueChange: (value: number) => void,
+    formatValue: (value: number) => string = (v) => v.toString().padStart(2, '0')
+  ) => (
+    <View style={timePickerStyles.pickerContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={timePickerStyles.scrollContainer}
+        decelerationRate="fast"
+        snapToInterval={40}
+        snapToAlignment="center"
+        contentOffset={{ x: 0, y: selectedValue * 40 }}
+      >
+        {items.map((item) => (
+          <TouchableOpacity
+            key={item}
+            style={[
+              timePickerStyles.pickerItem,
+              item === selectedValue && timePickerStyles.selectedPickerItem
+            ]}
+            onPress={() => onValueChange(item)}
+          >
+            <Text style={[
+              timePickerStyles.pickerItemText,
+              { color: item === selectedValue ? colors.primary : colors.textPrimary }
+            ]}>
+              {formatValue(item)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
+  const handleConfirm = () => {
+    const timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+    onTimeSelect(timeString);
+    onClose();
+  };
+
+  const timePickerStyles = StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContent: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 20,
+      padding: 30,
+      width: width * 0.85,
+      maxHeight: '70%',
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+      textAlign: 'center',
+      marginBottom: 30,
+    },
+    pickersContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      marginBottom: 30,
+    },
+    pickerContainer: {
+      width: 80,
+      height: 200,
+      backgroundColor: colors.inputBackground,
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+    scrollContainer: {
+      paddingVertical: 80,
+    },
+    pickerItem: {
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    selectedPickerItem: {
+      backgroundColor: colors.primaryLight || colors.primary + '20',
+    },
+    pickerItemText: {
+      fontSize: 18,
+      fontWeight: '500',
+    },
+    pickerLabel: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginTop: 10,
+    },
+    modalActions: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    modalButton: {
+      flex: 1,
+      paddingVertical: 15,
+      borderRadius: 10,
+      alignItems: 'center',
+      marginHorizontal: 5,
+    },
+    cancelButton: {
+      backgroundColor: colors.inputBackground,
+    },
+    confirmButton: {
+      backgroundColor: colors.primary,
+    },
+    buttonText: {
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    cancelButtonText: {
+      color: colors.textSecondary,
+    },
+    confirmButtonText: {
+      color: colors.background,
+    },
+  });
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={timePickerStyles.modalOverlay}>
+        <View style={timePickerStyles.modalContent}>
+          <Text style={timePickerStyles.modalTitle}>{title}</Text>
+          
+          <View style={timePickerStyles.pickersContainer}>
+            <View>
+              {renderScrollPicker(hours, selectedHour, setSelectedHour)}
+              <Text style={timePickerStyles.pickerLabel}>Hour</Text>
+            </View>
+            
+            <Text style={{ fontSize: 24, color: colors.textPrimary, marginHorizontal: 20 }}>:</Text>
+            
+            <View>
+              {renderScrollPicker(minutes, selectedMinute, setSelectedMinute)}
+              <Text style={timePickerStyles.pickerLabel}>Minute</Text>
+            </View>
+          </View>
+          
+          <View style={timePickerStyles.modalActions}>
+            <TouchableOpacity
+              style={[timePickerStyles.modalButton, timePickerStyles.cancelButton]}
+              onPress={onClose}
+            >
+              <Text style={[timePickerStyles.buttonText, timePickerStyles.cancelButtonText]}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[timePickerStyles.modalButton, timePickerStyles.confirmButton]}
+              onPress={handleConfirm}
+            >
+              <Text style={[timePickerStyles.buttonText, timePickerStyles.confirmButtonText]}>
+                Confirm
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 export default function WorkdayManagerScreen() {
   const { tasks } = useApp();
   const { colors } = useTheme();
@@ -46,6 +254,11 @@ export default function WorkdayManagerScreen() {
   const [editTitle, setEditTitle] = useState('');
   const [editStartTime, setEditStartTime] = useState('');
   const [editEndTime, setEditEndTime] = useState('');
+
+  // Time picker modal state
+  const [timePickerVisible, setTimePickerVisible] = useState(false);
+  const [timePickerTitle, setTimePickerTitle] = useState('');
+  const [timePickerType, setTimePickerType] = useState<'workdayStart' | 'workdayEnd' | 'editStart' | 'editEnd'>('workdayStart');
 
   // Color themes for different session types
   const sessionColors = {
@@ -202,6 +415,46 @@ export default function WorkdayManagerScreen() {
     ) || null;
   };
 
+  // Time picker handlers
+  const openTimePicker = (type: 'workdayStart' | 'workdayEnd' | 'editStart' | 'editEnd', title: string) => {
+    setTimePickerType(type);
+    setTimePickerTitle(title);
+    setTimePickerVisible(true);
+  };
+
+  const handleTimePickerSelect = (time: string) => {
+    switch (timePickerType) {
+      case 'workdayStart':
+        setWorkdayStart(time);
+        break;
+      case 'workdayEnd':
+        setWorkdayEnd(time);
+        break;
+      case 'editStart':
+        setEditStartTime(time);
+        break;
+      case 'editEnd':
+        setEditEndTime(time);
+        break;
+    }
+    setTimePickerVisible(false);
+  };
+
+  const getInitialTimeForPicker = (): string => {
+    switch (timePickerType) {
+      case 'workdayStart':
+        return workdayStart;
+      case 'workdayEnd':
+        return workdayEnd;
+      case 'editStart':
+        return editStartTime;
+      case 'editEnd':
+        return editEndTime;
+      default:
+        return '09:00';
+    }
+  };
+
   // Session actions
   const startWorkday = () => {
     const newSchedule = generateWorkdaySchedule();
@@ -342,22 +595,22 @@ export default function WorkdayManagerScreen() {
           <View style={styles.settingsContainer}>
             <View style={styles.timeSettingRow}>
               <Text style={styles.settingLabel}>Start time:</Text>
-              <TextInput
-                style={styles.timeInput}
-                value={workdayStart}
-                onChangeText={setWorkdayStart}
-                placeholder="09:00"
-              />
+              <TouchableOpacity
+                style={styles.timeButton}
+                onPress={() => openTimePicker('workdayStart', 'Select Start Time')}
+              >
+                <Text style={styles.timeButtonText}>{workdayStart}</Text>
+              </TouchableOpacity>
             </View>
             
             <View style={styles.timeSettingRow}>
               <Text style={styles.settingLabel}>End time:</Text>
-              <TextInput
-                style={styles.timeInput}
-                value={workdayEnd}
-                onChangeText={setWorkdayEnd}
-                placeholder="17:00"
-              />
+              <TouchableOpacity
+                style={styles.timeButton}
+                onPress={() => openTimePicker('workdayEnd', 'Select End Time')}
+              >
+                <Text style={styles.timeButtonText}>{workdayEnd}</Text>
+              </TouchableOpacity>
             </View>
             
             <TouchableOpacity
@@ -481,20 +734,20 @@ export default function WorkdayManagerScreen() {
             />
             
             <Text style={styles.inputLabel}>Start Time</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={editStartTime}
-              onChangeText={setEditStartTime}
-              placeholder="HH:MM"
-            />
+            <TouchableOpacity
+              style={styles.timeButton}
+              onPress={() => openTimePicker('editStart', 'Select Start Time')}
+            >
+              <Text style={styles.timeButtonText}>{editStartTime || 'HH:MM'}</Text>
+            </TouchableOpacity>
             
             <Text style={styles.inputLabel}>End Time</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={editEndTime}
-              onChangeText={setEditEndTime}
-              placeholder="HH:MM"
-            />
+            <TouchableOpacity
+              style={styles.timeButton}
+              onPress={() => openTimePicker('editEnd', 'Select End Time')}
+            >
+              <Text style={styles.timeButtonText}>{editEndTime || 'HH:MM'}</Text>
+            </TouchableOpacity>
             
             <View style={styles.modalActions}>
               <TouchableOpacity
@@ -513,6 +766,16 @@ export default function WorkdayManagerScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Time Picker Modal */}
+      <TimePickerModal
+        visible={timePickerVisible}
+        onClose={() => setTimePickerVisible(false)}
+        onTimeSelect={handleTimePickerSelect}
+        initialTime={getInitialTimeForPicker()}
+        title={timePickerTitle}
+        colors={colors}
+      />
     </View>
   );
 }
@@ -667,6 +930,21 @@ const createStyles = (colors: any) => StyleSheet.create({
     textAlign: 'center',
     backgroundColor: colors.cardBackground,
     color: colors.text,
+  },
+  timeButton: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: 12,
+    minWidth: 80,
+    backgroundColor: colors.cardBackground,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timeButtonText: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '500',
   },
   toggle: {
     width: 50,

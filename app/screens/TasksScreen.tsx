@@ -507,7 +507,7 @@ export default function TasksScreen() {
           onPress={() => setShowAddModal(true)}
           activeOpacity={0.8}
         >
-          <Text style={styles.addButtonText}>+ Add Task</Text>
+          <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
       </View>
 
