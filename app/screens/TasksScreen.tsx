@@ -126,7 +126,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   priorityText: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.white,
+    color: colors.buttonText,
   },
   deleteButton: {
     backgroundColor: colors.peach,
@@ -233,10 +233,10 @@ const createStyles = (colors: any) => StyleSheet.create({
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.white,
+    color: colors.buttonText,
   },
   addButtonText: {
-    color: colors.white,
+    color: colors.buttonText,
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -402,7 +402,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontFamily: Fonts.body?.fontFamily || 'System',
   },
   priorityButtonTextActive: {
-    color: colors.white,
+    color: colors.buttonText,
   },
   createButton: {
     flex: 1,
@@ -417,7 +417,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   createButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.white,
+    color: colors.buttonText,
     fontFamily: Fonts.body?.fontFamily || 'System',
   },
 });

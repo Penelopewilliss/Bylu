@@ -155,6 +155,7 @@ function TopBar({
 
   return (
     <View style={styles.topBar}>
+      <View style={styles.spacer} />
       <View style={styles.currentTab}>
         <Text style={styles.currentTabLabel}>{getTabLabel(activeTab)}</Text>
       </View>
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
   // Top Bar Styles
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#F7D1DA', // Light pink
     paddingHorizontal: 16,
@@ -304,14 +305,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   currentTab: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    pointerEvents: 'none',
   },
   currentTabEmoji: {
     fontSize: 20,
@@ -327,6 +323,9 @@ const styles = StyleSheet.create({
     fontStyle: 'italic', // Add italic for handwritten feel
     letterSpacing: 1,
     textAlign: 'center',
+  },
+  spacer: {
+    width: 34, // Same width as hamburger button to balance the layout
   },
   hamburgerButton: {
     padding: 8, // Reduced from 12

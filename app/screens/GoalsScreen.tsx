@@ -395,7 +395,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 20,
   },
   addButtonText: {
-    color: 'white',
+    color: colors.buttonText,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -448,7 +448,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   progressPercentage: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: 'white',
+    color: colors.buttonText,
   },
   tasksPreview: {
     marginBottom: 16,
@@ -512,7 +512,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     minHeight: 44,
   },
   editButtonText: {
-    color: 'white',
+    color: colors.buttonText,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -560,7 +560,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 8,
   },
   saveButtonText: {
-    color: 'white',
+    color: colors.buttonText,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -620,7 +620,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
   },
   addTaskButtonText: {
-    color: 'white',
+    color: colors.buttonText,
     fontSize: 16,
     fontWeight: '600',
   },

@@ -167,12 +167,12 @@ const createStyles = (colors: any) => StyleSheet.create({
   cardTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.buttonText,
     marginTop: 4,
   },
   cardSubtitle: {
     fontSize: 11,
-    color: '#FFFFFF',
+    color: colors.buttonText,
     textAlign: 'center',
     opacity: 0.9,
   },

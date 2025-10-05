@@ -1413,7 +1413,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     elevation: 5,
   },
   startButtonText: {
-    color: colors.white,
+    color: colors.buttonText,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -1460,7 +1460,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 12,
   },
   doneEditingText: {
-    color: colors.white,
+    color: colors.buttonText,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -1656,7 +1656,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '600',
   },
   saveButtonText: {
-    color: colors.white,
+    color: colors.buttonText,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -1709,7 +1709,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.primary,
   },
   topButtonText: {
-    color: colors.white,
+    color: colors.buttonText,
     fontSize: 14,
     fontWeight: '600',
   },
