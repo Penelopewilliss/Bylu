@@ -14,9 +14,6 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>✨ Welcome to Glowgetter</Text>
-      <Text style={styles.subtitle}>Your productivity dashboard</Text>
-      
       {/* Quick Stats */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
@@ -97,7 +94,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 8,

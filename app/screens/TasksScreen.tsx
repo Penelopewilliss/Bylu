@@ -25,21 +25,34 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  titleContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    pointerEvents: 'none',
+  },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: colors.text,
     fontFamily: Fonts.header?.fontFamily || 'System',
+    textAlign: 'center',
   },
   addButton: {
+    position: 'absolute',
+    right: 20,
     backgroundColor: colors.primary,
     width: 40,
     height: 40,
@@ -51,6 +64,28 @@ const createStyles = (colors: any) => StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
+  },
+  addTasksContainer: {
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  addTasksButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  addTasksButtonText: {
+    color: colors.background,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   content: {
     flex: 1,
@@ -294,6 +329,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   progressCard: {
     backgroundColor: colors.cardBackground,
     marginHorizontal: 20,
+    marginTop: 20,
     marginBottom: 20,
     padding: 20,
     borderRadius: 16,
@@ -501,14 +537,6 @@ export default function TasksScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Tasks</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setShowAddModal(true)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Progress Card */}
@@ -525,6 +553,17 @@ export default function TasksScreen() {
             ]} 
           />
         </View>
+      </View>
+
+      {/* Add Tasks Button */}
+      <View style={styles.addTasksContainer}>
+        <TouchableOpacity
+          style={styles.addTasksButton}
+          onPress={() => setShowAddModal(true)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.addTasksButtonText}>Add Tasks</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Search Bar */}

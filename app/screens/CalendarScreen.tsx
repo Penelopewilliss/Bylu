@@ -29,10 +29,11 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12, // Reduced from 16
+    marginTop: 20,
     backgroundColor: colors.cardBackground,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -63,7 +64,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   calendarContainer: {
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 36,
     paddingBottom: 120, // Add bottom padding to prevent FAB overlap
   },
   dayHeaderRow: {
@@ -405,7 +406,7 @@ const MONTHS = [
 ];
 
 export default function CalendarScreen() {
-  const { events, addEvent, deleteEvent } = useApp();
+  const { events } = useApp();
   const { colors, formatTime, isMilitaryTime } = useTheme();
   
   const styles = createStyles(colors);
@@ -417,6 +418,32 @@ export default function CalendarScreen() {
   const [showDayModal, setShowDayModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [isCreatingFromSpecificDay, setIsCreatingFromSpecificDay] = useState(false);
+  
+  // Local events state (since AppContext doesn't have addEvent/deleteEvent)
+  const [localEvents, setLocalEvents] = useState<CalendarEvent[]>([]);
+  
+  // Combined events from AppContext and local state
+  const allEvents = [...events, ...localEvents];
+  
+  // Date picker state
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  // Update form date when dropdowns change
+  const updateFormDate = (month: number, day: number, year: number) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    setFormData(prev => ({ ...prev, date: dateStr }));
+  };
+
+  // Sync dropdowns with form date
+  const syncDropdownsWithDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    setSelectedMonth(date.getMonth());
+    setSelectedDay(date.getDate());
+    setSelectedYear(date.getFullYear());
+  };
   
   // Time picker state
   const [selectedHour, setSelectedHour] = useState(9);
@@ -427,6 +454,7 @@ export default function CalendarScreen() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    date: new Date().toISOString().split('T')[0], // Default to today
     time: '',
     category: 'personal' as 'work' | 'personal' | 'health' | 'learning' | 'other'
   });
@@ -459,7 +487,7 @@ export default function CalendarScreen() {
   // Get events for a specific date
   const getEventsForDate = (date: Date) => {
     const dateStr = date.toDateString();
-    return events.filter(event => {
+    return allEvents.filter(event => {
       const eventDate = new Date(event.startDate);
       return eventDate.toDateString() === dateStr;
     });
@@ -499,20 +527,32 @@ export default function CalendarScreen() {
   // Handle add appointment
   const handleAddAppointment = () => {
     setEditingEvent(null);
-    setFormData({ title: '', description: '', time: '', category: 'personal' });
+    const initialDate = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    setFormData({ 
+      title: '', 
+      description: '', 
+      date: initialDate, 
+      time: '', 
+      category: 'personal' 
+    });
+    syncDropdownsWithDate(initialDate);
     setShowAddModal(true);
   };
 
   // Handle edit appointment
   const handleEditAppointment = (event: CalendarEvent) => {
+    setIsCreatingFromSpecificDay(false);
     setEditingEvent(event);
     const eventDate = new Date(event.startDate);
+    const dateStr = eventDate.toISOString().split('T')[0];
     setFormData({
       title: event.title,
       description: event.description || '',
+      date: dateStr,
       time: eventDate.toTimeString().slice(0, 5),
       category: event.category as any
     });
+    syncDropdownsWithDate(dateStr);
     setShowAddModal(true);
   };
 
@@ -523,7 +563,12 @@ export default function CalendarScreen() {
       return;
     }
     
-    const appointmentDate = selectedDate || new Date();
+    if (!formData.date) {
+      Alert.alert('Error', 'Please enter a date for your appointment');
+      return;
+    }
+    
+    const appointmentDate = new Date(formData.date);
     
     // Convert time to 24-hour format
     let hour24 = selectedHour;
@@ -544,6 +589,7 @@ export default function CalendarScreen() {
     endDate.setHours(hour24 + 1, selectedMinute, 0, 0); // Default 1 hour duration
 
     const eventData = {
+      id: editingEvent?.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
       title: formData.title.trim(),
       description: formData.description.trim(),
       startDate: startDate.toISOString(),
@@ -552,11 +598,25 @@ export default function CalendarScreen() {
       category: formData.category
     };
 
-    // For now, only adding new events since updateEvent isn't in AppContext
-    addEvent(eventData);
+    // Add to local events state
+    if (editingEvent) {
+      // Update existing event
+      setLocalEvents(prev => prev.map(event => 
+        event.id === editingEvent.id ? eventData : event
+      ));
+    } else {
+      // Add new event
+      setLocalEvents(prev => [...prev, eventData]);
+    }
 
     setShowAddModal(false);
-    setFormData({ title: '', description: '', time: '', category: 'personal' });
+    setFormData({ 
+      title: '', 
+      description: '', 
+      date: new Date().toISOString().split('T')[0], 
+      time: '', 
+      category: 'personal' 
+    });
     setEditingEvent(null);
   };
 
@@ -567,7 +627,10 @@ export default function CalendarScreen() {
       'Are you sure you want to delete this appointment?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteEvent(eventId) }
+        { text: 'Delete', style: 'destructive', onPress: () => {
+          // Remove from local events
+          setLocalEvents(prev => prev.filter(event => event.id !== eventId));
+        }}
       ]
     );
   };
@@ -661,7 +724,10 @@ export default function CalendarScreen() {
       {/* Floating Add Button */}
       <TouchableOpacity 
         style={styles.fab} 
-        onPress={handleAddAppointment}
+        onPress={() => {
+          setIsCreatingFromSpecificDay(false);
+          handleAddAppointment();
+        }}
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
@@ -718,7 +784,17 @@ export default function CalendarScreen() {
                 style={styles.addAppointmentButton}
                 onPress={() => {
                   setShowDayModal(false);
-                  handleAddAppointment();
+                  setIsCreatingFromSpecificDay(true);
+                  const dateStr = selectedDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
+                  setFormData({ 
+                    title: '', 
+                    description: '', 
+                    date: dateStr, 
+                    time: '', 
+                    category: 'personal' 
+                  });
+                  setEditingEvent(null);
+                  setShowAddModal(true);
                 }}
               >
                 <Text style={styles.addAppointmentButtonText}>+ Add Appointment</Text>
@@ -756,6 +832,87 @@ export default function CalendarScreen() {
                 value={formData.title}
                 onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
               />
+              
+              <Text style={styles.label}>Date</Text>
+              <View style={styles.timePickerContainer}>
+                <View style={styles.timePicker}>
+                  <Text style={styles.timePickerLabel}>Month</Text>
+                  <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
+                    {MONTHS.map((month, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          styles.timeOption,
+                          selectedMonth === index && styles.selectedTimeOption
+                        ]}
+                        onPress={() => {
+                          setSelectedMonth(index);
+                          updateFormDate(index, selectedDay, selectedYear);
+                        }}
+                      >
+                        <Text style={[
+                          styles.timeOptionText,
+                          selectedMonth === index && styles.selectedTimeOptionText
+                        ]}>
+                          {month.slice(0, 3)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                
+                <View style={styles.timePicker}>
+                  <Text style={styles.timePickerLabel}>Day</Text>
+                  <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                      <TouchableOpacity
+                        key={day}
+                        style={[
+                          styles.timeOption,
+                          selectedDay === day && styles.selectedTimeOption
+                        ]}
+                        onPress={() => {
+                          setSelectedDay(day);
+                          updateFormDate(selectedMonth, day, selectedYear);
+                        }}
+                      >
+                        <Text style={[
+                          styles.timeOptionText,
+                          selectedDay === day && styles.selectedTimeOptionText
+                        ]}>
+                          {day}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                
+                <View style={styles.timePicker}>
+                  <Text style={styles.timePickerLabel}>Year</Text>
+                  <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map((year) => (
+                      <TouchableOpacity
+                        key={year}
+                        style={[
+                          styles.timeOption,
+                          selectedYear === year && styles.selectedTimeOption
+                        ]}
+                        onPress={() => {
+                          setSelectedYear(year);
+                          updateFormDate(selectedMonth, selectedDay, year);
+                        }}
+                      >
+                        <Text style={[
+                          styles.timeOptionText,
+                          selectedYear === year && styles.selectedTimeOptionText
+                        ]}>
+                          {year}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
               
               <Text style={styles.label}>Time</Text>
               <View style={styles.timePickerContainer}>

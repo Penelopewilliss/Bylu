@@ -8,8 +8,6 @@ export default function SensoryBreaksScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🌸 Sensory Breaks</Text>
-      <Text style={styles.subtitle}>Take a mindful moment</Text>
     </View>
   );
 }

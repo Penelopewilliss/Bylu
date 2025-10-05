@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   // Top Bar Styles
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     backgroundColor: '#F7D1DA', // Light pink
     paddingHorizontal: 16,
@@ -302,11 +302,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
+    position: 'relative',
   },
   currentTab: {
-    flex: 1,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 45,
+    bottom: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    pointerEvents: 'none',
   },
   currentTabEmoji: {
     fontSize: 20,

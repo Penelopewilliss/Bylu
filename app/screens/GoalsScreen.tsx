@@ -179,14 +179,17 @@ export default function GoalsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header with Add Button */}
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Goals</Text>
+      </View>
+
+      {/* Add Goal Button */}
+      <View style={styles.addGoalContainer}>
         <TouchableOpacity
-          style={styles.addButton}
+          style={styles.addGoalButton}
           onPress={openAddModal}
         >
-          <Text style={styles.addButtonText}>+ Add Goal</Text>
+          <Text style={styles.addGoalButtonText}>+ Add Goal</Text>
         </TouchableOpacity>
       </View>
 
@@ -377,19 +380,32 @@ const createStyles = (colors: any) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  titleContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    pointerEvents: 'none',
+  },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: colors.text,
+    textAlign: 'center',
   },
   addButton: {
+    position: 'absolute',
+    right: 20,
     paddingVertical: 8,
     paddingHorizontal: 16,
     backgroundColor: colors.primary,
@@ -400,10 +416,33 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  addGoalContainer: {
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  addGoalButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  addGoalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
   goalsList: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 0,
   },
   goalCard: {
     backgroundColor: colors.cardBackground,
