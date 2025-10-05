@@ -736,10 +736,14 @@ export default function WorkdayManagerScreen() {
               </View>
               
               <View style={styles.sessionContent}>
-                <Text style={[
-                  styles.sessionTitle,
-                  (session.completed || session.skipped) && styles.sessionTitleCompleted
-                ]}>
+                <Text 
+                  style={[
+                    styles.sessionTitle,
+                    (session.completed || session.skipped) && styles.sessionTitleCompleted
+                  ]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {session.title}
                 </Text>
                 <Text style={styles.sessionType}>
@@ -1229,12 +1233,15 @@ const createStyles = (colors: any) => StyleSheet.create({
   sessionContent: {
     flex: 1,
     justifyContent: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   sessionTitle: {
     fontSize: 14,
     fontWeight: '600',
     color: colors.text,
     marginBottom: 1,
+    textAlign: 'left',
   },
   sessionTitleCompleted: {
     textDecorationLine: 'line-through',
