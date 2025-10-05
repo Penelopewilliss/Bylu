@@ -14,21 +14,6 @@ import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
-// Temporary colors for compatibility
-const colors = {
-  background: '#FFFFFF',
-  cardBackground: '#FEFEFE',
-  primary: '#E8B4C4',
-  secondary: '#F7D1DA',
-  text: '#2D2D2D',
-  textSecondary: '#6B6B6B',
-  textLight: '#9CA3AF',
-  border: '#F3F4F6',
-  shadow: 'rgba(0, 0, 0, 0.1)',
-  success: '#10B981',
-  progressBg: '#F3F4F6',
-};
-
 // Types
 interface MicroTask {
   id: string;
@@ -46,8 +31,8 @@ interface Goal {
 }
 
 export default function GoalsScreen() {
-  // const { colors } = useTheme();  // Temporarily disabled for testing
-  // const styles = createStyles(colors);
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   
   const [goals, setGoals] = useState<Goal[]>([
     {
@@ -384,7 +369,7 @@ export default function GoalsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -606,6 +591,7 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     backgroundColor: colors.background,
+    color: colors.text,
   },
   textArea: {
     height: 80,
@@ -624,6 +610,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: 8,
     backgroundColor: colors.background,
+    color: colors.text,
   },
   addTaskButton: {
     paddingHorizontal: 20,

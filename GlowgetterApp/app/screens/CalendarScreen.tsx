@@ -25,7 +25,7 @@ const getCategoryColors = (colors: any) => ({
 const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -406,7 +406,7 @@ const MONTHS = [
 
 export default function CalendarScreen() {
   const { events, addEvent, deleteEvent } = useApp();
-  const { colors, formatTime } = useTheme();
+  const { colors, formatTime, isMilitaryTime } = useTheme();
   
   const styles = createStyles(colors);
   
@@ -525,13 +525,17 @@ export default function CalendarScreen() {
     
     const appointmentDate = selectedDate || new Date();
     
-    // Convert 12-hour format to 24-hour format
+    // Convert time to 24-hour format
     let hour24 = selectedHour;
-    if (selectedAmPm === 'PM' && selectedHour !== 12) {
-      hour24 = selectedHour + 12;
-    } else if (selectedAmPm === 'AM' && selectedHour === 12) {
-      hour24 = 0;
+    if (!isMilitaryTime) {
+      // Only convert if we're using 12-hour format
+      if (selectedAmPm === 'PM' && selectedHour !== 12) {
+        hour24 = selectedHour + 12;
+      } else if (selectedAmPm === 'AM' && selectedHour === 12) {
+        hour24 = 0;
+      }
     }
+    // If isMilitaryTime is true, selectedHour is already in 24-hour format (0-23)
     
     const startDate = new Date(appointmentDate);
     startDate.setHours(hour24, selectedMinute, 0, 0);
@@ -758,7 +762,10 @@ export default function CalendarScreen() {
                 <View style={styles.timePicker}>
                   <Text style={styles.timePickerLabel}>Hour</Text>
                   <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
+                    {(isMilitaryTime 
+                      ? Array.from({ length: 24 }, (_, i) => i) 
+                      : Array.from({ length: 12 }, (_, i) => i + 1)
+                    ).map((hour) => (
                       <TouchableOpacity
                         key={hour}
                         style={[
@@ -801,28 +808,30 @@ export default function CalendarScreen() {
                   </ScrollView>
                 </View>
                 
-                <View style={styles.timePicker}>
-                  <Text style={styles.timePickerLabel}>AM/PM</Text>
-                  <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
-                    {['AM', 'PM'].map((period) => (
-                      <TouchableOpacity
-                        key={period}
-                        style={[
-                          styles.timeOption,
-                          selectedAmPm === period && styles.selectedTimeOption
-                        ]}
-                        onPress={() => setSelectedAmPm(period as 'AM' | 'PM')}
-                      >
-                        <Text style={[
-                          styles.timeOptionText,
-                          selectedAmPm === period && styles.selectedTimeOptionText
-                        ]}>
-                          {period}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
+                {!isMilitaryTime && (
+                  <View style={styles.timePicker}>
+                    <Text style={styles.timePickerLabel}>AM/PM</Text>
+                    <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
+                      {['AM', 'PM'].map((period) => (
+                        <TouchableOpacity
+                          key={period}
+                          style={[
+                            styles.timeOption,
+                            selectedAmPm === period && styles.selectedTimeOption
+                          ]}
+                          onPress={() => setSelectedAmPm(period as 'AM' | 'PM')}
+                        >
+                          <Text style={[
+                            styles.timeOptionText,
+                            selectedAmPm === period && styles.selectedTimeOptionText
+                          ]}>
+                            {period}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
               </View>
               
               <Text style={styles.label}>Category</Text>

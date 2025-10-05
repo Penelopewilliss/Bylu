@@ -11,6 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -33,6 +34,8 @@ interface TimeSlot {
 
 export default function WorkdayManagerScreen() {
   const { tasks } = useApp();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [sessions, setSessions] = useState<WorkdaySession[]>([]);
   const [workdayStarted, setWorkdayStarted] = useState(false);
   const [workdayStart, setWorkdayStart] = useState('09:00');
@@ -514,25 +517,25 @@ export default function WorkdayManagerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   header: {
-    padding: 12, // Reduced from 16
-    paddingTop: 20, // Reduced from 30
-    backgroundColor: '#F7D1DA',
-    borderBottomLeftRadius: 15, // Slightly smaller radius
+    padding: 12,
+    paddingTop: 20,
+    backgroundColor: colors.secondary,
+    borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
     alignItems: 'center',
   },
   motivationText: {
-    fontSize: 16, // Reduced from 18
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#C2185B',
+    color: colors.primary,
     textAlign: 'center',
-    marginBottom: 8, // Reduced from 12
+    marginBottom: 8,
   },
   progressContainer: {
     width: '100%',
@@ -541,18 +544,18 @@ const styles = StyleSheet.create({
   progressBar: {
     width: '80%',
     height: 8,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: colors.progressBg,
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#C2185B',
+    backgroundColor: colors.primary,
     borderRadius: 4,
   },
   progressText: {
     fontSize: 12,
-    color: '#6B6B6B',
+    color: colors.textSecondary,
     marginTop: 4,
   },
   currentSessionContainer: {
@@ -563,7 +566,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -574,7 +577,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     opacity: 0.8,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -583,34 +586,34 @@ const styles = StyleSheet.create({
   currentSessionLabel: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#2D2D2D',
+    color: colors.text,
     marginBottom: 2,
   },
   nextSessionLabel: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#2D2D2D',
+    color: colors.text,
     marginBottom: 2,
   },
   currentSessionTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#2D2D2D',
+    color: colors.text,
     marginBottom: 2,
   },
   nextSessionTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#2D2D2D',
+    color: colors.text,
     marginBottom: 2,
   },
   currentSessionTime: {
     fontSize: 12,
-    color: '#6B6B6B',
+    color: colors.textSecondary,
   },
   nextSessionTime: {
     fontSize: 12,
-    color: '#6B6B6B',
+    color: colors.textSecondary,
   },
   setupContainer: {
     flex: 1,
@@ -621,13 +624,13 @@ const styles = StyleSheet.create({
   setupTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#2D2D2D',
+    color: colors.text,
     textAlign: 'center',
     marginBottom: 6,
   },
   setupSubtitle: {
     fontSize: 14,
-    color: '#6B6B6B',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 30,
     lineHeight: 20,
@@ -651,51 +654,52 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 14,
-    color: '#2D2D2D',
+    color: colors.text,
     fontWeight: '500',
   },
   timeInput: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
     minWidth: 80,
     textAlign: 'center',
-    backgroundColor: '#FFF',
+    backgroundColor: colors.cardBackground,
+    color: colors.text,
   },
   toggle: {
     width: 50,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: colors.border,
     padding: 2,
   },
   toggleActive: {
-    backgroundColor: '#C2185B',
+    backgroundColor: colors.primary,
   },
   toggleThumb: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#FFF',
+    backgroundColor: colors.cardBackground,
   },
   toggleThumbActive: {
     transform: [{ translateX: 26 }],
   },
   startButton: {
-    backgroundColor: '#C2185B',
+    backgroundColor: colors.primary,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 20,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
   },
   startButtonText: {
-    color: '#FFF',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -708,7 +712,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     marginBottom: 8,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -728,11 +732,11 @@ const styles = StyleSheet.create({
   sessionTime: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#2D2D2D',
+    color: colors.text,
   },
   sessionDuration: {
     fontSize: 10,
-    color: '#6B6B6B',
+    color: colors.textSecondary,
     marginTop: 1,
   },
   sessionContent: {
@@ -742,7 +746,7 @@ const styles = StyleSheet.create({
   sessionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2D2D2D',
+    color: colors.text,
     marginBottom: 1,
   },
   sessionTitleCompleted: {
@@ -750,7 +754,7 @@ const styles = StyleSheet.create({
   },
   sessionType: {
     fontSize: 10,
-    color: '#6B6B6B',
+    color: colors.textSecondary,
     textTransform: 'capitalize',
   },
   sessionActions: {
@@ -761,13 +765,13 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: colors.cardBackground,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 6,
   },
   skipButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: colors.border,
   },
   actionButtonText: {
     fontSize: 14,
@@ -777,11 +781,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: colors.cardBackground,
   },
   statusText: {
     fontSize: 10,
-    color: '#6B6B6B',
+    color: colors.textSecondary,
   },
   fabContainer: {
     position: 'absolute',
@@ -793,39 +797,39 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#C2185B',
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
   },
   resetFab: {
-    backgroundColor: '#FF7043',
+    backgroundColor: colors.peach,
     width: 40,
     height: 40,
     borderRadius: 20,
   },
   fabText: {
-    color: '#FFF',
+    color: colors.white,
     fontSize: 18,
     fontWeight: 'bold',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.modalBackground,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
     width: width * 0.85,
-    backgroundColor: '#FFF',
+    backgroundColor: colors.modalContent,
     borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 16,
@@ -834,24 +838,25 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2D2D2D',
+    color: colors.text,
     textAlign: 'center',
     marginBottom: 20,
   },
   inputLabel: {
     fontSize: 12,
-    color: '#6B6B6B',
+    color: colors.textSecondary,
     marginBottom: 6,
     fontWeight: '500',
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.border,
     borderRadius: 10,
     padding: 12,
     fontSize: 14,
     marginBottom: 12,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: colors.background,
+    color: colors.text,
   },
   modalActions: {
     flexDirection: 'row',
@@ -866,18 +871,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   cancelButton: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.border,
   },
   saveButton: {
-    backgroundColor: '#C2185B',
+    backgroundColor: colors.primary,
   },
   cancelButtonText: {
-    color: '#6B6B6B',
+    color: colors.textSecondary,
     fontSize: 14,
     fontWeight: '600',
   },
   saveButtonText: {
-    color: '#FFF',
+    color: colors.white,
     fontSize: 14,
     fontWeight: '600',
   },
