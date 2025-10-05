@@ -283,6 +283,25 @@ const createStyles = (colors: any) => StyleSheet.create({
     maxHeight: 400,
     marginBottom: 20,
   },
+  dateDisplayContainer: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  dateDisplayLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  dateDisplayText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
   label: {
     fontSize: 16,
     fontWeight: '600',
@@ -417,6 +436,7 @@ export default function CalendarScreen() {
   const [showDayModal, setShowDayModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [isFromDayClick, setIsFromDayClick] = useState(false); // Track if appointment is from day click
   
   // Time picker state
   const [selectedHour, setSelectedHour] = useState(9);
@@ -497,9 +517,10 @@ export default function CalendarScreen() {
   };
 
   // Handle add appointment
-  const handleAddAppointment = () => {
+  const handleAddAppointment = (fromDayClick: boolean = false) => {
     setEditingEvent(null);
     setFormData({ title: '', description: '', time: '', category: 'personal' });
+    setIsFromDayClick(fromDayClick);
     setShowAddModal(true);
   };
 
@@ -513,6 +534,7 @@ export default function CalendarScreen() {
       time: eventDate.toTimeString().slice(0, 5),
       category: event.category as any
     });
+    setIsFromDayClick(false); // Editing doesn't need date picker hidden
     setShowAddModal(true);
   };
 
@@ -661,7 +683,7 @@ export default function CalendarScreen() {
       {/* Floating Add Button */}
       <TouchableOpacity 
         style={styles.fab} 
-        onPress={handleAddAppointment}
+        onPress={() => handleAddAppointment(false)} // Pass false to show date picker
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
@@ -718,7 +740,7 @@ export default function CalendarScreen() {
                 style={styles.addAppointmentButton}
                 onPress={() => {
                   setShowDayModal(false);
-                  handleAddAppointment();
+                  handleAddAppointment(true); // Pass true to indicate it's from a day click
                 }}
               >
                 <Text style={styles.addAppointmentButtonText}>+ Add Appointment</Text>
@@ -749,6 +771,20 @@ export default function CalendarScreen() {
             </Text>
             
             <ScrollView style={styles.formContainer}>
+              {isFromDayClick && selectedDate && (
+                <View style={styles.dateDisplayContainer}>
+                  <Text style={styles.dateDisplayLabel}>Date</Text>
+                  <Text style={styles.dateDisplayText}>
+                    {selectedDate.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      month: 'long', 
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </Text>
+                </View>
+              )}
+              
               <Text style={styles.label}>Title *</Text>
               <TextInput
                 style={styles.input}
