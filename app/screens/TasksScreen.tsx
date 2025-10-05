@@ -10,7 +10,8 @@ import {
   Modal,
   ScrollView,
   SafeAreaView,
-  Dimensions 
+  Dimensions,
+  PanResponder 
 } from 'react-native';
 import Fonts from '../constants/fonts';
 import { useApp } from '../context/AppContext';
@@ -55,22 +56,6 @@ const createStyles = (colors: any) => StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-  },
-  searchContainer: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginVertical: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  searchText: {
-    fontSize: 16,
-    color: colors.textSecondary,
   },
   taskCard: {
     backgroundColor: colors.cardBackground,
@@ -328,16 +313,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.success,
     borderRadius: 4,
   },
-  searchIcon: {
-    fontSize: 16,
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: colors.text,
-    fontFamily: Fonts.body?.fontFamily || 'System',
-  },
   listContainer: {
     paddingHorizontal: 20,
     paddingBottom: 20,
@@ -431,7 +406,23 @@ export default function TasksScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
   const [newTaskPriority, setNewTaskPriority] = useState<'high' | 'medium' | 'low'>('medium');
-  const [searchText, setSearchText] = useState('');
+
+  // PanResponder for swipe to close modal
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (evt, gestureState) => {
+      // Respond to both upward and downward swipes that are more vertical than horizontal
+      return Math.abs(gestureState.dy) > 20 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      // Optional: Add visual feedback during swipe
+    },
+    onPanResponderRelease: (evt, gestureState) => {
+      // Close modal if swiped up more than 100px OR down more than 100px
+      if (Math.abs(gestureState.dy) > 100) {
+        setShowAddModal(false);
+      }
+    },
+  });
 
   const handleAddTask = () => {
     if (newTaskText.trim() === '') return;
@@ -449,10 +440,8 @@ export default function TasksScreen() {
     setShowAddModal(false);
   };
 
-  // Filter and sort tasks based on search and priority
-  const filteredTasks = tasks.filter(task => {
-    return task.title.toLowerCase().includes(searchText.toLowerCase());
-  }).sort((a, b) => {
+  // Sort tasks by priority
+  const filteredTasks = tasks.sort((a, b) => {
     // Sort by priority: high -> medium -> low
     const priorityOrder = { high: 3, medium: 2, low: 1 };
     return priorityOrder[b.priority] - priorityOrder[a.priority];
@@ -526,18 +515,6 @@ export default function TasksScreen() {
         </View>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search tasks..."
-          placeholderTextColor={colors.textSecondary}
-          value={searchText}
-          onChangeText={setSearchText}
-        />
-      </View>
-
       {/* Tasks List */}
       <FlatList
         data={filteredTasks}
@@ -549,7 +526,7 @@ export default function TasksScreen() {
           <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>No tasks found</Text>
             <Text style={styles.emptySubtitle}>
-              {searchText ? 'Try a different search term' : 'Create your first task to get started!'}
+              Create your first task to get started!
             </Text>
           </View>
         }
@@ -562,7 +539,7 @@ export default function TasksScreen() {
         transparent={true}
         onRequestClose={() => setShowAddModal(false)}
       >
-        <View style={styles.modalOverlay}>
+        <View style={styles.modalOverlay} {...panResponder.panHandlers}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Add New Task</Text>
             

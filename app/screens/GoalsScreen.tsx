@@ -9,6 +9,7 @@ import {
   TextInput,
   Dimensions,
   Alert,
+  PanResponder,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
@@ -73,6 +74,23 @@ export default function GoalsScreen() {
   });
   const [newTaskText, setNewTaskText] = useState('');
   const [tempMicroTasks, setTempMicroTasks] = useState<MicroTask[]>([]);
+
+  // PanResponder for swipe-down to close modal
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (evt, gestureState) => {
+      // Respond to both upward and downward swipes that are more vertical than horizontal
+      return Math.abs(gestureState.dy) > 20 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      // Optional: Add visual feedback during swipe
+    },
+    onPanResponderRelease: (evt, gestureState) => {
+      // Close modal if swiped up more than 100px OR down more than 100px
+      if (Math.abs(gestureState.dy) > 100) {
+        setModalVisible(false);
+      }
+    },
+  });
 
   // Calculate progress for a goal
   const calculateProgress = (goal: Goal): number => {
@@ -267,7 +285,7 @@ export default function GoalsScreen() {
         presentationStyle="fullScreen"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
+        <View style={styles.modalContainer} {...panResponder.panHandlers}>
           <View style={styles.modalHeader}>
             <TouchableOpacity
               style={styles.cancelButton}
@@ -378,7 +396,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
     backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -402,13 +420,13 @@ const createStyles = (colors: any) => StyleSheet.create({
   goalsList: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 0,
   },
   goalCard: {
     backgroundColor: colors.cardBackground,
     borderRadius: 16,
-    marginBottom: 16,
-    padding: 20,
+    marginBottom: 12,
+    padding: 16,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -419,13 +437,13 @@ const createStyles = (colors: any) => StyleSheet.create({
   goalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   goalInfo: {
     flex: 1,
   },
   goalTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 4,

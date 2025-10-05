@@ -8,7 +8,8 @@ import {
   TextInput, 
   ScrollView,
   SafeAreaView,
-  Alert 
+  Alert,
+  PanResponder 
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -56,6 +57,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 18,
     color: colors.text,
     fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 18,
   },
   monthText: {
     fontSize: 20,
@@ -333,24 +336,29 @@ const createStyles = (colors: any) => StyleSheet.create({
   categoryContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: 'space-between',
+    gap: 4,
     marginBottom: 8,
   },
   categoryButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
     borderRadius: 20,
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    width: '48%', // Two buttons per row, wider
+    minHeight: 40,
   },
   selectedCategory: {
     borderWidth: 2,
     borderColor: colors.text,
   },
   categoryText: {
-    fontSize: 14,
+    fontSize: 12,
     color: colors.text,
     fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 16,
   },
   addModalButtons: {
     flexDirection: 'row',
@@ -501,6 +509,24 @@ export default function CalendarScreen() {
     date: new Date().toISOString().split('T')[0], // Default to today
     time: '',
     category: 'personal' as 'work' | 'personal' | 'health' | 'learning' | 'other'
+  });
+
+  // PanResponder for swipe to close modal
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (evt, gestureState) => {
+      // Respond to both upward and downward swipes that are more vertical than horizontal
+      return Math.abs(gestureState.dy) > 20 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      // Optional: Add visual feedback during swipe
+    },
+    onPanResponderRelease: (evt, gestureState) => {
+      // Close modal if swiped up more than 100px OR down more than 100px
+      if (Math.abs(gestureState.dy) > 100) {
+        setShowAddModal(false);
+        setShowDayModal(false);
+      }
+    },
   });
 
   // Get calendar grid for current month
@@ -699,14 +725,14 @@ export default function CalendarScreen() {
             style={styles.navButton} 
             onPress={() => navigateMonth('prev')}
           >
-            <Text style={styles.navButtonText}>←</Text>
+            <Text style={styles.navButtonText}>‹‹</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.navButton} 
             onPress={() => navigateMonth('next')}
           >
-            <Text style={styles.navButtonText}>→</Text>
+            <Text style={styles.navButtonText}>››</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -794,7 +820,7 @@ export default function CalendarScreen() {
         transparent={true}
         onRequestClose={() => setShowDayModal(false)}
       >
-        <View style={styles.modalOverlay}>
+        <View style={styles.modalOverlay} {...panResponder.panHandlers}>
           <View style={styles.dayModalContent}>
             <Text style={styles.dayModalTitle}>
               {selectedDate?.toLocaleDateString('en-US', { 
@@ -873,7 +899,7 @@ export default function CalendarScreen() {
         transparent={true}
         onRequestClose={() => setShowAddModal(false)}
       >
-        <View style={styles.modalOverlay}>
+        <View style={styles.modalOverlay} {...panResponder.panHandlers}>
           <View style={styles.addModalContent}>
             <Text style={styles.addModalTitle}>
               {editingEvent ? 'Edit Appointment' : 'New Appointment'}
@@ -1110,12 +1136,10 @@ export default function CalendarScreen() {
                     ]}
                     onPress={() => setFormData(prev => ({ ...prev, category: category as any }))}
                   >
-                    <Text style={styles.categoryText}>
-                      {category === 'work' ? '💼' :
-                       category === 'personal' ? '💖' :
-                       category === 'health' ? '✨' :
-                       category === 'learning' ? '📚' : '📋'}
-                      {category}
+                    <Text style={styles.categoryText} numberOfLines={1}>
+                      {category === 'work' ? '💼 Work' :
+                       category === 'personal' ? '💖 Personal' :
+                       category === 'health' ? '✨ Health' : '📚 Learning'}
                     </Text>
                   </TouchableOpacity>
                 ))}

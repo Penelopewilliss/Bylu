@@ -842,10 +842,6 @@ export default function WorkdayManagerScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.motivationText}>
-          ✨ Let's make today productive!
-        </Text>
-        
         {workdayStarted && (
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
@@ -857,24 +853,6 @@ export default function WorkdayManagerScreen() {
           </View>
         )}
       </View>
-
-            {/* Action Buttons */}
-      {workdayStarted && (
-        <View style={styles.topButtonContainer}>
-          <TouchableOpacity style={styles.topButton} onPress={addCustomSession}>
-            <Text style={styles.topButtonText}>+ Add Session</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Reset button available when workday not started */}
-      {!workdayStarted && sessions.length > 0 && (
-        <View style={styles.topButtonContainer}>
-          <TouchableOpacity style={[styles.topButton, styles.resetTopButton]} onPress={resetWorkday}>
-            <Text style={styles.topButtonText}>🔄 Reset</Text>
-          </TouchableOpacity>
-        </View>
-      )}
 
       {/* Current/Next Session Info */}
       {workdayStarted && (currentSession || nextSession) && (

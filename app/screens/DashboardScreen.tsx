@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 
 export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { colors } = useTheme();
-  const { tasks, events } = useApp();
+  const { tasks, events, toggleTask } = useApp();
   const styles = createStyles(colors);
 
   // Get today's tasks and events
@@ -30,17 +30,59 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
         </View>
       </View>
 
+      {/* Today's Tasks Preview */}
+      {todayTasks.length > 0 ? (
+        <View style={styles.tasksSection}>
+          <View style={styles.tasksSectionCard}>
+            <Text style={styles.tasksSectionTitle}>Today's Tasks</Text>
+            <View style={styles.tasksContainer}>
+              {todayTasks.map((task, index) => (
+                <TouchableOpacity key={task.id} style={styles.taskCard}>
+                  <View style={styles.taskContent}>
+                    <TouchableOpacity 
+                      style={styles.heartCheckbox}
+                      onPress={() => toggleTask(task.id)}
+                    >
+                      <Text style={styles.heartIcon}>🤍</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.taskTitle}>
+                      {task.title}
+                    </Text>
+                    <View style={[styles.priorityBadge, { backgroundColor: 
+                      task.priority === 'high' ? colors.peach : 
+                      task.priority === 'medium' ? colors.accent : colors.lavender 
+                    }]}>
+                      <Text style={styles.priorityText}>{task.priority}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View style={styles.tasksSection}>
+          <View style={styles.tasksSectionCard}>
+            <Text style={styles.tasksSectionTitle}>Today's Tasks</Text>
+            <View style={styles.emptyTasksContainer}>
+              <Text style={styles.emptyTasksText}>🎉 All tasks completed!</Text>
+              <Text style={styles.emptyTasksSubtext}>Great job staying productive!</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
       {/* Quick Actions */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.cardContainer}>
         <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Calendar')}>
           <Text style={styles.cardEmoji}>📅</Text>
-          <Text style={styles.cardTitle}>Today's Schedule</Text>
-          <Text style={styles.cardSubtitle}>View calendar</Text>
+          <Text style={styles.cardTitle}>Calendar</Text>
+          <Text style={styles.cardSubtitle}>View schedule</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Tasks')}>
           <Text style={styles.cardEmoji}>✓</Text>
-          <Text style={styles.cardTitle}>Quick Tasks</Text>
+          <Text style={styles.cardTitle}>Tasks</Text>
           <Text style={styles.cardSubtitle}>Manage todos</Text>
         </TouchableOpacity>
       </View>
@@ -48,28 +90,15 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       <View style={styles.cardContainer}>
         <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Goals')}>
           <Text style={styles.cardEmoji}>🎯</Text>
-          <Text style={styles.cardTitle}>Goals Progress</Text>
-          <Text style={styles.cardSubtitle}>Track goals</Text>
+          <Text style={styles.cardTitle}>Goals</Text>
+          <Text style={styles.cardSubtitle}>Track progress</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Workday')}>
           <Text style={styles.cardEmoji}>⚡</Text>
-          <Text style={styles.cardTitle}>Sensory Breaks</Text>
-          <Text style={styles.cardSubtitle}>Take a break</Text>
+          <Text style={styles.cardTitle}>Workday</Text>
+          <Text style={styles.cardSubtitle}>Manage sessions</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Today's Tasks Preview */}
-      {todayTasks.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>Today's Tasks</Text>
-          {todayTasks.map((task, index) => (
-            <TouchableOpacity key={task.id} style={styles.taskPreview}>
-              <Text style={styles.taskTitle}>{task.title}</Text>
-              <Text style={styles.taskPriority}>{task.priority}</Text>
-            </TouchableOpacity>
-          ))}
-        </>
-      )}
 
       {/* Today's Events Preview */}
       {todayEvents.length > 0 && (
@@ -176,6 +205,52 @@ const createStyles = (colors: any) => StyleSheet.create({
     textAlign: 'center',
     opacity: 0.9,
   },
+  tasksSection: {
+    marginBottom: 24,
+  },
+  tasksSectionCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  tasksSectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 0,
+    textAlign: 'center',
+  },
+  tasksContainer: {
+    gap: 12,
+    marginTop: 16,
+  },
+  taskCard: {
+    backgroundColor: colors.background,
+    padding: 18,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  taskContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priorityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  priorityText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.white,
+  },
   taskPreview: {
     backgroundColor: colors.cardBackground,
     padding: 16,
@@ -191,9 +266,39 @@ const createStyles = (colors: any) => StyleSheet.create({
     elevation: 1,
   },
   taskTitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: colors.text,
     flex: 1,
+    fontWeight: '500',
+    marginLeft: 12,
+  },
+  taskTitleCompleted: {
+    textDecorationLine: 'line-through',
+    color: colors.textLight,
+    opacity: 0.6,
+  },
+  heartCheckbox: {
+    paddingHorizontal: 4,
+  },
+  heartIcon: {
+    fontSize: 24,
+  },
+  emptyTasksContainer: {
+    paddingVertical: 24,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  emptyTasksText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyTasksSubtext: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
   },
   taskPriority: {
     fontSize: 12,

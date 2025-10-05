@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Dimensions, PanResponder } from 'react-native';
 import * as Font from 'expo-font';
 import { AppProvider } from './app/context/AppContext';
 import { ThemeProvider } from './app/context/ThemeContext';
@@ -192,6 +192,41 @@ function MainApp() {
   const [isSplashFinished, setIsSplashFinished] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  
+  const tabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Workday', 'Settings'];
+
+  const navigateToTab = (direction: 'next' | 'prev') => {
+    const currentIndex = tabs.indexOf(activeTab);
+    let newIndex;
+    
+    if (direction === 'next') {
+      newIndex = currentIndex === tabs.length - 1 ? 0 : currentIndex + 1;
+    } else {
+      newIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
+    }
+    
+    setActiveTab(tabs[newIndex]);
+  };
+
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gestureState) => {
+      return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 20;
+    },
+    onPanResponderMove: (_, gestureState) => {
+      // Optional: Add visual feedback during swipe
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      const SWIPE_THRESHOLD = 50;
+      
+      if (gestureState.dx > SWIPE_THRESHOLD) {
+        // Swipe right - go to previous tab
+        navigateToTab('prev');
+      } else if (gestureState.dx < -SWIPE_THRESHOLD) {
+        // Swipe left - go to next tab
+        navigateToTab('next');
+      }
+    },
+  });
 
   useEffect(() => {
     // Skip font loading for now and just set fonts as loaded
@@ -204,7 +239,7 @@ function MainApp() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} {...panResponder.panHandlers}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <TopBar 
         activeTab={activeTab} 
