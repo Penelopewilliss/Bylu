@@ -17,12 +17,6 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Settings</Text>
-        <Text style={styles.subtitle}>Customize your experience</Text>
-      </View>
-
       {/* Settings Options */}
       <ScrollView style={styles.settingsContainer} showsVerticalScrollIndicator={false}>
         
@@ -92,12 +86,14 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: 20,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '700',
     color: colors.text,
     marginBottom: 4,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
@@ -106,6 +102,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   settingsContainer: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 20,
   },
   section: {
     marginTop: 32,

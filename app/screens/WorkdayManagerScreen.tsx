@@ -840,24 +840,6 @@ export default function WorkdayManagerScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.motivationText}>
-          ✨ Let's make today productive!
-        </Text>
-        
-        {workdayStarted && (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progress}%` }]} />
-            </View>
-            <Text style={styles.progressText}>
-              {Math.round(progress)}% complete
-            </Text>
-          </View>
-        )}
-      </View>
-
             {/* Action Buttons */}
       {workdayStarted && (
         <View style={styles.topButtonContainer}>
@@ -1302,7 +1284,8 @@ const createStyles = (colors: any) => StyleSheet.create({
   setupContainer: {
     flex: 1,
     padding: 16,
-    justifyContent: 'center',
+    paddingTop: 24,
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   setupTitle: {
