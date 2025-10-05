@@ -193,18 +193,9 @@ function MainApp() {
   const [menuVisible, setMenuVisible] = useState(false);
 
   useEffect(() => {
-    async function loadFonts() {
-      try {
-        await Font.loadAsync({
-          // Add your custom fonts here when available
-        });
-        setFontsLoaded(true);
-      } catch (error) {
-        console.warn('Font loading failed, using system fonts:', error);
-        setFontsLoaded(true);
-      }
-    }
-    loadFonts();
+    // Skip font loading for now and just set fonts as loaded
+    // This prevents the app from getting stuck on splash screen
+    setFontsLoaded(true);
   }, []);
 
   if (!isSplashFinished || !fontsLoaded) {

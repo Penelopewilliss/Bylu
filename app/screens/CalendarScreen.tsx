@@ -1,36 +1,892 @@
-// CalendarScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import Colors from '../constants/colors';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  Modal, 
+  TextInput, 
+  ScrollView,
+  SafeAreaView,
+  Alert 
+} from 'react-native';
 import { useApp } from '../context/AppContext';
-import { format } from 'date-fns';
+import { useTheme } from '../context/ThemeContext';
+import type { CalendarEvent } from '../types';
+
+// Category colors configuration
+const getCategoryColors = (colors: any) => ({
+  work: colors.primary,
+  personal: colors.accent,
+  health: colors.lavender,
+  learning: colors.peach,
+});
+
+const createStyles = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12, // Reduced from 16
+    backgroundColor: colors.cardBackground,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  monthNavigation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  navButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 8,
+  },
+  navButtonText: {
+    fontSize: 18,
+    color: colors.text,
+    fontWeight: '600',
+  },
+  monthText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginHorizontal: 16,
+  },
+  calendarContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 120, // Add bottom padding to prevent FAB overlap
+  },
+  dayHeaderRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  dayHeader: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    paddingVertical: 8,
+  },
+  weekRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  dayCell: {
+    flex: 1,
+    height: 40, // Smaller for more compact calendar
+    margin: 1,
+    backgroundColor: colors.cardBackground,
+    borderRadius: 6, // Smaller radius for more compact look
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 4, // Reduced padding
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  todayCell: {
+    backgroundColor: colors.secondary,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  otherMonthCell: {
+    backgroundColor: colors.border,
+  },
+  dayNumber: {
+    fontSize: 14,    // Reduced from 16 for mobile
+    fontWeight: '600',
+    color: colors.text,
+  },
+  todayText: {
+    color: colors.text,
+    fontWeight: '700',
+  },
+  otherMonthText: {
+    color: colors.textLight,
+  },
+  eventDots: {
+    flexDirection: 'row',
+    marginTop: 4,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  eventDot: {
+    width: 4,        // Smaller dots for mobile
+    height: 4,
+    borderRadius: 2,
+    marginHorizontal: 0.5,
+    marginVertical: 1,
+  },
+  moreEvents: {
+    fontSize: 10,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 100, // Move higher to avoid calendar overlap
+    width: 48, // Slightly smaller
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  fabText: {
+    fontSize: 20, // Smaller to match the smaller FAB
+    color: colors.cardBackground,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  dayModalContent: {
+    backgroundColor: colors.cardBackground,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 24,
+    paddingHorizontal: 20,
+    maxHeight: '80%',
+  },
+  dayModalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  eventsContainer: {
+    maxHeight: 300,
+    marginBottom: 20,
+  },
+  eventCard: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  eventHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    flex: 1,
+  },
+  deleteButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.peach,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '600',
+  },
+  eventTime: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  eventDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
+  noEvents: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: colors.textLight,
+    fontStyle: 'italic',
+    marginVertical: 40,
+  },
+  dayModalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingBottom: 20,
+  },
+  addAppointmentButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  addAppointmentButtonText: {
+    color: colors.cardBackground,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  closeButton: {
+    flex: 1,
+    backgroundColor: colors.border,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: colors.text,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  addModalContent: {
+    backgroundColor: colors.cardBackground,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 24,
+    paddingHorizontal: 20,
+    maxHeight: '90%',
+  },
+  addModalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  formContainer: {
+    maxHeight: 400,
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+    marginTop: 16,
+  },
+  input: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  categoryButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  selectedCategory: {
+    borderWidth: 2,
+    borderColor: colors.text,
+  },
+  categoryText: {
+    fontSize: 14,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  addModalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingBottom: 20,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: colors.border,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: colors.text,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: colors.cardBackground,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  timePickerContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 16,
+    gap: 16,
+  },
+  timePicker: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  timePickerLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  timeScrollView: {
+    height: 120,
+    width: '100%',
+  },
+  timeOption: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginVertical: 2,
+    alignItems: 'center',
+  },
+  selectedTimeOption: {
+    backgroundColor: colors.primary,
+  },
+  timeOptionText: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  selectedTimeOptionText: {
+    color: colors.cardBackground,
+    fontWeight: '600',
+  },
+});
+
+const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 export default function CalendarScreen() {
-  const { events } = useApp();
-  const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
+  const { events, addEvent, deleteEvent } = useApp();
+  const { colors, formatTime, isMilitaryTime } = useTheme();
+  
+  const styles = createStyles(colors);
+  
+  // Category colors
+  const CATEGORY_COLORS = getCategoryColors(colors);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showDayModal, setShowDayModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  
+  // Time picker state
+  const [selectedHour, setSelectedHour] = useState(9);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  const [selectedAmPm, setSelectedAmPm] = useState<'AM' | 'PM'>('AM');
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    time: '',
+    category: 'personal' as 'work' | 'personal' | 'health' | 'learning' | 'other'
+  });
 
-  const eventsForDate = events.filter(event => event.startDate.startsWith(selectedDate));
+  // Get calendar grid for current month
+  const getCalendarGrid = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    const calendar = [];
+    const current = new Date(startDate);
+    
+    for (let week = 0; week < 6; week++) {
+      const weekDays = [];
+      for (let day = 0; day < 7; day++) {
+        weekDays.push(new Date(current));
+        current.setDate(current.getDate() + 1);
+      }
+      calendar.push(weekDays);
+      if (current > lastDay && current.getDay() === 0) break;
+    }
+    
+    return calendar;
+  };
+
+  // Get events for a specific date
+  const getEventsForDate = (date: Date) => {
+    const dateStr = date.toDateString();
+    return events.filter(event => {
+      const eventDate = new Date(event.startDate);
+      return eventDate.toDateString() === dateStr;
+    });
+  };
+
+  // Check if date is today
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
+  // Check if date is in current month
+  const isCurrentMonth = (date: Date) => {
+    return date.getMonth() === currentDate.getMonth();
+  };
+
+  // Navigate months
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
+      return newDate;
+    });
+  };
+
+  // Go to today
+  const goToToday = () => {
+    setCurrentDate(new Date());
+  };
+
+  // Handle day press
+  const handleDayPress = (date: Date) => {
+    setSelectedDate(date);
+    setShowDayModal(true);
+  };
+
+  // Handle add appointment
+  const handleAddAppointment = () => {
+    setEditingEvent(null);
+    setFormData({ title: '', description: '', time: '', category: 'personal' });
+    setShowAddModal(true);
+  };
+
+  // Handle edit appointment
+  const handleEditAppointment = (event: CalendarEvent) => {
+    setEditingEvent(event);
+    const eventDate = new Date(event.startDate);
+    setFormData({
+      title: event.title,
+      description: event.description || '',
+      time: eventDate.toTimeString().slice(0, 5),
+      category: event.category as any
+    });
+    setShowAddModal(true);
+  };
+
+  // Save appointment
+  const saveAppointment = () => {
+    if (!formData.title.trim()) {
+      Alert.alert('Error', 'Please enter a title for your appointment');
+      return;
+    }
+    
+    const appointmentDate = selectedDate || new Date();
+    
+    // Convert time to 24-hour format
+    let hour24 = selectedHour;
+    if (!isMilitaryTime) {
+      // Only convert if we're using 12-hour format
+      if (selectedAmPm === 'PM' && selectedHour !== 12) {
+        hour24 = selectedHour + 12;
+      } else if (selectedAmPm === 'AM' && selectedHour === 12) {
+        hour24 = 0;
+      }
+    }
+    // If isMilitaryTime is true, selectedHour is already in 24-hour format (0-23)
+    
+    const startDate = new Date(appointmentDate);
+    startDate.setHours(hour24, selectedMinute, 0, 0);
+    
+    const endDate = new Date(startDate);
+    endDate.setHours(hour24 + 1, selectedMinute, 0, 0); // Default 1 hour duration
+
+    const eventData = {
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      color: CATEGORY_COLORS[formData.category],
+      category: formData.category
+    };
+
+    // For now, only adding new events since updateEvent isn't in AppContext
+    addEvent(eventData);
+
+    setShowAddModal(false);
+    setFormData({ title: '', description: '', time: '', category: 'personal' });
+    setEditingEvent(null);
+  };
+
+  // Delete appointment
+  const handleDeleteAppointment = (eventId: string) => {
+    Alert.alert(
+      'Delete Appointment',
+      'Are you sure you want to delete this appointment?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => deleteEvent(eventId) }
+      ]
+    );
+  };
+
+  const calendar = getCalendarGrid();
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        <Text style={styles.dateTitle}>{selectedDate}</Text>
-        {eventsForDate.length === 0 && <Text style={styles.noEvents}>No events today</Text>}
-        {eventsForDate.map(event => (
-          <View key={event.id} style={[styles.eventCard, { backgroundColor: event.color }]}>\n            <Text style={styles.eventTitle}>{event.title}</Text>\n            {event.description && <Text style={styles.eventDescription}>{event.description}</Text>}\n            <Text style={styles.eventTime}>\n              {format(new Date(event.startDate), 'HH:mm')} - {format(new Date(event.endDate), 'HH:mm')}\n            </Text>\n          </View>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.monthNavigation}>
+          <TouchableOpacity 
+            style={styles.navButton} 
+            onPress={() => navigateMonth('prev')}
+          >
+            <Text style={styles.navButtonText}>←</Text>
+          </TouchableOpacity>
+          
+          <Text style={styles.monthText}>
+            {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </Text>
+          
+          <TouchableOpacity 
+            style={styles.navButton} 
+            onPress={() => navigateMonth('next')}
+          >
+            <Text style={styles.navButtonText}>→</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Calendar Grid */}
+      <ScrollView style={styles.calendarContainer} showsVerticalScrollIndicator={false}>
+        {/* Day Headers */}
+        <View style={styles.dayHeaderRow}>
+          {DAYS.map((day, index) => (
+            <Text key={index} style={styles.dayHeader}>
+              {day}
+            </Text>
+          ))}
+        </View>
+
+        {/* Calendar Weeks */}
+        {calendar.map((week, weekIndex) => (
+          <View key={weekIndex} style={styles.weekRow}>
+            {week.map((date, dayIndex) => {
+              const dayEvents = getEventsForDate(date);
+              const isToday_ = isToday(date);
+              const isCurrentMonth_ = isCurrentMonth(date);
+              
+              return (
+                <TouchableOpacity
+                  key={dayIndex}
+                  style={[
+                    styles.dayCell,
+                    isToday_ && styles.todayCell,
+                    !isCurrentMonth_ && styles.otherMonthCell
+                  ]}
+                  onPress={() => handleDayPress(date)}
+                >
+                  <Text style={[
+                    styles.dayNumber,
+                    isToday_ && styles.todayText,
+                    !isCurrentMonth_ && styles.otherMonthText
+                  ]}>
+                    {date.getDate()}
+                  </Text>
+                  
+                  {/* Event dots */}
+                  <View style={styles.eventDots}>
+                    {dayEvents.slice(0, 3).map((event, index) => (
+                      <View
+                        key={event.id}
+                        style={[
+                          styles.eventDot,
+                          { backgroundColor: event.color }
+                        ]}
+                      />
+                    ))}
+                    {dayEvents.length > 3 && (
+                      <Text style={styles.moreEvents}>+{dayEvents.length - 3}</Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         ))}
       </ScrollView>
-    </View>
+
+      {/* Floating Add Button */}
+      <TouchableOpacity 
+        style={styles.fab} 
+        onPress={handleAddAppointment}
+      >
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
+
+      {/* Day Modal */}
+      <Modal
+        visible={showDayModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowDayModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.dayModalContent}>
+            <Text style={styles.dayModalTitle}>
+              {selectedDate?.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </Text>
+            
+            <ScrollView style={styles.eventsContainer}>
+              {selectedDate && getEventsForDate(selectedDate).map((event) => (
+                <TouchableOpacity
+                  key={event.id}
+                  style={[styles.eventCard, { borderLeftColor: event.color }]}
+                  onPress={() => handleEditAppointment(event)}
+                >
+                  <View style={styles.eventHeader}>
+                    <Text style={styles.eventTitle}>{event.title}</Text>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleDeleteAppointment(event.id)}
+                    >
+                      <Text style={styles.deleteButtonText}>×</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.eventTime}>
+                    {formatTime(new Date(event.startDate).getHours(), new Date(event.startDate).getMinutes())}
+                  </Text>
+                  {event.description && (
+                    <Text style={styles.eventDescription}>{event.description}</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+              
+              {selectedDate && getEventsForDate(selectedDate).length === 0 && (
+                <Text style={styles.noEvents}>No appointments for this day</Text>
+              )}
+            </ScrollView>
+            
+            <View style={styles.dayModalButtons}>
+              <TouchableOpacity
+                style={styles.addAppointmentButton}
+                onPress={() => {
+                  setShowDayModal(false);
+                  handleAddAppointment();
+                }}
+              >
+                <Text style={styles.addAppointmentButtonText}>+ Add Appointment</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowDayModal(false)}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Add/Edit Appointment Modal */}
+      <Modal
+        visible={showAddModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAddModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.addModalContent}>
+            <Text style={styles.addModalTitle}>
+              {editingEvent ? 'Edit Appointment' : 'New Appointment'}
+            </Text>
+            
+            <ScrollView style={styles.formContainer}>
+              <Text style={styles.label}>Title *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="What's your appointment?"
+                value={formData.title}
+                onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
+              />
+              
+              <Text style={styles.label}>Time</Text>
+              <View style={styles.timePickerContainer}>
+                <View style={styles.timePicker}>
+                  <Text style={styles.timePickerLabel}>Hour</Text>
+                  <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
+                    {(isMilitaryTime 
+                      ? Array.from({ length: 24 }, (_, i) => i) 
+                      : Array.from({ length: 12 }, (_, i) => i + 1)
+                    ).map((hour) => (
+                      <TouchableOpacity
+                        key={hour}
+                        style={[
+                          styles.timeOption,
+                          selectedHour === hour && styles.selectedTimeOption
+                        ]}
+                        onPress={() => setSelectedHour(hour)}
+                      >
+                        <Text style={[
+                          styles.timeOptionText,
+                          selectedHour === hour && styles.selectedTimeOptionText
+                        ]}>
+                          {hour.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                
+                <View style={styles.timePicker}>
+                  <Text style={styles.timePickerLabel}>Minutes</Text>
+                  <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
+                    {[0, 15, 30, 45].map((minute) => (
+                      <TouchableOpacity
+                        key={minute}
+                        style={[
+                          styles.timeOption,
+                          selectedMinute === minute && styles.selectedTimeOption
+                        ]}
+                        onPress={() => setSelectedMinute(minute)}
+                      >
+                        <Text style={[
+                          styles.timeOptionText,
+                          selectedMinute === minute && styles.selectedTimeOptionText
+                        ]}>
+                          {minute.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                
+                {!isMilitaryTime && (
+                  <View style={styles.timePicker}>
+                    <Text style={styles.timePickerLabel}>AM/PM</Text>
+                    <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
+                      {['AM', 'PM'].map((period) => (
+                        <TouchableOpacity
+                          key={period}
+                          style={[
+                            styles.timeOption,
+                            selectedAmPm === period && styles.selectedTimeOption
+                          ]}
+                          onPress={() => setSelectedAmPm(period as 'AM' | 'PM')}
+                        >
+                          <Text style={[
+                            styles.timeOptionText,
+                            selectedAmPm === period && styles.selectedTimeOptionText
+                          ]}>
+                            {period}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+              </View>
+              
+              <Text style={styles.label}>Category</Text>
+              <View style={styles.categoryContainer}>
+                {Object.entries(CATEGORY_COLORS).map(([category, color]) => (
+                  <TouchableOpacity
+                    key={category}
+                    style={[
+                      styles.categoryButton,
+                      { backgroundColor: color },
+                      formData.category === category && styles.selectedCategory
+                    ]}
+                    onPress={() => setFormData(prev => ({ ...prev, category: category as any }))}
+                  >
+                    <Text style={styles.categoryText}>
+                      {category === 'work' ? '💼' :
+                       category === 'personal' ? '💖' :
+                       category === 'health' ? '✨' :
+                       category === 'learning' ? '📚' : '📋'}
+                      {category}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              
+              <Text style={styles.label}>Notes</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Add any notes..."
+                multiline
+                value={formData.description}
+                onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))}
+              />
+            </ScrollView>
+            
+            <View style={styles.addModalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowAddModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={saveAppointment}
+              >
+                <Text style={styles.saveButtonText}>
+                  {editingEvent ? 'Update' : 'Save'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.white },
-  scrollView: { padding: 20 },
-  dateTitle: { fontSize: 20, fontWeight: '700', color: Colors.text, marginBottom: 16 },
-  noEvents: { fontSize: 16, color: Colors.textLight },
-  eventCard: { padding: 16, borderRadius: 12, marginBottom: 12 },
-  eventTitle: { fontSize: 16, fontWeight: '600', color: Colors.text },
-  eventDescription: { fontSize: 14, color: Colors.textLight, marginTop: 4 },
-  eventTime: { fontSize: 12, color: Colors.textLight, marginTop: 6 },
-});
