@@ -1,14 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// Define color palettes for light and dark modes
 const lightColors = {
   background: '#FFFFFF',
   cardBackground: '#FEFEFE',
-  primary: '#E8B4C4',       // Blush pink
-  secondary: '#F7D1DA',     // Light pink
-  accent: '#B4E8D1',        // Mint green
-  lavender: '#DDD6FE',      // Soft purple
-  peach: '#FECACA',         // Light coral
+  primary: '#E8B4C4',
+  secondary: '#F7D1DA',
+  accent: '#B4E8D1',
+  lavender: '#DDD6FE',
+  peach: '#FECACA',
   text: '#2D2D2D',
   textSecondary: '#6B6B6B',
   textLight: '#9CA3AF',
@@ -26,11 +25,11 @@ const lightColors = {
 const darkColors = {
   background: '#1A1A1A',
   cardBackground: '#2D2D2D',
-  primary: '#E8B4C4',       // Keep the blush pink as accent
-  secondary: '#F7D1DA',     // Keep light pink for highlights
-  accent: '#B4E8D1',        // Keep mint green
-  lavender: '#DDD6FE',      // Keep soft purple
-  peach: '#FECACA',         // Keep light coral
+  primary: '#E8B4C4',
+  secondary: '#F7D1DA',
+  accent: '#B4E8D1',
+  lavender: '#DDD6FE',
+  peach: '#FECACA',
   text: '#FFFFFF',
   textSecondary: '#B0B0B0',
   textLight: '#8A8A8A',
@@ -45,27 +44,20 @@ const darkColors = {
   white: '#FFFFFF',
 };
 
-export type ColorPalette = typeof lightColors;
-
-interface ThemeContextType {
+export type ThemeContextType = {
   isDarkMode: boolean;
   isMilitaryTime: boolean;
-  colors: ColorPalette;
+  colors: typeof lightColors;
   toggleDarkMode: () => void;
   toggleMilitaryTime: () => void;
   formatTime: (hour: number, minute: number) => string;
-}
+};
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-interface ThemeProviderProps {
-  children: ReactNode;
-}
-
-export function ThemeProvider({ children }: ThemeProviderProps) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMilitaryTime, setIsMilitaryTime] = useState(false);
-
   const colors = isDarkMode ? darkColors : lightColors;
 
   const toggleDarkMode = () => {
@@ -78,10 +70,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   const formatTime = (hour: number, minute: number): string => {
     if (isMilitaryTime) {
-      // 24-hour format
       return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
     } else {
-      // 12-hour format with AM/PM
       const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
       const ampm = hour >= 12 ? 'PM' : 'AM';
       return `${displayHour}:${minute.toString().padStart(2, '0')} ${ampm}`;

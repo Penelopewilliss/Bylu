@@ -1,130 +1,113 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import type { Task, CalendarEvent } from '../types';
+// AppContext.tsx
+import createContextHook from '@nkzw/create-context-hook';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import type { Task, CalendarEvent, MoodEntry, FocusSession, Badge, BrainDumpEntry, HyperfocusLog, WeeklyReflection } from '../types';
 
-interface AppContextType {
-  tasks: Task[];
-  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'completed'>) => void;
-  toggleTask: (id: string) => void;
-  deleteTask: (id: string) => void;
-  events: CalendarEvent[];
-  addEvent: (event: Omit<CalendarEvent, 'id'>) => void;
-  updateEvent: (id: string, event: Partial<CalendarEvent>) => void;
-  deleteEvent: (id: string) => void;
-}
+const STORAGE_KEYS = {
+	TASKS: '@planner_tasks',
+	EVENTS: '@planner_events',
+	MOODS: '@planner_moods',
+	FOCUS_SESSIONS: '@planner_focus_sessions',
+	BADGES: '@planner_badges',
+	BRAIN_DUMP: '@planner_brain_dump',
+	HYPERFOCUS_LOGS: '@planner_hyperfocus_logs',
+	REFLECTIONS: '@planner_reflections',
+	FOCUS_STREAK: '@planner_focus_streak',
+	TINY_WINS: '@planner_tiny_wins',
+};
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+export const [AppProvider, useApp] = createContextHook(() => {
+	const [tasks, setTasks] = useState<Task[]>([]);
+	const [events, setEvents] = useState<CalendarEvent[]>([]);
+	const [moods, setMoods] = useState<MoodEntry[]>([]);
+	const [focusSessions, setFocusSessions] = useState<FocusSession[]>([]);
+	const [badges, setBadges] = useState<Badge[]>([]);
+	const [brainDump, setBrainDump] = useState<BrainDumpEntry[]>([]);
+	const [hyperfocusLogs, setHyperfocusLogs] = useState<HyperfocusLog[]>([]);
+	const [reflections, setReflections] = useState<WeeklyReflection[]>([]);
+	const [focusStreak, setFocusStreak] = useState<number>(0);
+	const [tinyWins, setTinyWins] = useState<string[]>([]);
+	const [isLoading, setIsLoading] = useState<boolean>(true);
 
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: '1',
-      title: 'Morning meditation',
-      description: 'Start the day with mindfulness',
-      category: 'health',
-      priority: 'high',
-      completed: false,
-      createdAt: new Date().toISOString(),
-      microSteps: []
-    },
-    {
-      id: '2',
-      title: 'Complete project proposal',
-      description: 'Finish the wellness app proposal',
-      category: 'work',
-      priority: 'high',
-      completed: true,
-      createdAt: new Date().toISOString(),
-      completedAt: new Date().toISOString(),
-      microSteps: []
-    }
-  ]);
+	useEffect(() => {
+		loadData();
+	}, []);
 
-  const [events, setEvents] = useState<CalendarEvent[]>([
-    // Sample events for testing
-    {
-      id: '1',
-      title: 'Team Meeting',
-      description: 'Weekly team sync meeting',
-      startDate: new Date().toISOString(),
-      endDate: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour later
-      color: '#E8B4C4',
-      category: 'work'
-    },
-    {
-      id: '2',
-      title: 'Yoga Class',
-      description: 'Morning yoga session',
-      startDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-      endDate: new Date(Date.now() + 24 * 60 * 60 * 1000 + 90 * 60 * 1000).toISOString(), // 1.5 hours
-      color: '#B4E8D1',
-      category: 'health'
-    }
-  ]);
+	const loadData = async () => {
+		try {
+			const [
+				storedTasks,
+				storedEvents,
+				storedMoods,
+				storedFocusSessions,
+				storedBadges,
+				storedBrainDump,
+				storedHyperfocusLogs,
+				storedReflections,
+				storedFocusStreak,
+				storedTinyWins,
+			] = await Promise.all([
+				AsyncStorage.getItem(STORAGE_KEYS.TASKS),
+				AsyncStorage.getItem(STORAGE_KEYS.EVENTS),
+				AsyncStorage.getItem(STORAGE_KEYS.MOODS),
+				AsyncStorage.getItem(STORAGE_KEYS.FOCUS_SESSIONS),
+				AsyncStorage.getItem(STORAGE_KEYS.BADGES),
+				AsyncStorage.getItem(STORAGE_KEYS.BRAIN_DUMP),
+				AsyncStorage.getItem(STORAGE_KEYS.HYPERFOCUS_LOGS),
+				AsyncStorage.getItem(STORAGE_KEYS.REFLECTIONS),
+				AsyncStorage.getItem(STORAGE_KEYS.FOCUS_STREAK),
+				AsyncStorage.getItem(STORAGE_KEYS.TINY_WINS),
+			]);
 
-  const addTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'completed'>) => {
-    const newTask: Task = {
-      ...taskData,
-      id: Date.now().toString(),
-      completed: false,
-      createdAt: new Date().toISOString(),
-    };
-    setTasks(prev => [...prev, newTask]);
-  };
+			if (storedTasks) setTasks(JSON.parse(storedTasks));
+			if (storedEvents) setEvents(JSON.parse(storedEvents));
+			if (storedMoods) setMoods(JSON.parse(storedMoods));
+			if (storedFocusSessions) setFocusSessions(JSON.parse(storedFocusSessions));
+			if (storedBadges) setBadges(JSON.parse(storedBadges));
+			if (storedBrainDump) setBrainDump(JSON.parse(storedBrainDump));
+			if (storedHyperfocusLogs) setHyperfocusLogs(JSON.parse(storedHyperfocusLogs));
+			if (storedReflections) setReflections(JSON.parse(storedReflections));
+			if (storedFocusStreak) setFocusStreak(JSON.parse(storedFocusStreak));
+			if (storedTinyWins) setTinyWins(JSON.parse(storedTinyWins));
+		} catch (error) {
+			console.error('Error loading data:', error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-  const toggleTask = (id: string) => {
-    setTasks(prev => prev.map(task => 
-      task.id === id 
-        ? { 
-            ...task, 
-            completed: !task.completed,
-            completedAt: !task.completed ? new Date().toISOString() : undefined
-          }
-        : task
-    ));
-  };
+	const saveTasks = async (newTasks: Task[]) => {
+		setTasks(newTasks);
+		await AsyncStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(newTasks));
+	};
 
-  const deleteTask = (id: string) => {
-    setTasks(prev => prev.filter(task => task.id !== id));
-  };
+	const addTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt' | 'completed'>) => {
+		const newTask: Task = {
+			...task,
+			id: Date.now().toString(),
+			createdAt: new Date().toISOString(),
+			completed: false,
+			microSteps: [],
+		};
+		await saveTasks([...tasks, newTask]);
+	}, [tasks]);
 
-  const addEvent = (eventData: Omit<CalendarEvent, 'id'>) => {
-    const newEvent: CalendarEvent = {
-      ...eventData,
-      id: Date.now().toString(),
-    };
-    setEvents(prev => [...prev, newEvent]);
-  };
+	// Je kunt hier alle andere save/update functies op dezelfde manier toevoegen
+	// updateTask, deleteTask, toggleTaskComplete, addEvent, addMoodEntry, etc.
 
-  const updateEvent = (id: string, eventData: Partial<CalendarEvent>) => {
-    setEvents(prev => prev.map(event => 
-      event.id === id ? { ...event, ...eventData } : event
-    ));
-  };
-
-  const deleteEvent = (id: string) => {
-    setEvents(prev => prev.filter(event => event.id !== id));
-  };
-
-  return (
-    <AppContext.Provider value={{
-      tasks,
-      addTask,
-      toggleTask,
-      deleteTask,
-      events,
-      addEvent,
-      updateEvent,
-      deleteEvent
-    }}>
-      {children}
-    </AppContext.Provider>
-  );
-}
-
-export function useApp() {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
-  return context;
-}
+	return useMemo(() => ({
+		tasks,
+		events,
+		moods,
+		focusSessions,
+		badges,
+		brainDump,
+		hyperfocusLogs,
+		reflections,
+		focusStreak,
+		tinyWins,
+		isLoading,
+		addTask,
+	}), [tasks, events, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, addTask]);
+});

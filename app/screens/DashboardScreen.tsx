@@ -1,38 +1,52 @@
+// DashboardScreen.tsx
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Colors from '../constants/colors';
+import Fonts from '../constants/fonts';
 
 export default function DashboardScreen() {
-  const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const navigation = useNavigation<any>();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>✨ Dashboard</Text>
-      <Text style={styles.subtitle}>Welcome to your dashboard!</Text>
-    </View>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Dashboard</Text>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => navigation.navigate('Tasks')}
+      >
+        <Text style={styles.cardText}>Tasks</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => navigation.navigate('Calendar')}
+      >
+        <Text style={styles.cardText}>Calendar</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => navigation.navigate('SensoryBreaks')}
+      >
+        <Text style={styles.cardText}>Sensory Breaks</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => navigation.navigate('Settings')}
+      >
+        <Text style={styles.cardText}>Settings</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 28, fontWeight: '700', marginBottom: 20 },
+  card: {
+    backgroundColor: Colors.secondary,
     padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.background,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: colors.text,
+    borderRadius: 16,
     marginBottom: 16,
-    textAlign: 'center',
   },
-  subtitle: {
-    fontSize: 20,
-    color: colors.textSecondary,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
+  cardText: { fontSize: 18, fontWeight: '600', color: Colors.text },
 });
