@@ -167,10 +167,10 @@ function TopBar({
   );
 }
 
-function Screen({ activeTab }: { activeTab: TabName }) {
+function Screen({ activeTab, onNavigate }: { activeTab: TabName; onNavigate: (tab: TabName) => void }) {
   switch (activeTab) {
     case 'Dashboard':
-      return <DashboardScreen />;
+      return <DashboardScreen onNavigate={onNavigate} />;
     case 'Tasks':
       return <TasksScreen />;
     case 'Calendar':
@@ -182,7 +182,7 @@ function Screen({ activeTab }: { activeTab: TabName }) {
     case 'Settings':
       return <SettingsScreen />;
     default:
-      return <DashboardScreen />;
+      return <DashboardScreen onNavigate={onNavigate} />;
   }
 }
 
@@ -210,7 +210,7 @@ function MainApp() {
         onMenuPress={() => setMenuVisible(true)} 
       />
       <View style={styles.content}>
-        <Screen activeTab={activeTab} />
+        <Screen activeTab={activeTab} onNavigate={setActiveTab} />
       </View>
       
       <HamburgerMenu
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   // Top Bar Styles
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     backgroundColor: '#F7D1DA', // Light pink
     paddingHorizontal: 16,
@@ -304,9 +304,14 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   currentTab: {
-    flex: 1,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    pointerEvents: 'none',
   },
   currentTabEmoji: {
     fontSize: 20,

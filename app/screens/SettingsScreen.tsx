@@ -19,8 +19,6 @@ export default function SettingsScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Settings</Text>
-        <Text style={styles.subtitle}>Customize your experience</Text>
       </View>
 
       {/* Settings Options */}

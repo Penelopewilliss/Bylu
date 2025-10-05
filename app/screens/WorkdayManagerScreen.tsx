@@ -1302,8 +1302,10 @@ const createStyles = (colors: any) => StyleSheet.create({
   setupContainer: {
     flex: 1,
     padding: 16,
-    justifyContent: 'center',
+    paddingTop: 40,
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    gap: 8,
   },
   setupTitle: {
     fontSize: 22,
@@ -1322,19 +1324,19 @@ const createStyles = (colors: any) => StyleSheet.create({
   settingsContainer: {
     width: '100%',
     maxWidth: 280,
-    marginBottom: 20,
+    marginBottom: 12,
   },
   timeSettingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   toggleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 0,
   },
   settingLabel: {
     fontSize: 14,

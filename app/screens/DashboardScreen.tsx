@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 
-export default function DashboardScreen() {
+export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { colors } = useTheme();
   const { tasks, events } = useApp();
   const styles = createStyles(colors);
@@ -14,9 +14,6 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>✨ Welcome to Glowgetter</Text>
-      <Text style={styles.subtitle}>Your productivity dashboard</Text>
-      
       {/* Quick Stats */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
@@ -36,12 +33,12 @@ export default function DashboardScreen() {
       {/* Quick Actions */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.cardContainer}>
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Calendar')}>
           <Text style={styles.cardEmoji}>📅</Text>
           <Text style={styles.cardTitle}>Today's Schedule</Text>
           <Text style={styles.cardSubtitle}>View calendar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Tasks')}>
           <Text style={styles.cardEmoji}>✓</Text>
           <Text style={styles.cardTitle}>Quick Tasks</Text>
           <Text style={styles.cardSubtitle}>Manage todos</Text>
@@ -49,12 +46,12 @@ export default function DashboardScreen() {
       </View>
 
       <View style={styles.cardContainer}>
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Goals')}>
           <Text style={styles.cardEmoji}>🎯</Text>
           <Text style={styles.cardTitle}>Goals Progress</Text>
           <Text style={styles.cardSubtitle}>Track goals</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Workday')}>
           <Text style={styles.cardEmoji}>⚡</Text>
           <Text style={styles.cardTitle}>Sensory Breaks</Text>
           <Text style={styles.cardSubtitle}>Take a break</Text>
@@ -114,7 +111,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
     marginBottom: 16,
-    marginTop: 24,
+    marginTop: 8,
+    textAlign: 'center',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -124,18 +122,18 @@ const createStyles = (colors: any) => StyleSheet.create({
   statCard: {
     backgroundColor: colors.cardBackground,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: 'center',
     flex: 1,
     marginHorizontal: 4,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
     color: colors.primary,
   },
@@ -150,33 +148,33 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: 16,
   },
   card: {
-    backgroundColor: colors.cardBackground,
-    padding: 20,
+    backgroundColor: colors.primary,
+    padding: 16,
     borderRadius: 16,
     alignItems: 'center',
     flex: 1,
     marginHorizontal: 4,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   cardEmoji: {
-    fontSize: 24,
+    fontSize: 28,
     marginBottom: 8,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '600',
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: 4,
+    color: '#FFFFFF',
+    marginTop: 4,
   },
   cardSubtitle: {
-    fontSize: 12,
-    color: colors.textSecondary,
+    fontSize: 11,
+    color: '#FFFFFF',
     textAlign: 'center',
+    opacity: 0.9,
   },
   taskPreview: {
     backgroundColor: colors.cardBackground,

@@ -181,7 +181,6 @@ export default function GoalsScreen() {
     <View style={styles.container}>
       {/* Header with Add Button */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Goals</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={openAddModal}
@@ -377,7 +376,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: colors.background,

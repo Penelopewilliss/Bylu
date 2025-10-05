@@ -25,7 +25,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 16,
@@ -501,7 +501,6 @@ export default function TasksScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Tasks</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => setShowAddModal(true)}
