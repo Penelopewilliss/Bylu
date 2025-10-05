@@ -9,6 +9,7 @@ import {
   Alert,
   Modal,
   TextInput,
+  Animated,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -240,6 +241,118 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
   );
 };
 
+// Success notification component
+const SuccessNotification = ({ visible, colors }: { visible: boolean; colors: any }) => {
+  const fadeAnim = new Animated.Value(0);
+  const scaleAnim = new Animated.Value(0.8);
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 0.8,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]);
+
+  if (!visible) return null;
+
+  const notificationStyles = StyleSheet.create({
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      zIndex: 1000,
+    },
+    notification: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 20,
+      padding: 30,
+      alignItems: 'center',
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 16,
+      borderWidth: 2,
+      borderColor: colors.success,
+    },
+    icon: {
+      fontSize: 48,
+      marginBottom: 16,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: colors.text,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    subtitle: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: 20,
+    },
+    emoji: {
+      fontSize: 24,
+    },
+  });
+
+  return (
+    <Animated.View 
+      style={[
+        notificationStyles.overlay,
+        {
+          opacity: fadeAnim,
+          transform: [{ scale: scaleAnim }],
+        },
+      ]}
+    >
+      <View style={notificationStyles.notification}>
+        <Text style={notificationStyles.icon}>🚀</Text>
+        <Text style={notificationStyles.title}>Workday Started!</Text>
+        <Text style={notificationStyles.subtitle}>
+          Your productive day begins now
+        </Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <Text style={notificationStyles.emoji}>✨</Text>
+          <Text style={notificationStyles.emoji}>💪</Text>
+          <Text style={notificationStyles.emoji}>🌟</Text>
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
+
+// Main component
 export default function WorkdayManagerScreen() {
   const { tasks } = useApp();
   const { colors } = useTheme();
@@ -269,6 +382,9 @@ export default function WorkdayManagerScreen() {
 
   // Edit sessions mode state
   const [editSessionsMode, setEditSessionsMode] = useState(false);
+
+  // Success notification state
+  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
 
   // Color themes for different session types
   const sessionColors = {
@@ -500,49 +616,89 @@ export default function WorkdayManagerScreen() {
     }
     
     setWorkdayStarted(true);
+    
+    // Show success notification
+    setShowSuccessNotification(true);
+    setTimeout(() => {
+      setShowSuccessNotification(false);
+    }, 3000); // Hide after 3 seconds
+    
     console.log('Workday started successfully!'); // Debug log
   };
 
   const resetWorkday = () => {
     console.log('Reset workday button pressed'); // Debug log
+    
     Alert.alert(
       'Reset Workday',
       'Are you sure you want to reset your workday schedule? This will clear all sessions and stop your current workday.',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Cancel', 
+          style: 'cancel',
+          onPress: () => console.log('Reset cancelled')
+        },
         { 
           text: 'Reset', 
           style: 'destructive',
           onPress: () => {
             console.log('Reset confirmed, clearing all data'); // Debug log
-            // Clear all sessions
-            setSessions([]);
-            // Stop workday
-            setWorkdayStarted(false);
-            // Reset workday times to defaults
-            setWorkdayStart('09:00');
-            setWorkdayEnd('17:00');
-            setAutoBreaks(true);
-            // Clear any modal states
-            setEditModalVisible(false);
-            setAddSessionModalVisible(false);
-            setTimePickerVisible(false);
-            setSelectedSession(null);
-            // Clear edit form data
-            setEditTitle('');
-            setEditStartTime('');
-            setEditEndTime('');
-            // Clear new session form data
-            setNewSessionTitle('');
-            setNewSessionStartTime('');
-            setNewSessionEndTime('');
-            setNewSessionType('focus');
-            // Reset time picker state
-            setTimePickerType('workdayStart');
-            setTimePickerTitle('');
             
-            console.log('Reset completed successfully'); // Debug log
-            Alert.alert('Success', 'Workday has been reset successfully!');
+            try {
+              // Clear all sessions
+              setSessions([]);
+              console.log('Sessions cleared');
+              
+              // Stop workday
+              setWorkdayStarted(false);
+              console.log('Workday stopped');
+              
+              // Reset workday times to defaults
+              setWorkdayStart('09:00');
+              setWorkdayEnd('17:00');
+              setAutoBreaks(true);
+              console.log('Times reset to defaults');
+              
+              // Clear any modal states
+              setEditModalVisible(false);
+              setAddSessionModalVisible(false);
+              setTimePickerVisible(false);
+              setSelectedSession(null);
+              console.log('Modals cleared');
+              
+              // Clear edit form data
+              setEditTitle('');
+              setEditStartTime('');
+              setEditEndTime('');
+              console.log('Edit form cleared');
+              
+              // Clear new session form data
+              setNewSessionTitle('');
+              setNewSessionStartTime('');
+              setNewSessionEndTime('');
+              setNewSessionType('focus');
+              console.log('New session form cleared');
+              
+              // Reset time picker state
+              setTimePickerType('workdayStart');
+              setTimePickerTitle('');
+              console.log('Time picker state reset');
+              
+              // Hide success notification if showing
+              setShowSuccessNotification(false);
+              console.log('Success notification hidden');
+              
+              console.log('Reset completed successfully'); // Debug log
+              
+              // Show success message
+              setTimeout(() => {
+                Alert.alert('Success', 'Workday has been reset successfully!');
+              }, 100);
+              
+            } catch (error) {
+              console.error('Error during reset:', error);
+              Alert.alert('Error', 'Something went wrong during reset. Please try again.');
+            }
           }
         }
       ]
@@ -702,14 +858,11 @@ export default function WorkdayManagerScreen() {
         )}
       </View>
 
-      {/* Action Buttons */}
+            {/* Action Buttons */}
       {workdayStarted && (
         <View style={styles.topButtonContainer}>
           <TouchableOpacity style={styles.topButton} onPress={addCustomSession}>
             <Text style={styles.topButtonText}>+ Add Session</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.topButton, styles.resetTopButton]} onPress={resetWorkday}>
-            <Text style={styles.topButtonText}>🔄 Reset</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -803,32 +956,33 @@ export default function WorkdayManagerScreen() {
               ]}
               onPress={() => openEditModal(session)}
             >
-              <View style={styles.sessionTimeContainer}>
-                <Text style={styles.sessionTime}>
-                  {session.startTime}
-                </Text>
-                <Text style={styles.sessionDuration}>
-                  {session.endTime}
-                </Text>
+              {/* Top row: Time and main content */}
+              <View style={styles.sessionTopRow}>
+                <View style={styles.sessionTimeContainer}>
+                  <Text style={styles.sessionTime}>
+                    {session.startTime}
+                  </Text>
+                  <Text style={styles.sessionDuration}>
+                    {session.endTime}
+                  </Text>
+                </View>
+                
+                <View style={styles.sessionContent}>
+                  <Text 
+                    style={[
+                      styles.sessionTitle,
+                      (session.completed || session.skipped) && styles.sessionTitleCompleted
+                    ]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {session.title}
+                  </Text>
+                </View>
               </View>
-              
-              <View style={styles.sessionContent}>
-                <Text 
-                  style={[
-                    styles.sessionTitle,
-                    (session.completed || session.skipped) && styles.sessionTitleCompleted
-                  ]}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {session.title}
-                </Text>
-                <Text style={styles.sessionType}>
-                  {session.type.charAt(0).toUpperCase() + session.type.slice(1)}
-                </Text>
-              </View>
-              
-              <View style={styles.sessionActions}>
+
+              {/* Bottom row: Action buttons */}
+                            <View style={styles.sessionActions}>
                 {!session.completed && !session.skipped && (
                   <>
                     <TouchableOpacity
@@ -851,6 +1005,41 @@ export default function WorkdayManagerScreen() {
                     </TouchableOpacity>
                   </>
                 )}
+
+                {/* Move and Delete buttons - always visible */}
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.moveButton]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    const sessionIndex = sessions.findIndex(s => s.id === session.id);
+                    if (sessionIndex > 0) moveSession(session.id, 'up');
+                  }}
+                  disabled={sessions.findIndex(s => s.id === session.id) === 0}
+                >
+                  <Text style={[styles.actionButtonText, sessions.findIndex(s => s.id === session.id) === 0 && styles.disabledText]}>↑</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.moveButton]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    const sessionIndex = sessions.findIndex(s => s.id === session.id);
+                    if (sessionIndex < sessions.length - 1) moveSession(session.id, 'down');
+                  }}
+                  disabled={sessions.findIndex(s => s.id === session.id) === sessions.length - 1}
+                >
+                  <Text style={[styles.actionButtonText, sessions.findIndex(s => s.id === session.id) === sessions.length - 1 && styles.disabledText]}>↓</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.deleteButton]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    deleteSession(session.id);
+                  }}
+                >
+                  <Text style={styles.actionButtonText}>🗑</Text>
+                </TouchableOpacity>
 
                 {session.completed && (
                   <View style={styles.statusIndicator}>
@@ -1005,6 +1194,9 @@ export default function WorkdayManagerScreen() {
         title={timePickerTitle}
         colors={colors}
       />
+
+      {/* Success Notification */}
+      <SuccessNotification visible={showSuccessNotification} colors={colors} />
     </View>
   );
 }
@@ -1298,8 +1490,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     padding: 16,
   },
   sessionCard: {
-    flexDirection: 'row',
-    padding: 12,
+    flexDirection: 'column',
+    padding: 16,
+    minHeight: 100,
     borderRadius: 12,
     marginBottom: 8,
     shadowColor: colors.shadow,
@@ -1314,20 +1507,25 @@ const createStyles = (colors: any) => StyleSheet.create({
   sessionSkipped: {
     opacity: 0.5,
   },
+  sessionTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   sessionTimeContainer: {
     alignItems: 'center',
-    marginRight: 12,
-    minWidth: 50,
+    marginRight: 16,
+    minWidth: 60,
   },
   sessionTime: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold',
     color: colors.text,
   },
   sessionDuration: {
-    fontSize: 10,
+    fontSize: 12,
     color: colors.textSecondary,
-    marginTop: 1,
+    marginTop: 2,
   },
   sessionContent: {
     flex: 1,
@@ -1336,28 +1534,31 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'flex-start',
   },
   sessionTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 1,
+    marginBottom: 4,
     textAlign: 'left',
+    lineHeight: 20,
   },
   sessionTitleCompleted: {
     textDecorationLine: 'line-through',
   },
   sessionType: {
-    fontSize: 10,
+    fontSize: 12,
     color: colors.textSecondary,
     textTransform: 'capitalize',
   },
   sessionActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
   },
   actionButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: colors.cardBackground,
     alignItems: 'center',
     justifyContent: 'center',

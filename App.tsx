@@ -213,17 +213,6 @@ function MainApp() {
         <Screen activeTab={activeTab} />
       </View>
       
-      {/* Floating Workday Button - Only show when not on Workday tab */}
-      {activeTab !== 'Workday' && (
-        <TouchableOpacity 
-          style={styles.floatingWorkdayButton}
-          onPress={() => setActiveTab('Workday')}
-        >
-          <Text style={styles.floatingButtonText}>🚀</Text>
-          <Text style={styles.floatingButtonLabel}>Workday</Text>
-        </TouchableOpacity>
-      )}
-      
       <HamburgerMenu
         activeTab={activeTab}
         onTabPress={setActiveTab}
@@ -408,31 +397,5 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 10,
     fontWeight: '500',
-  },
-  floatingWorkdayButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#F7D1DA',
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  floatingButtonText: {
-    fontSize: 20,
-    marginBottom: 2,
-  },
-  floatingButtonLabel: {
-    fontSize: 8,
-    fontWeight: 'bold',
-    color: '#8B5A6B',
-    textAlign: 'center',
   },
 });

@@ -88,15 +88,23 @@ export const [AppProvider, useApp] = createContextHook(() => {
 			id: Date.now().toString(),
 			createdAt: new Date().toISOString(),
 			completed: false,
-			microSteps: [],
 		};
-		await saveTasks([...tasks, newTask]);
+		const updatedTasks = [...tasks, newTask];
+		await saveTasks(updatedTasks);
+		return newTask;
 	}, [tasks]);
 
-	// Je kunt hier alle andere save/update functies op dezelfde manier toevoegen
-	// updateTask, deleteTask, toggleTaskComplete, addEvent, addMoodEntry, etc.
+	const toggleTask = useCallback(async (taskId: string) => {
+		const updatedTasks = tasks.map(task => 
+			task.id === taskId ? { ...task, completed: !task.completed } : task
+		);
+		await saveTasks(updatedTasks);
+	}, [tasks]);
 
-	return useMemo(() => ({
+	const deleteTask = useCallback(async (taskId: string) => {
+		const updatedTasks = tasks.filter(task => task.id !== taskId);
+		await saveTasks(updatedTasks);
+	}, [tasks]);	return useMemo(() => ({
 		tasks,
 		events,
 		moods,
@@ -109,5 +117,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		tinyWins,
 		isLoading,
 		addTask,
-	}), [tasks, events, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, addTask]);
+		toggleTask,
+		deleteTask,
+	}), [tasks, events, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, addTask, toggleTask, deleteTask]);
 });

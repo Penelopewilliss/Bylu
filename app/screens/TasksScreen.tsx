@@ -37,7 +37,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: colors.text,
-    fontFamily: Fonts.title?.fontFamily || 'System',
+    fontFamily: Fonts.header?.fontFamily || 'System',
   },
   addButton: {
     backgroundColor: colors.primary,
@@ -308,14 +308,14 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '600',
     color: colors.textSecondary,
     marginBottom: 8,
-    fontFamily: Fonts.subtitle?.fontFamily || 'System',
+    fontFamily: Fonts.body?.fontFamily || 'System',
   },
   progressStats: {
     fontSize: 24,
     fontWeight: '700',
     color: colors.text,
     marginBottom: 12,
-    fontFamily: Fonts.title?.fontFamily || 'System',
+    fontFamily: Fonts.header?.fontFamily || 'System',
   },
   progressBar: {
     height: 8,
@@ -352,7 +352,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
     marginBottom: 8,
-    fontFamily: Fonts.subtitle?.fontFamily || 'System',
+    fontFamily: Fonts.bodyBold?.fontFamily || 'System',
   },
   emptySubtitle: {
     fontSize: 14,
