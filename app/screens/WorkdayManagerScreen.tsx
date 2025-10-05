@@ -258,7 +258,14 @@ export default function WorkdayManagerScreen() {
   // Time picker modal state
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [timePickerTitle, setTimePickerTitle] = useState('');
-  const [timePickerType, setTimePickerType] = useState<'workdayStart' | 'workdayEnd' | 'editStart' | 'editEnd'>('workdayStart');
+  const [timePickerType, setTimePickerType] = useState<'workdayStart' | 'workdayEnd' | 'editStart' | 'editEnd' | 'newStart' | 'newEnd'>('workdayStart');
+
+  // Add session modal state
+  const [addSessionModalVisible, setAddSessionModalVisible] = useState(false);
+  const [newSessionType, setNewSessionType] = useState<'focus' | 'break' | 'lunch' | 'task'>('focus');
+  const [newSessionTitle, setNewSessionTitle] = useState('');
+  const [newSessionStartTime, setNewSessionStartTime] = useState('');
+  const [newSessionEndTime, setNewSessionEndTime] = useState('');
 
   // Color themes for different session types
   const sessionColors = {
@@ -416,7 +423,7 @@ export default function WorkdayManagerScreen() {
   };
 
   // Time picker handlers
-  const openTimePicker = (type: 'workdayStart' | 'workdayEnd' | 'editStart' | 'editEnd', title: string) => {
+  const openTimePicker = (type: 'workdayStart' | 'workdayEnd' | 'editStart' | 'editEnd' | 'newStart' | 'newEnd', title: string) => {
     setTimePickerType(type);
     setTimePickerTitle(title);
     setTimePickerVisible(true);
@@ -436,6 +443,12 @@ export default function WorkdayManagerScreen() {
       case 'editEnd':
         setEditEndTime(time);
         break;
+      case 'newStart':
+        setNewSessionStartTime(time);
+        break;
+      case 'newEnd':
+        setNewSessionEndTime(time);
+        break;
     }
     setTimePickerVisible(false);
   };
@@ -450,6 +463,10 @@ export default function WorkdayManagerScreen() {
         return editStartTime;
       case 'editEnd':
         return editEndTime;
+      case 'newStart':
+        return newSessionStartTime || '09:00';
+      case 'newEnd':
+        return newSessionEndTime || '10:00';
       default:
         return '09:00';
     }
@@ -523,22 +540,89 @@ export default function WorkdayManagerScreen() {
   };
 
   const addCustomSession = () => {
-    // Add a custom session at the end
-    const lastSession = sessions[sessions.length - 1];
-    const startTime = lastSession ? lastSession.endTime : workdayStart;
-    
+    // Open modal for adding new session
+    setNewSessionTitle('');
+    setNewSessionStartTime('');
+    setNewSessionEndTime('');
+    setNewSessionType('focus');
+    setAddSessionModalVisible(true);
+  };
+
+  const saveNewSession = () => {
+    if (!newSessionTitle || !newSessionStartTime || !newSessionEndTime) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
     const newSession: WorkdaySession = {
-      id: (sessions.length + 1).toString(),
-      title: '✨ Custom Session',
-      type: 'focus',
-      startTime,
-      endTime: formatTime(addMinutes(parseTimeString(startTime), 30)),
+      id: Date.now().toString(),
+      title: newSessionTitle,
+      type: newSessionType,
+      startTime: newSessionStartTime,
+      endTime: newSessionEndTime,
       completed: false,
       skipped: false,
-      color: sessionColors.focus,
+      color: sessionColors[newSessionType],
     };
 
-    setSessions(prev => [...prev, newSession]);
+    // Insert the session in the correct chronological order
+    const newSessions = [...sessions, newSession].sort((a, b) => {
+      return a.startTime.localeCompare(b.startTime);
+    });
+
+    setSessions(newSessions);
+    setAddSessionModalVisible(false);
+  };
+
+  const deleteSession = (sessionId: string) => {
+    Alert.alert(
+      'Delete Session',
+      'Are you sure you want to delete this session?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setSessions(prev => prev.filter(session => session.id !== sessionId));
+          }
+        }
+      ]
+    );
+  };
+
+  const moveSession = (sessionId: string, direction: 'up' | 'down') => {
+    const currentIndex = sessions.findIndex(s => s.id === sessionId);
+    if (currentIndex === -1) return;
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= sessions.length) return;
+
+    const newSessions = [...sessions];
+    [newSessions[currentIndex], newSessions[newIndex]] = [newSessions[newIndex], newSessions[currentIndex]];
+    setSessions(newSessions);
+  };
+
+  const duplicateSession = (sessionId: string) => {
+    const sessionToDuplicate = sessions.find(s => s.id === sessionId);
+    if (!sessionToDuplicate) return;
+
+    const lastSession = sessions[sessions.length - 1];
+    const startTime = lastSession ? lastSession.endTime : workdayStart;
+    const duration = timeToMinutes(parseTimeString(sessionToDuplicate.endTime)) - 
+                    timeToMinutes(parseTimeString(sessionToDuplicate.startTime));
+
+    const duplicatedSession: WorkdaySession = {
+      ...sessionToDuplicate,
+      id: Date.now().toString(),
+      title: `${sessionToDuplicate.title} (Copy)`,
+      startTime,
+      endTime: formatTime(addMinutes(parseTimeString(startTime), duration)),
+      completed: false,
+      skipped: false,
+    };
+
+    setSessions(prev => [...prev, duplicatedSession]);
   };
 
   const currentSession = getCurrentSession();
@@ -686,6 +770,56 @@ export default function WorkdayManagerScreen() {
                     </TouchableOpacity>
                   </>
                 )}
+                
+                {/* Management buttons - always visible */}
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.moveButton]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    moveSession(session.id, 'up');
+                  }}
+                  disabled={sessions.findIndex(s => s.id === session.id) === 0}
+                >
+                  <Text style={[
+                    styles.actionButtonText, 
+                    sessions.findIndex(s => s.id === session.id) === 0 && styles.disabledText
+                  ]}>↑</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.moveButton]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    moveSession(session.id, 'down');
+                  }}
+                  disabled={sessions.findIndex(s => s.id === session.id) === sessions.length - 1}
+                >
+                  <Text style={[
+                    styles.actionButtonText,
+                    sessions.findIndex(s => s.id === session.id) === sessions.length - 1 && styles.disabledText
+                  ]}>↓</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.duplicateButton]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    duplicateSession(session.id);
+                  }}
+                >
+                  <Text style={styles.actionButtonText}>📋</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.deleteButton]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    deleteSession(session.id);
+                  }}
+                >
+                  <Text style={styles.actionButtonText}>🗑</Text>
+                </TouchableOpacity>
+
                 {session.completed && (
                   <View style={styles.statusIndicator}>
                     <Text style={styles.statusText}>✓ Done</Text>
@@ -761,6 +895,81 @@ export default function WorkdayManagerScreen() {
                 onPress={saveSessionEdit}
               >
                 <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Add Session Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={addSessionModalVisible}
+        onRequestClose={() => setAddSessionModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add New Session</Text>
+            
+            <Text style={styles.inputLabel}>Session Type</Text>
+            <View style={styles.typeSelector}>
+              {(['focus', 'break', 'lunch', 'task'] as const).map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.typeButton,
+                    newSessionType === type && styles.typeButtonSelected,
+                    { backgroundColor: newSessionType === type ? sessionColors[type] : colors.cardBackground }
+                  ]}
+                  onPress={() => setNewSessionType(type)}
+                >
+                  <Text style={[
+                    styles.typeButtonText,
+                    { color: newSessionType === type ? colors.text : colors.textSecondary }
+                  ]}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            
+            <Text style={styles.inputLabel}>Title</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={newSessionTitle}
+              onChangeText={setNewSessionTitle}
+              placeholder={`Enter ${newSessionType} session title`}
+            />
+            
+            <Text style={styles.inputLabel}>Start Time</Text>
+            <TouchableOpacity
+              style={styles.timeButton}
+              onPress={() => openTimePicker('newStart', 'Select Start Time')}
+            >
+              <Text style={styles.timeButtonText}>{newSessionStartTime || 'HH:MM'}</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.inputLabel}>End Time</Text>
+            <TouchableOpacity
+              style={styles.timeButton}
+              onPress={() => openTimePicker('newEnd', 'Select End Time')}
+            >
+              <Text style={styles.timeButtonText}>{newSessionEndTime || 'HH:MM'}</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setAddSessionModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={saveNewSession}
+              >
+                <Text style={styles.saveButtonText}>Add Session</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1051,9 +1260,21 @@ const createStyles = (colors: any) => StyleSheet.create({
   skipButton: {
     backgroundColor: colors.border,
   },
+  moveButton: {
+    backgroundColor: colors.secondaryLight || colors.secondary + '40',
+  },
+  duplicateButton: {
+    backgroundColor: colors.primaryLight || colors.primary + '40',
+  },
+  deleteButton: {
+    backgroundColor: '#ff6b6b40',
+  },
   actionButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  disabledText: {
+    opacity: 0.3,
   },
   statusIndicator: {
     paddingHorizontal: 6,
@@ -1164,4 +1385,35 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  typeSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  typeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  typeButtonSelected: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  typeButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
 });
+
+// Fix color references in the modal
+const getInputBackgroundColor = (colors: any) => {
+  return colors.inputBackground || colors.cardBackground;
+};
+
+const getTextPrimaryColor = (colors: any) => {
+  return colors.textPrimary || colors.text;
+};
