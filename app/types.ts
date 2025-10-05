@@ -1,11 +1,95 @@
 export type Priority = 'high' | 'medium' | 'low';
 export type Category = 'work' | 'personal' | 'health' | 'learning' | 'other';
 export type MoodType = 'energized' | 'happy' | 'calm' | 'tired' | 'stressed';
+export type GoalCategory = 'personal' | 'career' | 'health' | 'finance';
 
 export interface MicroStep {
   id: string;
   title: string;
   completed: boolean;
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  description: string;
+  category: GoalCategory;
+  targetDate: string;
+  completed: boolean;
+  createdAt: string;
+}
+
+export interface Strategy {
+  id: string;
+  goalId: string;
+  step: string;
+  completed: boolean;
+}
+
+// New Workflow Types
+export interface WorkflowSubtask {
+  id: string;
+  text: string;
+  completed: boolean;
+  createdAt: string;
+}
+
+export interface WorkflowStep {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  subtasks: WorkflowSubtask[];
+  createdAt: string;
+}
+
+export interface WorkflowRequirement {
+  id: string;
+  title: string;
+  type: 'money' | 'time' | 'knowledge' | 'equipment' | 'skill' | 'document' | 'other';
+  description?: string;
+  icon?: string;
+  completed: boolean;
+}
+
+export interface WorkflowContact {
+  id: string;
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  notes?: string;
+}
+
+export interface WorkflowResource {
+  id: string;
+  title: string;
+  type: 'contact' | 'website' | 'document' | 'note';
+  value: string; // email, phone, URL, or file path
+  description?: string;
+}
+
+export interface WorkflowProgress {
+  id: string;
+  date: string;
+  note: string;
+  type: 'milestone' | 'reflection' | 'obstacle' | 'insight';
+}
+
+export interface WorkflowGoal {
+  id: string;
+  title: string;
+  description: string;
+  category: GoalCategory;
+  steps: WorkflowStep[];
+  requirements: WorkflowRequirement[];
+  contacts: WorkflowContact[];
+  resources: WorkflowResource[];
+  progressNotes: WorkflowProgress[];
+  targetDate: string;
+  completed: boolean;
+  createdAt: string;
 }
 
 export interface Task {
