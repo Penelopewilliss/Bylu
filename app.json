@@ -21,7 +21,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.penelope11.glowgetterapp"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -29,6 +30,14 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "eeb29cff-888f-4029-9650-5ebf124cbcd2"
+      }
+    },
+    "cli": {
+      "appVersionSource": "local"
+    }
   }
 }

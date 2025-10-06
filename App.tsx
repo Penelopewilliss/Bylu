@@ -41,7 +41,7 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
   return (
     <Animated.View style={[styles.splash, { opacity: fadeAnim }]}>
       <Animated.Image 
-        source={require('./assets/icon.png')} 
+        source={require('./assets/splash.png')} 
         style={[styles.splashLogo, { transform: [{ scale: scaleAnim }] }]}
         resizeMode="cover"
       />
