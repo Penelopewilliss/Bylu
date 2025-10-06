@@ -375,7 +375,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   categoryText: {
     fontSize: 12,
-    color: colors.text,
+    color: '#2C2C2C', // Dark color that works on all category backgrounds
     fontWeight: '500',
     textAlign: 'center',
     lineHeight: 16,
