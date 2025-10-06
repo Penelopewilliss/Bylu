@@ -12,10 +12,22 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
+import { useCalendarSync } from '../context/CalendarSyncContext';
 import NotificationService from '../services/NotificationService';
 
 export default function SettingsScreen() {
   const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime } = useTheme();
+  const { 
+    isConnected, 
+    isAuthenticating, 
+    isSyncing, 
+    syncEnabled, 
+    lastSyncTime,
+    authenticateGoogle, 
+    disconnectGoogle, 
+    syncCalendar, 
+    enableSync 
+  } = useCalendarSync();
 
   const styles = createStyles(colors);
 
@@ -69,6 +81,73 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      const success = await authenticateGoogle();
+      if (success) {
+        Alert.alert(
+          '✅ Connected!',
+          'Successfully connected to Google Calendar. Your appointments will now sync automatically.',
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert(
+          '❌ Connection Failed',
+          'Failed to connect to Google Calendar. Please try again.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Error connecting to Google Calendar:', error);
+      Alert.alert(
+        '❌ Error',
+        'An error occurred while connecting to Google Calendar.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  const handleGoogleDisconnect = async () => {
+    Alert.alert(
+      '🔌 Disconnect Google Calendar',
+      'Are you sure you want to disconnect from Google Calendar? Your local appointments will be preserved.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Disconnect', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await disconnectGoogle();
+              Alert.alert(
+                '✅ Disconnected',
+                'Successfully disconnected from Google Calendar.',
+                [{ text: 'OK' }]
+              );
+            } catch (error) {
+              console.error('Error disconnecting Google Calendar:', error);
+              Alert.alert('Error', 'Failed to disconnect from Google Calendar.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleSyncNow = async () => {
+    try {
+      await syncCalendar();
+      Alert.alert(
+        '✅ Sync Complete',
+        `Calendar synced successfully at ${new Date().toLocaleTimeString()}`,
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error syncing calendar:', error);
+      Alert.alert('Error', 'Failed to sync calendar. Please try again.');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -111,6 +190,21 @@ export default function SettingsScreen() {
               trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={isMilitaryTime ? colors.background : colors.textLight}
             />
+          </View>
+        </View>
+
+        {/* Google Calendar Sync Section - Temporarily Disabled */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📅 Google Calendar Sync</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>🔧 Coming Soon</Text>
+              <Text style={styles.settingDescription}>
+                Google Calendar sync requires additional setup. This feature will be available in a future update.
+              </Text>
+            </View>
+            <Text style={styles.chevron}>⏳</Text>
           </View>
         </View>
 

@@ -6,7 +6,9 @@ import {
   StyleSheet,
   Dimensions,
   ScrollView,
+  Alert,
 } from 'react-native';
+import { useCalendarSync } from '../context/CalendarSyncContext';
 
 const { width } = Dimensions.get('window');
 
@@ -46,6 +48,7 @@ interface OnboardingScreenProps {
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
+  const { authenticateGoogle, isAuthenticating } = useCalendarSync();
 
   const goToNext = () => {
     if (currentPage < pages.length - 1) {
@@ -58,6 +61,36 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     } else {
       onComplete();
     }
+  };
+
+  const handleConnectGoogle = async () => {
+    try {
+      const success = await authenticateGoogle();
+      if (success) {
+        Alert.alert(
+          '✅ Connected!',
+          'Successfully connected to Google Calendar!',
+          [{ text: 'Continue', onPress: onComplete }]
+        );
+      } else {
+        Alert.alert(
+          'Connection Failed',
+          'No worries! You can connect Google Calendar later in Settings.',
+          [{ text: 'Continue', onPress: onComplete }]
+        );
+      }
+    } catch (error) {
+      console.error('Error connecting to Google Calendar:', error);
+      Alert.alert(
+        'Connection Failed',
+        'No worries! You can connect Google Calendar later in Settings.',
+        [{ text: 'Continue', onPress: onComplete }]
+      );
+    }
+  };
+
+  const handleSkipGoogle = () => {
+    onComplete();
   };
 
   const goToPrevious = () => {
@@ -118,11 +151,16 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             </TouchableOpacity>
           )}
           
-          <TouchableOpacity style={styles.nextButton} onPress={goToNext}>
-            <Text style={styles.nextButtonText}>
-              {currentPage === pages.length - 1 ? 'Get Started' : 'Next'}
-            </Text>
-          </TouchableOpacity>
+          {currentPage === pages.length - 1 ? (
+            // Last page - Get Started
+            <TouchableOpacity style={styles.nextButton} onPress={onComplete}>
+              <Text style={styles.nextButtonText}>Get Started</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.nextButton} onPress={goToNext}>
+              <Text style={styles.nextButtonText}>Next</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
@@ -218,6 +256,50 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   nextButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'System',
+  },
+  googleButtons: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 12,
+    marginLeft: 12,
+  },
+  skipButton: {
+    backgroundColor: '#F0F0F0',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  skipButtonText: {
+    color: '#666',
+    fontSize: 14,
+    fontWeight: '500',
+    fontFamily: 'System',
+  },
+  connectButton: {
+    backgroundColor: '#4285F4', // Google blue
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    alignItems: 'center',
+    shadowColor: '#4285F4',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  connectButtonDisabled: {
+    backgroundColor: '#CCCCCC',
+    shadowOpacity: 0,
+  },
+  connectButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',

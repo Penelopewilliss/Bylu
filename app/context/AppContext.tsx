@@ -171,6 +171,13 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		await saveEvents(updatedEvents);
 	}, [events]);
 
+	const updateEvent = useCallback(async (eventId: string, updatedEvent: Partial<CalendarEvent>) => {
+		const updatedEvents = events.map(event => 
+			event.id === eventId ? { ...event, ...updatedEvent } : event
+		);
+		await saveEvents(updatedEvents);
+	}, [events]);
+
 	// Goal management functions
 	const saveGoals = async (newGoals: Goal[]) => {
 		setGoals(newGoals);
@@ -240,10 +247,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		toggleTask,
 		deleteTask,
 		addEvent,
+		updateEvent,
 		deleteEvent,
 		addGoal,
 		updateGoal,
 		deleteGoal,
 		toggleGoalMicroTask,
-	}), [tasks, events, goals, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, isOnboardingCompleted, completeOnboarding, addTask, toggleTask, deleteTask, addEvent, deleteEvent, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask]);
+	}), [tasks, events, goals, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, isOnboardingCompleted, completeOnboarding, addTask, toggleTask, deleteTask, addEvent, updateEvent, deleteEvent, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask]);
 });

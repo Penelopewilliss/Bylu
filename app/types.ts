@@ -47,6 +47,12 @@ export interface CalendarEvent {
   endDate: string;
   color: string;
   category: Category;
+  // Google Calendar sync fields
+  googleId?: string;
+  lastSyncTime?: string;
+  source?: 'local' | 'google';
+  localOnly?: boolean;
+  isAllDay?: boolean;
 }
 
 export interface MoodEntry {

@@ -5,6 +5,7 @@ import * as Font from 'expo-font';
 import { AppProvider } from './app/context/AppContext';
 import { ThemeProvider } from './app/context/ThemeContext';
 import { OfflineProvider } from './app/context/OfflineContext';
+import { CalendarSyncProvider } from './app/context/CalendarSyncContext';
 import NotificationService from './app/services/NotificationService';
 import OfflineIndicator from './app/components/OfflineIndicator';
 
@@ -189,7 +190,7 @@ function TopBar({
   );
 }
 
-function Screen({ activeTab, onNavigate }: { activeTab: TabName; onNavigate: (tab: TabName) => void }) {
+function Screen({ activeTab, onNavigate }: { activeTab: TabName; onNavigate: (tab: string) => void }) {
   switch (activeTab) {
     case 'Dashboard':
       return <DashboardScreen onNavigate={onNavigate} />;
@@ -328,6 +329,13 @@ function MainApp() {
 
   console.log('📱 Showing main app');
 
+  const handleNavigate = (tab: string) => {
+    const validTabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Settings'];
+    if (validTabs.includes(tab as TabName)) {
+      setActiveTab(tab as TabName);
+    }
+  };
+
   return (
     <View style={styles.container} {...panResponder.panHandlers}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -337,7 +345,7 @@ function MainApp() {
       />
       <OfflineIndicator />
       <View style={styles.content}>
-        <Screen activeTab={activeTab} onNavigate={setActiveTab} />
+        <Screen activeTab={activeTab} onNavigate={handleNavigate} />
       </View>
       
       <HamburgerMenu
@@ -357,7 +365,9 @@ export default function App() {
     <ThemeProvider>
       <AppProvider>
         <OfflineProvider>
-          <MainApp />
+          <CalendarSyncProvider>
+            <MainApp />
+          </CalendarSyncProvider>
         </OfflineProvider>
       </AppProvider>
     </ThemeProvider>
