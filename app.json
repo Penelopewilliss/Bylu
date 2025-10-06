@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "GlowgetterApp",
-    "slug": "glowgetterapp",
+    "slug": "glowgetter-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -35,9 +35,6 @@
       "eas": {
         "projectId": "eeb29cff-888f-4029-9650-5ebf124cbcd2"
       }
-    },
-    "cli": {
-      "appVersionSource": "local"
     },
     "owner": "penelope11"
   }

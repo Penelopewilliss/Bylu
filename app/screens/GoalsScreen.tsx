@@ -130,9 +130,25 @@ export default function GoalsScreen() {
   };
 
   // Delete goal - use context function
-  const handleDeleteGoal = (goalId: string) => {
-    console.log('Deleting goal:', goalId);
-    deleteGoal(goalId);
+  const handleDeleteGoal = (goalId: string, goalTitle: string) => {
+    Alert.alert(
+      "Delete Goal",
+      `Are you sure you want to delete "${goalTitle}"? This will permanently remove the goal and all its progress.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            console.log('Deleting goal:', goalId);
+            deleteGoal(goalId);
+          }
+        }
+      ]
+    );
   };
 
   // Open edit modal
@@ -169,12 +185,21 @@ export default function GoalsScreen() {
       </View>
 
       {/* Goals List */}
-      <ScrollView 
-        style={styles.goalsList} 
-        contentContainerStyle={styles.goalsListContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {goals.map((goal) => {
+      {goals.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyIcon}>🎯</Text>
+          <Text style={styles.emptyTitle}>No goals yet!</Text>
+          <Text style={styles.emptySubtitle}>
+            Start your journey! Tap + to add your first goal and unlock your potential.
+          </Text>
+        </View>
+      ) : (
+        <ScrollView 
+          style={styles.goalsList} 
+          contentContainerStyle={styles.goalsListContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {goals.map((goal) => {
           const progress = calculateProgress(goal);
           return (
             <View key={goal.id} style={styles.goalCard}>
@@ -232,7 +257,7 @@ export default function GoalsScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.deleteButton}
-                  onPress={() => handleDeleteGoal(goal.id)}
+                  onPress={() => handleDeleteGoal(goal.id, goal.title)}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.deleteIcon}>🗑️</Text>
@@ -241,7 +266,8 @@ export default function GoalsScreen() {
             </View>
           );
         })}
-      </ScrollView>
+        </ScrollView>
+      )}
 
       {/* Add/Edit Goal Modal */}
       <Modal
@@ -398,6 +424,30 @@ const createStyles = (colors: any) => StyleSheet.create({
   goalsListContent: {
     paddingBottom: 120, // Extra space at bottom for comfortable scrolling
     flexGrow: 1,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+    paddingVertical: 60,
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   goalCard: {
     backgroundColor: colors.cardBackground,
@@ -581,6 +631,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
+    paddingBottom: 32, // Extra padding for Android navigation bar
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.background,

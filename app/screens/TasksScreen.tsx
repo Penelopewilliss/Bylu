@@ -10,14 +10,13 @@ import {
   Modal,
   ScrollView,
   SafeAreaView,
-  Dimensions,
-  PanResponder 
+  PanResponder,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import Fonts from '../constants/fonts';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 const createStyles = (colors: any) => StyleSheet.create({
   container: {
@@ -50,6 +49,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
+    paddingBottom: 34, // Extra padding for Android navigation bar
   },
   content: {
     flex: 1,
@@ -191,6 +191,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingBottom: 20, // Extra padding for Android navigation bar
   },
   cancelButton: {
     flex: 1,
@@ -322,6 +323,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 60,
   },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
@@ -406,6 +411,7 @@ export default function TasksScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
   const [newTaskPriority, setNewTaskPriority] = useState<'high' | 'medium' | 'low'>('medium');
+  const [isLoading, setIsLoading] = useState(false);
 
   // PanResponder for swipe to close modal (all directions)
   const panResponder = PanResponder.create({
@@ -431,20 +437,46 @@ export default function TasksScreen() {
     onPanResponderTerminationRequest: () => false, // Don't allow termination
   });
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (newTaskText.trim() === '') return;
-
-    addTask({
-      title: newTaskText.trim(),
-      description: '',
-      category: 'other',
-      priority: newTaskPriority,
-      microSteps: [],
-    });
     
-    setNewTaskText('');
-    setNewTaskPriority('medium');
-    setShowAddModal(false);
+    setIsLoading(true);
+    
+    try {
+      await addTask({
+        title: newTaskText.trim(),
+        description: '',
+        category: 'other',
+        priority: newTaskPriority,
+        microSteps: [],
+      });
+      
+      setNewTaskText('');
+      setNewTaskPriority('medium');
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Error adding task:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteTask = (taskId: string, taskTitle: string) => {
+    Alert.alert(
+      "Delete Task",
+      `Are you sure you want to delete "${taskTitle}"? This action cannot be undone.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteTask(taskId)
+        }
+      ]
+    );
   };
 
   // Sort tasks by priority
@@ -485,7 +517,7 @@ export default function TasksScreen() {
       
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => deleteTask(item.id)}
+        onPress={() => handleDeleteTask(item.id, item.title)}
         activeOpacity={0.7}
       >
         <Text style={styles.deleteIcon}>🗑️</Text>
@@ -535,9 +567,10 @@ export default function TasksScreen() {
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No tasks found</Text>
+            <Text style={styles.emptyIcon}>📝</Text>
+            <Text style={styles.emptyTitle}>No tasks yet!</Text>
             <Text style={styles.emptySubtitle}>
-              Create your first task to get started!
+              Tap the + button below to add your first task and start being productive!
             </Text>
           </View>
         }
@@ -613,12 +646,16 @@ export default function TasksScreen() {
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={[styles.createButton, !newTaskText.trim() && styles.createButtonDisabled]}
+                style={[styles.createButton, (!newTaskText.trim() || isLoading) && styles.createButtonDisabled]}
                 onPress={handleAddTask}
                 activeOpacity={0.7}
-                disabled={!newTaskText.trim()}
+                disabled={!newTaskText.trim() || isLoading}
               >
-                <Text style={styles.createButtonText}>Create Task</Text>
+                {isLoading ? (
+                  <ActivityIndicator size="small" color={colors.background} />
+                ) : (
+                  <Text style={styles.createButtonText}>Create Task</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>

@@ -146,16 +146,22 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   eventDots: {
     flexDirection: 'row',
-    marginTop: 4,
+    marginTop: 2,
     flexWrap: 'wrap',
     justifyContent: 'center',
+    minHeight: 8, // Ensure space for dots
   },
   eventDot: {
-    width: 4,        // Smaller dots for mobile
-    height: 4,
-    borderRadius: 2,
-    marginHorizontal: 0.5,
+    width: 6,        // Bigger dots for better visibility
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 1,
     marginVertical: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 1,
+    elevation: 2, // Android shadow
   },
   moreEvents: {
     fontSize: 10,
@@ -255,12 +261,25 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 20,
   },
-  noEvents: {
+  dayEmptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  dayEmptyIcon: {
+    fontSize: 32,
+    marginBottom: 12,
+  },
+  dayEmptyText: {
     textAlign: 'center',
     fontSize: 16,
-    color: colors.textLight,
-    fontStyle: 'italic',
-    marginVertical: 40,
+    color: colors.text,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  dayEmptySubtext: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: colors.textSecondary,
   },
   dayModalButtons: {
     flexDirection: 'row',
@@ -363,7 +382,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   addModalButtons: {
     flexDirection: 'row',
     gap: 12,
-    paddingBottom: 20,
+    paddingBottom: 32, // Extra padding for Android navigation bar
   },
   cancelButton: {
     flex: 1,
@@ -1103,7 +1122,11 @@ export default function CalendarScreen() {
               ))}
               
               {selectedDate && getEventsForDate(selectedDate).length === 0 && (
-                <Text style={styles.noEvents}>No appointments for this day</Text>
+                <View style={styles.dayEmptyState}>
+                  <Text style={styles.dayEmptyIcon}>📅</Text>
+                  <Text style={styles.dayEmptyText}>No appointments for this day</Text>
+                  <Text style={styles.dayEmptySubtext}>Tap + to add an appointment</Text>
+                </View>
               )}
             </ScrollView>
             
