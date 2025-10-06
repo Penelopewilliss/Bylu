@@ -2,11 +2,12 @@
 import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import type { Task, CalendarEvent, MoodEntry, FocusSession, Badge, BrainDumpEntry, HyperfocusLog, WeeklyReflection } from '../types';
+import type { Task, CalendarEvent, MoodEntry, FocusSession, Badge, BrainDumpEntry, HyperfocusLog, WeeklyReflection, Goal, MicroTask } from '../types';
 
 const STORAGE_KEYS = {
 	TASKS: '@planner_tasks',
 	EVENTS: '@planner_events',
+	GOALS: '@planner_goals',
 	MOODS: '@planner_moods',
 	FOCUS_SESSIONS: '@planner_focus_sessions',
 	BADGES: '@planner_badges',
@@ -20,6 +21,7 @@ const STORAGE_KEYS = {
 export const [AppProvider, useApp] = createContextHook(() => {
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
+	const [goals, setGoals] = useState<Goal[]>([]);
 	const [moods, setMoods] = useState<MoodEntry[]>([]);
 	const [focusSessions, setFocusSessions] = useState<FocusSession[]>([]);
 	const [badges, setBadges] = useState<Badge[]>([]);
@@ -39,6 +41,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 			const [
 				storedTasks,
 				storedEvents,
+				storedGoals,
 				storedMoods,
 				storedFocusSessions,
 				storedBadges,
@@ -50,6 +53,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 			] = await Promise.all([
 				AsyncStorage.getItem(STORAGE_KEYS.TASKS),
 				AsyncStorage.getItem(STORAGE_KEYS.EVENTS),
+				AsyncStorage.getItem(STORAGE_KEYS.GOALS),
 				AsyncStorage.getItem(STORAGE_KEYS.MOODS),
 				AsyncStorage.getItem(STORAGE_KEYS.FOCUS_SESSIONS),
 				AsyncStorage.getItem(STORAGE_KEYS.BADGES),
@@ -62,6 +66,42 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
 			if (storedTasks) setTasks(JSON.parse(storedTasks));
 			if (storedEvents) setEvents(JSON.parse(storedEvents));
+			if (storedGoals) {
+				setGoals(JSON.parse(storedGoals));
+			} else {
+				// Set default goals if none exist
+				const defaultGoals: Goal[] = [
+					{
+						id: '1',
+						title: 'Launch Dream Business',
+						microTasks: [
+							{ id: 't1', text: 'Complete business plan', completed: true },
+							{ id: 't2', text: 'Research target market', completed: true },
+							{ id: 't3', text: 'Secure initial funding', completed: false },
+							{ id: 't4', text: 'Build MVP prototype', completed: false },
+							{ id: 't5', text: 'Test with 10 customers', completed: false },
+						],
+						resources: 'Business mentor, funding ($10k), web developer, marketing budget',
+						notes: 'Focus on solving a real problem. Start small and iterate quickly.',
+						createdAt: new Date().toISOString(),
+					},
+					{
+						id: '2',
+						title: 'Get Fit & Healthy',
+						microTasks: [
+							{ id: 't6', text: 'Join a gym', completed: true },
+							{ id: 't7', text: 'Work out 3x per week', completed: false },
+							{ id: 't8', text: 'Meal prep on Sundays', completed: false },
+							{ id: 't9', text: 'Drink 8 glasses water daily', completed: false },
+						],
+						resources: 'Gym membership, meal prep containers, fitness tracker',
+						notes: 'Consistency over perfection. Start with 20-minute workouts.',
+						createdAt: new Date().toISOString(),
+					},
+				];
+				setGoals(defaultGoals);
+				await AsyncStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(defaultGoals));
+			}
 			if (storedMoods) setMoods(JSON.parse(storedMoods));
 			if (storedFocusSessions) setFocusSessions(JSON.parse(storedFocusSessions));
 			if (storedBadges) setBadges(JSON.parse(storedBadges));
@@ -127,9 +167,55 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		await saveEvents(updatedEvents);
 	}, [events]);
 
+	// Goal management functions
+	const saveGoals = async (newGoals: Goal[]) => {
+		setGoals(newGoals);
+		await AsyncStorage.setItem(STORAGE_KEYS.GOALS, JSON.stringify(newGoals));
+	};
+
+	const addGoal = useCallback(async (goal: Omit<Goal, 'id' | 'createdAt'>) => {
+		const newGoal: Goal = {
+			...goal,
+			id: Date.now().toString(),
+			createdAt: new Date().toISOString(),
+		};
+		const updatedGoals = [...goals, newGoal];
+		await saveGoals(updatedGoals);
+		return newGoal;
+	}, [goals]);
+
+	const updateGoal = useCallback(async (goalId: string, updatedGoal: Partial<Goal>) => {
+		const updatedGoals = goals.map(goal => 
+			goal.id === goalId ? { ...goal, ...updatedGoal } : goal
+		);
+		await saveGoals(updatedGoals);
+	}, [goals]);
+
+	const deleteGoal = useCallback(async (goalId: string) => {
+		const updatedGoals = goals.filter(goal => goal.id !== goalId);
+		await saveGoals(updatedGoals);
+	}, [goals]);
+
+	const toggleGoalMicroTask = useCallback(async (goalId: string, taskId: string) => {
+		const updatedGoals = goals.map(goal =>
+			goal.id === goalId
+				? {
+						...goal,
+						microTasks: goal.microTasks.map(task =>
+							task.id === taskId
+								? { ...task, completed: !task.completed }
+								: task
+						)
+					}
+				: goal
+		);
+		await saveGoals(updatedGoals);
+	}, [goals]);
+
 	return useMemo(() => ({
 		tasks,
 		events,
+		goals,
 		moods,
 		focusSessions,
 		badges,
@@ -144,5 +230,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		deleteTask,
 		addEvent,
 		deleteEvent,
-	}), [tasks, events, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, addTask, toggleTask, deleteTask, addEvent, deleteEvent]);
+		addGoal,
+		updateGoal,
+		deleteGoal,
+		toggleGoalMicroTask,
+	}), [tasks, events, goals, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, addTask, toggleTask, deleteTask, addEvent, deleteEvent, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask]);
 });

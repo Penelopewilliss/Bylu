@@ -12,58 +12,15 @@ import {
   PanResponder,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { useApp } from '../context/AppContext';
+import type { Goal, MicroTask } from '../types';
 
 const { width } = Dimensions.get('window');
 
-// Types
-interface MicroTask {
-  id: string;
-  text: string;
-  completed: boolean;
-}
-
-interface Goal {
-  id: string;
-  title: string;
-  microTasks: MicroTask[];
-  resources: string;
-  notes: string;
-  createdAt: string;
-}
-
 export default function GoalsScreen() {
   const { colors } = useTheme();
+  const { goals, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask } = useApp();
   const styles = createStyles(colors);
-  
-  const [goals, setGoals] = useState<Goal[]>([
-    {
-      id: '1',
-      title: 'Launch Dream Business',
-      microTasks: [
-        { id: 't1', text: 'Complete business plan', completed: true },
-        { id: 't2', text: 'Research target market', completed: true },
-        { id: 't3', text: 'Secure initial funding', completed: false },
-        { id: 't4', text: 'Build MVP prototype', completed: false },
-        { id: 't5', text: 'Test with 10 customers', completed: false },
-      ],
-      resources: 'Business mentor, funding ($10k), web developer, marketing budget',
-      notes: 'Focus on solving a real problem. Start small and iterate quickly.',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      title: 'Get Fit & Healthy',
-      microTasks: [
-        { id: 't6', text: 'Join a gym', completed: true },
-        { id: 't7', text: 'Work out 3x per week', completed: false },
-        { id: 't8', text: 'Meal prep on Sundays', completed: false },
-        { id: 't9', text: 'Drink 8 glasses water daily', completed: false },
-      ],
-      resources: 'Gym membership, meal prep containers, fitness tracker',
-      notes: 'Consistency over perfection. Start with 20-minute workouts.',
-      createdAt: new Date().toISOString(),
-    },
-  ]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
@@ -108,18 +65,7 @@ export default function GoalsScreen() {
 
   // Toggle micro-task completion
   const toggleMicroTask = (goalId: string, taskId: string) => {
-    setGoals(prev => prev.map(goal =>
-      goal.id === goalId
-        ? {
-            ...goal,
-            microTasks: goal.microTasks.map(task =>
-              task.id === taskId
-                ? { ...task, completed: !task.completed }
-                : task
-            )
-          }
-        : goal
-    ));
+    toggleGoalMicroTask(goalId, taskId);
   };
 
   // Add micro-task to temp list (during goal creation)
@@ -142,7 +88,7 @@ export default function GoalsScreen() {
   };
 
   // Add or update goal
-  const saveGoal = () => {
+  const saveGoal = async () => {
     if (!newGoal.title.trim()) {
       Alert.alert('Error', 'Please enter a goal title');
       return;
@@ -153,19 +99,22 @@ export default function GoalsScreen() {
       return;
     }
 
-    const goal: Goal = {
-      id: editingGoal?.id || Date.now().toString(),
-      title: newGoal.title,
-      microTasks: tempMicroTasks,
-      resources: newGoal.resources,
-      notes: newGoal.notes,
-      createdAt: editingGoal?.createdAt || new Date().toISOString(),
-    };
-
     if (editingGoal) {
-      setGoals(prev => prev.map(g => g.id === editingGoal.id ? goal : g));
+      // Update existing goal
+      await updateGoal(editingGoal.id, {
+        title: newGoal.title,
+        microTasks: tempMicroTasks,
+        resources: newGoal.resources,
+        notes: newGoal.notes,
+      });
     } else {
-      setGoals(prev => [...prev, goal]);
+      // Add new goal
+      await addGoal({
+        title: newGoal.title,
+        microTasks: tempMicroTasks,
+        resources: newGoal.resources,
+        notes: newGoal.notes,
+      });
     }
 
     // Reset form
@@ -175,10 +124,10 @@ export default function GoalsScreen() {
     setModalVisible(false);
   };
 
-  // Delete goal - simplified like TasksScreen
-  const deleteGoal = (goalId: string) => {
+  // Delete goal - use context function
+  const handleDeleteGoal = (goalId: string) => {
     console.log('Deleting goal:', goalId);
-    setGoals(prev => prev.filter(goal => goal.id !== goalId));
+    deleteGoal(goalId);
   };
 
   // Open edit modal
@@ -215,7 +164,11 @@ export default function GoalsScreen() {
       </View>
 
       {/* Goals List */}
-      <ScrollView style={styles.goalsList} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.goalsList} 
+        contentContainerStyle={styles.goalsListContent}
+        showsVerticalScrollIndicator={false}
+      >
         {goals.map((goal) => {
           const progress = calculateProgress(goal);
           return (
@@ -274,7 +227,7 @@ export default function GoalsScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.deleteButton}
-                  onPress={() => deleteGoal(goal.id)}
+                  onPress={() => handleDeleteGoal(goal.id)}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.deleteIcon}>🗑️</Text>
@@ -432,6 +385,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 0,
+  },
+  goalsListContent: {
+    paddingBottom: 120, // Extra space at bottom for comfortable scrolling
+    flexGrow: 1,
   },
   goalCard: {
     backgroundColor: colors.cardBackground,

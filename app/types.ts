@@ -8,6 +8,23 @@ export interface MicroStep {
   completed: boolean;
 }
 
+export interface MicroTask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  microTasks: MicroTask[];
+  resources: string;
+  notes: string;
+  createdAt: string;
+}
+
+
+
 export interface Task {
   id: string;
   title: string;

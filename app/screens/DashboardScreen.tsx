@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 
 export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { colors } = useTheme();
-  const { tasks, events, toggleTask } = useApp();
+    const { tasks, events, toggleTask } = useApp();
   const styles = createStyles(colors);
 
   // Get today's tasks and events
@@ -166,10 +166,10 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
           <Text style={styles.cardTitle}>Goals</Text>
           <Text style={styles.cardSubtitle}>Track progress</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Workday')}>
-          <Text style={styles.cardEmoji}>⚡</Text>
-          <Text style={styles.cardTitle}>Workday</Text>
-          <Text style={styles.cardSubtitle}>Manage sessions</Text>
+        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Settings')}>
+          <Text style={styles.cardEmoji}>⚙️</Text>
+          <Text style={styles.cardTitle}>Settings</Text>
+          <Text style={styles.cardSubtitle}>Preferences</Text>
         </TouchableOpacity>
       </View>
 

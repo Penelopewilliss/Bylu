@@ -9,12 +9,11 @@ import TasksScreen from './app/screens/TasksScreen';
 import DashboardScreen from './app/screens/DashboardScreen';
 import CalendarScreen from './app/screens/CalendarScreen';
 import GoalsScreen from './app/screens/GoalsScreen';
-import WorkdayManagerScreen from './app/screens/WorkdayManagerScreen';
 import SettingsScreen from './app/screens/SettingsScreen';
 
 const { width, height } = Dimensions.get('window');
 
-type TabName = 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'Workday' | 'Settings';
+type TabName = 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'Settings';
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   useEffect(() => {
@@ -41,7 +40,7 @@ function HamburgerMenu({
   isVisible: boolean;
   onClose: () => void;
 }) {
-  const tabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Workday', 'Settings'];
+  const tabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Settings'];
 
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
@@ -53,8 +52,6 @@ function HamburgerMenu({
         return '📅';
       case 'Goals':
         return '🎯';
-      case 'Workday':
-        return '⏰';
       case 'Settings':
         return '⚙️';
       default:
@@ -135,8 +132,6 @@ function TopBar({
         return '📅';
       case 'Goals':
         return '🎯';
-      case 'Workday':
-        return '⏰';
       case 'Settings':
         return '⚙️';
       default:
@@ -178,8 +173,6 @@ function Screen({ activeTab, onNavigate }: { activeTab: TabName; onNavigate: (ta
       return <CalendarScreen />;
     case 'Goals':
       return <GoalsScreen />;
-    case 'Workday':
-      return <WorkdayManagerScreen />;
     case 'Settings':
       return <SettingsScreen />;
     default:
@@ -193,7 +186,7 @@ function MainApp() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   
-  const tabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Workday', 'Settings'];
+  const tabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Settings'];
 
   const navigateToTab = (direction: 'next' | 'prev') => {
     const currentIndex = tabs.indexOf(activeTab);
