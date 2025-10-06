@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Dimensions, PanResponder } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Dimensions, PanResponder, Animated, Image } from 'react-native';
 import * as Font from 'expo-font';
 import { AppProvider } from './app/context/AppContext';
 import { ThemeProvider } from './app/context/ThemeContext';
@@ -16,16 +16,36 @@ const { width, height } = Dimensions.get('window');
 type TabName = 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'Settings';
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
   useEffect(() => {
-    const timer = setTimeout(() => onFinish(), 2000);
+    // Start with a gentle scale-in animation
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      tension: 50,
+      friction: 7,
+      useNativeDriver: true,
+    }).start();
+
+    const timer = setTimeout(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 1000, // Longer fade out
+        useNativeDriver: true,
+      }).start(() => onFinish());
+    }, 2500); // Extended to 2500ms for more elegance
     return () => clearTimeout(timer);
-  }, [onFinish]);
+  }, [fadeAnim, scaleAnim, onFinish]);
 
   return (
-    <View style={styles.splash}>
-      <Text style={styles.splashTitle}>✨ Glowgetter</Text>
-      <Text style={styles.splashSubtitle}>Glow up your productivity</Text>
-    </View>
+    <Animated.View style={[styles.splash, { opacity: fadeAnim }]}>
+      <Animated.Image 
+        source={require('./assets/icon.png')} 
+        style={[styles.splashLogo, { transform: [{ scale: scaleAnim }] }]}
+        resizeMode="contain"
+      />
+    </Animated.View>
   );
 }
 
@@ -222,9 +242,26 @@ function MainApp() {
   });
 
   useEffect(() => {
-    // Skip font loading for now and just set fonts as loaded
-    // This prevents the app from getting stuck on splash screen
-    setFontsLoaded(true);
+    // Load only the working handwritten fonts for splash screen
+    const loadFonts = async () => {
+      try {
+        await Font.loadAsync({
+          'PatrickHand_400Regular': require('./assets/fonts/PatrickHand-Regular.ttf'),
+          // Ultra-chic handwritten fonts that are working
+          'DancingScript_400Regular': require('./assets/fonts/DancingScript.ttf'),
+          'GreatVibes_400Regular': require('./assets/fonts/GreatVibes.ttf'),
+          'Allura_400Regular': require('./assets/fonts/Allura.ttf'),
+        });
+        console.log('✨ Beautiful fonts loaded successfully!');
+        setFontsLoaded(true);
+      } catch (error) {
+        console.log('Font loading error:', error);
+        // Fallback: set fonts as loaded anyway so app doesn't get stuck
+        setFontsLoaded(true);
+      }
+    };
+    
+    loadFonts();
   }, []);
 
   if (!isSplashFinished || !fontsLoaded) {
@@ -274,20 +311,23 @@ const styles = StyleSheet.create({
   },
   splash: {
     flex: 1,
-    backgroundColor: '#F7D1DA',
+    backgroundColor: '#E8B4C4', // Primary pink color
     alignItems: 'center',
     justifyContent: 'center',
+    // Add subtle gradient effect feel
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
   },
-  splashTitle: {
-    fontSize: 48,
-    color: '#2D2D2D',
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  splashSubtitle: {
-    fontSize: 18,
-    color: '#6B6B6B',
-    textAlign: 'center',
+  splashLogo: {
+    width: 200, // Adjust size as needed
+    height: 200, // Keep it square or adjust ratio
+    // Add elegant shadow for depth
+    shadowColor: 'rgba(0, 0, 0, 0.25)',
+    shadowOffset: { width: 3, height: 4 },
+    shadowRadius: 8,
+    shadowOpacity: 1,
   },
   screen: {
     flex: 1,
