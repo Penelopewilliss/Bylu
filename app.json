@@ -38,6 +38,7 @@
     },
     "cli": {
       "appVersionSource": "local"
-    }
+    },
+    "owner": "penelope11"
   }
 }
