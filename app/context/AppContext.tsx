@@ -16,6 +16,7 @@ const STORAGE_KEYS = {
 	REFLECTIONS: '@planner_reflections',
 	FOCUS_STREAK: '@planner_focus_streak',
 	TINY_WINS: '@planner_tiny_wins',
+	ONBOARDING_COMPLETED: '@planner_onboarding_completed',
 };
 
 export const [AppProvider, useApp] = createContextHook(() => {
@@ -28,6 +29,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 	const [brainDump, setBrainDump] = useState<BrainDumpEntry[]>([]);
 	const [hyperfocusLogs, setHyperfocusLogs] = useState<HyperfocusLog[]>([]);
 	const [reflections, setReflections] = useState<WeeklyReflection[]>([]);
+	const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>(false);
 	const [focusStreak, setFocusStreak] = useState<number>(0);
 	const [tinyWins, setTinyWins] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -38,33 +40,35 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
 	const loadData = async () => {
 		try {
-			const [
-				storedTasks,
-				storedEvents,
-				storedGoals,
-				storedMoods,
-				storedFocusSessions,
-				storedBadges,
-				storedBrainDump,
-				storedHyperfocusLogs,
-				storedReflections,
-				storedFocusStreak,
-				storedTinyWins,
-			] = await Promise.all([
-				AsyncStorage.getItem(STORAGE_KEYS.TASKS),
-				AsyncStorage.getItem(STORAGE_KEYS.EVENTS),
-				AsyncStorage.getItem(STORAGE_KEYS.GOALS),
-				AsyncStorage.getItem(STORAGE_KEYS.MOODS),
-				AsyncStorage.getItem(STORAGE_KEYS.FOCUS_SESSIONS),
-				AsyncStorage.getItem(STORAGE_KEYS.BADGES),
-				AsyncStorage.getItem(STORAGE_KEYS.BRAIN_DUMP),
-				AsyncStorage.getItem(STORAGE_KEYS.HYPERFOCUS_LOGS),
-				AsyncStorage.getItem(STORAGE_KEYS.REFLECTIONS),
-				AsyncStorage.getItem(STORAGE_KEYS.FOCUS_STREAK),
-				AsyncStorage.getItem(STORAGE_KEYS.TINY_WINS),
-			]);
+		const [
+			storedTasks,
+			storedEvents,
+			storedGoals,
+			storedMoods,
+			storedFocusSessions,
+			storedBadges,
+			storedBrainDump,
+			storedHyperfocusLogs,
+			storedReflections,
+			storedFocusStreak,
+			storedTinyWins,
+			storedOnboardingCompleted,
+		] = await Promise.all([
+			AsyncStorage.getItem(STORAGE_KEYS.TASKS),
+			AsyncStorage.getItem(STORAGE_KEYS.EVENTS),
+			AsyncStorage.getItem(STORAGE_KEYS.GOALS),
+			AsyncStorage.getItem(STORAGE_KEYS.MOODS),
+			AsyncStorage.getItem(STORAGE_KEYS.FOCUS_SESSIONS),
+			AsyncStorage.getItem(STORAGE_KEYS.BADGES),
+			AsyncStorage.getItem(STORAGE_KEYS.BRAIN_DUMP),
+			AsyncStorage.getItem(STORAGE_KEYS.HYPERFOCUS_LOGS),
+			AsyncStorage.getItem(STORAGE_KEYS.REFLECTIONS),
+			AsyncStorage.getItem(STORAGE_KEYS.FOCUS_STREAK),
+			AsyncStorage.getItem(STORAGE_KEYS.TINY_WINS),
+			AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED),
+		]);
 
-			if (storedTasks) setTasks(JSON.parse(storedTasks));
+		if (storedTasks) setTasks(JSON.parse(storedTasks));
 			if (storedEvents) setEvents(JSON.parse(storedEvents));
 			if (storedGoals) {
 				setGoals(JSON.parse(storedGoals));
@@ -212,6 +216,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		await saveGoals(updatedGoals);
 	}, [goals]);
 
+	const completeOnboarding = useCallback(async () => {
+		setIsOnboardingCompleted(true);
+		await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, JSON.stringify(true));
+	}, []);
+
 	return useMemo(() => ({
 		tasks,
 		events,
@@ -225,6 +234,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		focusStreak,
 		tinyWins,
 		isLoading,
+		isOnboardingCompleted,
+		completeOnboarding,
 		addTask,
 		toggleTask,
 		deleteTask,
@@ -234,5 +245,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		updateGoal,
 		deleteGoal,
 		toggleGoalMicroTask,
-	}), [tasks, events, goals, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, addTask, toggleTask, deleteTask, addEvent, deleteEvent, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask]);
+	}), [tasks, events, goals, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, isOnboardingCompleted, completeOnboarding, addTask, toggleTask, deleteTask, addEvent, deleteEvent, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask]);
 });

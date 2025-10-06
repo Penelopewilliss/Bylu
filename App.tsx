@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Dimensions, PanResponder, Animated, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Font from 'expo-font';
 import { AppProvider } from './app/context/AppContext';
 import { ThemeProvider } from './app/context/ThemeContext';
+import NotificationService from './app/services/NotificationService';
 
 // Import the actual screen components
 import TasksScreen from './app/screens/TasksScreen';
@@ -10,6 +12,7 @@ import DashboardScreen from './app/screens/DashboardScreen';
 import CalendarScreen from './app/screens/CalendarScreen';
 import GoalsScreen from './app/screens/GoalsScreen';
 import SettingsScreen from './app/screens/SettingsScreen';
+import OnboardingScreen from './app/screens/OnboardingScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -205,6 +208,7 @@ function MainApp() {
   const [isSplashFinished, setIsSplashFinished] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean | null>(null);
   
   const tabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Settings'];
 
@@ -264,9 +268,62 @@ function MainApp() {
     loadFonts();
   }, []);
 
-  if (!isSplashFinished || !fontsLoaded) {
+  // Check onboarding status
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      try {
+        const onboardingCompleted = await AsyncStorage.getItem('@planner_onboarding_completed');
+        console.log('🔍 Onboarding check - stored value:', onboardingCompleted);
+        const isCompleted = onboardingCompleted === 'true';
+        console.log('🔍 Onboarding check - isCompleted:', isCompleted);
+        setIsOnboardingCompleted(isCompleted);
+      } catch (error) {
+        console.error('Error loading onboarding status:', error);
+        setIsOnboardingCompleted(false);
+      }
+    };
+    
+    checkOnboardingStatus();
+  }, []);
+
+  // Initialize notification service
+  useEffect(() => {
+    const initializeNotifications = async () => {
+      try {
+        const notificationService = NotificationService.getInstance();
+        await notificationService.initialize();
+        console.log('🔔 Notification service initialized');
+      } catch (error) {
+        console.error('Error initializing notifications:', error);
+      }
+    };
+    
+    initializeNotifications();
+  }, []);
+
+  const completeOnboarding = async () => {
+    try {
+      console.log('✅ Completing onboarding...');
+      await AsyncStorage.setItem('@planner_onboarding_completed', 'true');
+      setIsOnboardingCompleted(true);
+    } catch (error) {
+      console.error('Error saving onboarding status:', error);
+    }
+  };
+
+  console.log('🎯 App render - isSplashFinished:', isSplashFinished, 'fontsLoaded:', fontsLoaded, 'isOnboardingCompleted:', isOnboardingCompleted);
+
+  if (!isSplashFinished || !fontsLoaded || isOnboardingCompleted === null) {
     return <SplashScreen onFinish={() => setIsSplashFinished(true)} />;
   }
+
+  // Show onboarding for first-time users
+  if (!isOnboardingCompleted) {
+    console.log('🎉 Showing onboarding screen!');
+    return <OnboardingScreen onComplete={completeOnboarding} />;
+  }
+
+  console.log('📱 Showing main app');
 
   return (
     <View style={styles.container} {...panResponder.panHandlers}>

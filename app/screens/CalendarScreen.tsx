@@ -14,6 +14,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import type { CalendarEvent } from '../types';
+import NotificationService from '../services/NotificationService';
 
 // Category colors configuration
 const getCategoryColors = (colors: any) => ({
@@ -587,6 +588,85 @@ const createStyles = (colors: any) => StyleSheet.create({
   selectedWholeDayToggleText: {
     color: colors.background,
   },
+  // Notification Settings Styles
+  section: {
+    marginTop: 20,
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 15,
+  },
+  notificationToggle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  toggleLabel: {
+    fontSize: 16,
+    color: colors.text,
+    flex: 1,
+  },
+  toggle: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: colors.cardBackground,
+    borderWidth: 1,
+    borderColor: colors.border,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  toggleActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  toggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  toggleTextActive: {
+    color: colors.background,
+  },
+  notificationTimings: {
+    marginTop: 10,
+  },
+  timingTitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.text,
+    marginBottom: 10,
+  },
+  timingGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  timingChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: colors.cardBackground,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: 10,
+  },
+  timingChipSelected: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  timingChipText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text,
+  },
+  timingChipTextSelected: {
+    color: colors.background,
+  },
 });
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -652,7 +732,9 @@ export default function CalendarScreen() {
     duration: 60, // Default 1 hour in minutes
     useDuration: true, // true for duration, false for end time
     isWholeDay: false, // new whole day option
-    category: 'personal' as 'work' | 'personal' | 'health' | 'learning' | 'other'
+    category: 'personal' as 'work' | 'personal' | 'health' | 'learning' | 'other',
+    notificationTimings: [15, 60] as number[], // Default notification timings (15 mins, 1 hour)
+    notificationsEnabled: true // Enable notifications by default
   });
 
   // PanResponder for swipe to close modal (horizontal + vertical down from header area)
@@ -818,7 +900,9 @@ export default function CalendarScreen() {
       duration: 60,
       useDuration: true,
       isWholeDay: false,
-      category: 'personal' 
+      category: 'personal',
+      notificationTimings: [15, 60],
+      notificationsEnabled: true
     });
     syncDropdownsWithDate(initialDate);
     setShowAddModal(true);
@@ -841,7 +925,9 @@ export default function CalendarScreen() {
       duration: duration,
       useDuration: true,
       isWholeDay: false,
-      category: event.category as any
+      category: event.category as any,
+      notificationTimings: [15, 60], // Default for editing
+      notificationsEnabled: true
     });
     syncDropdownsWithDate(dateStr);
     setShowAddModal(true);
@@ -930,10 +1016,36 @@ export default function CalendarScreen() {
       if (editingEvent) {
         // For editing, delete the old event and add the updated one
         await deleteEvent(editingEvent.id);
+        
+        // Cancel old notifications
+        const notificationService = NotificationService.getInstance();
+        await notificationService.cancelAppointmentNotifications(editingEvent.id);
+        
         await addEvent(eventData);
+        
+        // Schedule new notifications with custom timings
+        if (formData.notificationsEnabled) {
+          await notificationService.scheduleAppointmentNotifications({
+            id: eventData.id,
+            title: eventData.title,
+            datetime: new Date(eventData.startDate),
+            description: eventData.description,
+          }, formData.notificationTimings);
+        }
       } else {
         // Add new event
         await addEvent(eventData);
+        
+        // Schedule notifications for new appointment with custom timings
+        const notificationService = NotificationService.getInstance();
+        if (formData.notificationsEnabled) {
+          await notificationService.scheduleAppointmentNotifications({
+            id: eventData.id,
+            title: eventData.title,
+            datetime: new Date(eventData.startDate),
+            description: eventData.description,
+          }, formData.notificationTimings);
+        }
       }
     } catch (error) {
       console.error('Error saving event:', error);
@@ -951,7 +1063,9 @@ export default function CalendarScreen() {
       duration: 60,
       useDuration: true,
       isWholeDay: false,
-      category: 'personal' 
+      category: 'personal',
+      notificationTimings: [15, 60],
+      notificationsEnabled: true
     });
     setEditingEvent(null);
   };
@@ -965,6 +1079,11 @@ export default function CalendarScreen() {
         { text: 'Cancel', style: 'cancel' },
         { text: 'Delete', style: 'destructive', onPress: async () => {
           try {
+            // Cancel notifications first
+            const notificationService = NotificationService.getInstance();
+            await notificationService.cancelAppointmentNotifications(eventId);
+            
+            // Then delete the event
             await deleteEvent(eventId);
           } catch (error) {
             console.error('Error deleting event:', error);
@@ -1153,7 +1272,9 @@ export default function CalendarScreen() {
                     duration: 60,
                     useDuration: true,
                     isWholeDay: false,
-                    category: 'personal' 
+                    category: 'personal',
+                    notificationTimings: [15, 60],
+                    notificationsEnabled: true
                   });
                   setEditingEvent(null);
                   setShowAddModal(true);
@@ -1583,6 +1704,62 @@ export default function CalendarScreen() {
                 value={formData.description}
                 onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))}
               />
+
+              {/* Notification Settings */}
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>🔔 Notification Settings</Text>
+                
+                {/* Enable/Disable Notifications */}
+                <View style={styles.notificationToggle}>
+                  <Text style={styles.toggleLabel}>Enable notifications for this appointment</Text>
+                  <TouchableOpacity
+                    style={[styles.toggle, formData.notificationsEnabled && styles.toggleActive]}
+                    onPress={() => setFormData(prev => ({ ...prev, notificationsEnabled: !prev.notificationsEnabled }))}
+                  >
+                    <Text style={[styles.toggleText, formData.notificationsEnabled && styles.toggleTextActive]}>
+                      {formData.notificationsEnabled ? 'ON' : 'OFF'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Notification Timing Options */}
+                {formData.notificationsEnabled && (
+                  <View style={styles.notificationTimings}>
+                    <Text style={styles.timingTitle}>Remind me:</Text>
+                    <View style={styles.timingGrid}>
+                      {[
+                        { value: 5, label: '5 min' },
+                        { value: 15, label: '15 min' },
+                        { value: 30, label: '30 min' },
+                        { value: 60, label: '1 hour' },
+                        { value: 120, label: '2 hours' },
+                        { value: 1440, label: '1 day' }
+                      ].map((option) => (
+                        <TouchableOpacity
+                          key={option.value}
+                          style={[
+                            styles.timingChip,
+                            formData.notificationTimings.includes(option.value) && styles.timingChipSelected
+                          ]}
+                          onPress={() => {
+                            const newTimings = formData.notificationTimings.includes(option.value)
+                              ? formData.notificationTimings.filter(t => t !== option.value)
+                              : [...formData.notificationTimings, option.value].sort((a, b) => a - b);
+                            setFormData(prev => ({ ...prev, notificationTimings: newTimings }));
+                          }}
+                        >
+                          <Text style={[
+                            styles.timingChipText,
+                            formData.notificationTimings.includes(option.value) && styles.timingChipTextSelected
+                          ]}>
+                            {option.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+              </View>
             </ScrollView>
             
             {/* Button area outside ScrollView */}

@@ -1,19 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
-  StyleSheet, 
+  StyleSheet,
   TouchableOpacity, 
   SafeAreaView, 
   ScrollView,
-  Switch 
+  Switch,
+  Alert,
+  Modal
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 
 export default function SettingsScreen() {
   const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime } = useTheme();
 
   const styles = createStyles(colors);
+
+  const resetOnboarding = async () => {
+    try {
+      console.log('🔄 Resetting onboarding...');
+      await AsyncStorage.removeItem('@planner_onboarding_completed');
+      console.log('✅ Onboarding reset successfully');
+      Alert.alert(
+        'Onboarding Reset',
+        'Please restart the app to see the onboarding flow.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error resetting onboarding:', error);
+      Alert.alert('Error', 'Failed to reset onboarding');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -60,6 +79,19 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* Developer Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Developer</Text>
+          
+          <TouchableOpacity style={styles.settingItem} onPress={resetOnboarding}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Reset Onboarding</Text>
+              <Text style={styles.settingDescription}>Clear onboarding state to see the welcome flow again</Text>
+            </View>
+            <Text style={styles.chevron}>🔄</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* App Info Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
@@ -76,6 +108,7 @@ export default function SettingsScreen() {
         </View>
 
       </ScrollView>
+
     </SafeAreaView>
   );
 }
@@ -160,5 +193,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 16,
     color: colors.textSecondary,
     fontWeight: '500',
+  },
+  chevron: {
+    fontSize: 18,
+    color: colors.textSecondary,
   },
 });
