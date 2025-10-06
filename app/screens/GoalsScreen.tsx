@@ -32,13 +32,18 @@ export default function GoalsScreen() {
   const [newTaskText, setNewTaskText] = useState('');
   const [tempMicroTasks, setTempMicroTasks] = useState<MicroTask[]>([]);
 
-  // PanResponder for swipe to close modal (all directions)
+  // PanResponder for swipe to close modal (down swipe only, not in input fields)
   const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponder: (evt) => {
+      // Only start gesture if it's in the header area (top 80px of modal)
+      const { pageY } = evt.nativeEvent;
+      const modalTop = 100; // Approximate modal top position
+      return pageY < modalTop + 80; // Only allow gestures in header area
+    },
     onMoveShouldSetPanResponder: (evt, gestureState) => {
-      // Only activate if we're clearly swiping and not just tapping
+      // Only activate for clear downward swipes
       const { dx, dy } = gestureState;
-      return Math.abs(dx) > 20 || Math.abs(dy) > 20;
+      return dy > 20 && Math.abs(dx) < Math.abs(dy); // Down swipe with minimal horizontal movement
     },
     onPanResponderGrant: () => {
       // Take control of the gesture
@@ -47,9 +52,9 @@ export default function GoalsScreen() {
       // Optional: Add visual feedback during swipe
     },
     onPanResponderRelease: (evt, gestureState) => {
-      // Close modal if swiped in any direction more than 60px
-      const { dx, dy } = gestureState;
-      if (Math.abs(dx) > 60 || Math.abs(dy) > 60) {
+      // Close modal only if swiped down more than 80px
+      const { dy } = gestureState;
+      if (dy > 80) {
         setModalVisible(false);
       }
     },
@@ -245,8 +250,8 @@ export default function GoalsScreen() {
         presentationStyle="fullScreen"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer} {...panResponder.panHandlers}>
-          <View style={styles.modalHeader}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader} {...panResponder.panHandlers}>
             <Text style={styles.modalTitle}>
               {editingGoal ? 'Edit Goal' : 'Add Goal'}
             </Text>
