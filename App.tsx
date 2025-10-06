@@ -68,15 +68,15 @@ function HamburgerMenu({
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
       case 'Dashboard':
-        return '🏠';
+        return '💖';
       case 'Tasks':
-        return '✓';
+        return '📝';
       case 'Calendar':
         return '📅';
       case 'Goals':
-        return '🎯';
+        return '✨';
       case 'Settings':
-        return '⚙️';
+        return '🌸';
       default:
         return '';
     }
@@ -109,24 +109,25 @@ function HamburgerMenu({
         onPress={onClose}
       >
         <View style={styles.dropdownMenu}>
-          {tabs.map((tab) => (
+          {tabs.map((tab, index) => (
             <TouchableOpacity
               key={tab}
               style={[
                 styles.menuItem,
-                activeTab === tab && styles.activeMenuItem
+                activeTab === tab && styles.activeMenuItem,
+                index === tabs.length - 1 && styles.lastMenuItem // No border on last item
               ]}
               onPress={() => handleTabPress(tab)}
             >
               <Text style={[
                 styles.menuEmoji,
-                { color: activeTab === tab ? '#C2185B' : '#6B6B6B' }
+                { color: activeTab === tab ? '#8E1538' : '#A0416B' }
               ]}>
                 {getTabEmoji(tab)}
               </Text>
               <Text style={[
                 styles.menuLabel,
-                { color: activeTab === tab ? '#C2185B' : '#2D2D2D' }
+                { color: activeTab === tab ? '#FFFFFF' : '#8E1538' }
               ]}>
                 {getTabLabel(tab)}
               </Text>
@@ -148,15 +149,15 @@ function TopBar({
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
       case 'Dashboard':
-        return '🏠';
+        return '💖';
       case 'Tasks':
-        return '✓';
+        return '📝';
       case 'Calendar':
         return '📅';
       case 'Goals':
-        return '🎯';
+        return '✨';
       case 'Settings':
-        return '⚙️';
+        return '🌸';
       default:
         return '';
     }
@@ -473,35 +474,48 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   dropdownMenu: {
-    backgroundColor: '#FFFFFF',
-    marginTop: 95, // Position below top bar
+    backgroundColor: '#F7D1DA', // Match the pink header
+    marginTop: 85, // Position perfectly below top bar
     marginRight: 16,
-    borderRadius: 12,
-    minWidth: 150,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
+    borderRadius: 16, // More rounded for modern look
+    minWidth: 180, // Slightly wider for better text spacing
+    shadowColor: '#C2185B', // Pink shadow
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: '#F0B7C4', // Subtle pink border
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20, // More padding for better touch area
+    paddingVertical: 16, // Increased vertical padding
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: 'rgba(194, 24, 91, 0.1)', // Very subtle pink separator
   },
   activeMenuItem: {
-    backgroundColor: '#FFF8F9',
+    backgroundColor: '#F5A3B7', // Darker pink for active state
+    borderRadius: 12, // Rounded active state
+    marginHorizontal: 8, // Inset the active item
+    marginVertical: 2, // Small margin for floating effect
+  },
+  lastMenuItem: {
+    borderBottomWidth: 0, // Remove border from last item
   },
   menuEmoji: {
-    fontSize: 16,
-    marginRight: 12,
+    fontSize: 18, // Slightly larger emoji
+    marginRight: 14, // More space between emoji and text
+    textShadowColor: 'rgba(255, 255, 255, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   menuLabel: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 15, // Slightly larger text
+    fontWeight: '600', // Bolder text
+    color: '#8E1538', // Darker pink for better contrast
+    letterSpacing: 0.3, // Slight letter spacing for elegance
   },
   // Legacy tab bar styles (to be removed)
   tabBar: {

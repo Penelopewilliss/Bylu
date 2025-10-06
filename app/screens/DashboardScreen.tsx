@@ -154,7 +154,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
           <Text style={styles.cardSubtitle}>View schedule</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Tasks')}>
-          <Text style={styles.cardEmoji}>✓</Text>
+          <Text style={styles.cardEmoji}>📝</Text>
           <Text style={styles.cardTitle}>Tasks</Text>
           <Text style={styles.cardSubtitle}>Manage todos</Text>
         </TouchableOpacity>
@@ -162,12 +162,12 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
 
       <View style={styles.cardContainer}>
         <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Goals')}>
-          <Text style={styles.cardEmoji}>🎯</Text>
+          <Text style={styles.cardEmoji}>✨</Text>
           <Text style={styles.cardTitle}>Goals</Text>
           <Text style={styles.cardSubtitle}>Track progress</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Settings')}>
-          <Text style={styles.cardEmoji}>⚙️</Text>
+          <Text style={styles.cardEmoji}>🌸</Text>
           <Text style={styles.cardTitle}>Settings</Text>
           <Text style={styles.cardSubtitle}>Preferences</Text>
         </TouchableOpacity>

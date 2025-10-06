@@ -6,9 +6,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DashboardScreen from '../screens/DashboardScreen';
 import TasksScreen from '../screens/TasksScreen';
 import CalendarScreen from '../screens/CalendarScreen';
-import SensoryBreaksScreen from '../screens/SensoryBreaksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import WorkflowGoalsScreen from '../screens/WorkflowGoalsScreen';
+import GoalsScreen from '../screens/GoalsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,6 +15,8 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Tab.Navigator
+        id={undefined}
+        initialRouteName="Dashboard"
         screenOptions={{
           tabBarActiveTintColor: '#F7D1DA',
           tabBarInactiveTintColor: '#8E8E8E',
@@ -40,48 +41,40 @@ const AppNavigator = () => {
           name="Dashboard"
           component={DashboardScreen}
           options={{
-            title: 'Dashboard',
-            tabBarLabel: 'Home',
+            title: '💖 Dashboard',
+            tabBarLabel: '💖 Home',
           }}
         />
         <Tab.Screen
           name="Calendar"
           component={CalendarScreen}
           options={{
-            title: 'Calendar',
-            tabBarLabel: 'Calendar',
+            title: '� Calendar',
+            tabBarLabel: '� Calendar',
           }}
         />
         <Tab.Screen
           name="Tasks"
           component={TasksScreen}
           options={{
-            title: 'Tasks',
-            tabBarLabel: 'Tasks',
+            title: '📝 Tasks',
+            tabBarLabel: '📝 Tasks',
           }}
         />
         <Tab.Screen
           name="Goals"
-          component={WorkflowGoalsScreen}
+          component={GoalsScreen}
           options={{
-            title: 'Goals',
-            tabBarLabel: 'Goals',
-          }}
-        />
-        <Tab.Screen
-          name="SensoryBreaks"
-          component={SensoryBreaksScreen}
-          options={{
-            title: 'Sensory Breaks',
-            tabBarLabel: 'Breaks',
+            title: '✨ Goals',
+            tabBarLabel: '✨ Goals',
           }}
         />
         <Tab.Screen
           name="Settings"
           component={SettingsScreen}
           options={{
-            title: 'Settings',
-            tabBarLabel: 'Settings',
+            title: '🌸 Settings',
+            tabBarLabel: '🌸 Settings',
           }}
         />
       </Tab.Navigator>
