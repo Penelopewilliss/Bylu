@@ -511,22 +511,29 @@ export default function CalendarScreen() {
     category: 'personal' as 'work' | 'personal' | 'health' | 'learning' | 'other'
   });
 
-  // PanResponder for swipe to close modal
+  // PanResponder for swipe to close modal (all directions)
   const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (evt, gestureState) => {
-      // Respond to both upward and downward swipes that are more vertical than horizontal
-      return Math.abs(gestureState.dy) > 20 && Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
+      // Only activate if we're clearly swiping and not just tapping
+      const { dx, dy } = gestureState;
+      return Math.abs(dx) > 20 || Math.abs(dy) > 20;
+    },
+    onPanResponderGrant: () => {
+      // Take control of the gesture
     },
     onPanResponderMove: (evt, gestureState) => {
       // Optional: Add visual feedback during swipe
     },
     onPanResponderRelease: (evt, gestureState) => {
-      // Close modal if swiped up more than 100px OR down more than 100px
-      if (Math.abs(gestureState.dy) > 100) {
+      // Close modal if swiped in any direction more than 60px
+      const { dx, dy } = gestureState;
+      if (Math.abs(dx) > 60 || Math.abs(dy) > 60) {
         setShowAddModal(false);
         setShowDayModal(false);
       }
     },
+    onPanResponderTerminationRequest: () => false, // Don't allow termination
   });
 
   // Get calendar grid for current month
