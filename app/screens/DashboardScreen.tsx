@@ -297,7 +297,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   priorityText: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.white,
+    color: '#000000',
   },
   taskPreview: {
     backgroundColor: colors.cardBackground,

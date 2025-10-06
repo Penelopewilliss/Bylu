@@ -20,6 +20,14 @@ const lightColors = {
   success: '#10B981',
   progressBg: '#F3F4F6',
   white: '#FFFFFF',
+  // Text colors specifically for pink/colored elements
+  primaryText: '#000000',
+  secondaryText: '#000000',
+  accentText: '#000000',
+  lavenderText: '#000000',
+  peachText: '#000000',
+  // Input placeholder text
+  placeholderText: '#9CA3AF',
 };
 
 const darkColors = {
@@ -36,12 +44,20 @@ const darkColors = {
   border: '#404040',
   shadow: 'rgba(0, 0, 0, 0.3)',
   buttonBackground: '#E8B4C4',
-  buttonText: '#1A1A1A',
+  buttonText: '#000000',
   modalBackground: 'rgba(0, 0, 0, 0.7)',
   modalContent: '#2D2D2D',
   success: '#10B981',
   progressBg: '#404040',
   white: '#FFFFFF',
+  // Text colors specifically for pink/colored elements
+  primaryText: '#000000',
+  secondaryText: '#000000',
+  accentText: '#000000',
+  lavenderText: '#000000',
+  peachText: '#000000',
+  // Input placeholder text
+  placeholderText: '#B0B0B0',
 };
 
 export type ThemeContextType = {

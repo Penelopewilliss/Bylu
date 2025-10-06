@@ -121,7 +121,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginLeft: 12,
   },
   deleteButtonText: {
-    color: colors.text,
+    color: colors.peachText,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -186,7 +186,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   priorityOptionText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.secondaryText,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -557,7 +557,7 @@ export default function TasksScreen() {
             <TextInput
               style={styles.modalInput}
               placeholder="What would you like to accomplish?"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={colors.placeholderText}
               value={newTaskText}
               onChangeText={setNewTaskText}
               multiline

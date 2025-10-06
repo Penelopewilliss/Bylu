@@ -261,6 +261,7 @@ export default function GoalsScreen() {
                 value={newGoal.title}
                 onChangeText={(text) => setNewGoal(prev => ({ ...prev, title: text }))}
                 placeholder="What do you want to achieve?"
+                placeholderTextColor={colors.placeholderText}
                 multiline={false}
               />
             </View>
@@ -276,6 +277,7 @@ export default function GoalsScreen() {
                   value={newTaskText}
                   onChangeText={setNewTaskText}
                   placeholder="Add a strategy task..."
+                  placeholderTextColor={colors.placeholderText}
                   onSubmitEditing={addTempMicroTask}
                 />
                 <TouchableOpacity
@@ -309,6 +311,7 @@ export default function GoalsScreen() {
                 value={newGoal.resources}
                 onChangeText={(text) => setNewGoal(prev => ({ ...prev, resources: text }))}
                 placeholder="List what you need to succeed..."
+                placeholderTextColor={colors.placeholderText}
                 multiline={true}
                 numberOfLines={3}
               />
@@ -323,6 +326,7 @@ export default function GoalsScreen() {
                 value={newGoal.notes}
                 onChangeText={(text) => setNewGoal(prev => ({ ...prev, notes: text }))}
                 placeholder="Any additional notes..."
+                placeholderTextColor={colors.placeholderText}
                 multiline={true}
                 numberOfLines={3}
               />
@@ -512,6 +516,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   deleteIcon: {
     fontSize: 16,
+    color: colors.secondaryText,
   },
   modalContainer: {
     flex: 1,
@@ -642,14 +647,14 @@ const createStyles = (colors: any) => StyleSheet.create({
   taskNumber: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: colors.text,
+    color: colors.secondaryText,
     marginRight: 8,
     minWidth: 20,
   },
   taskItemText: {
     flex: 1,
     fontSize: 14,
-    color: colors.text,
+    color: colors.secondaryText,
   },
   removeTaskButton: {
     paddingHorizontal: 8,

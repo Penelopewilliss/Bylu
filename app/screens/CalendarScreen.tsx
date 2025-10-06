@@ -55,7 +55,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   navButtonText: {
     fontSize: 18,
-    color: colors.text,
+    color: colors.secondaryText,
     fontWeight: '600',
     textAlign: 'center',
     lineHeight: 18,
@@ -963,6 +963,7 @@ export default function CalendarScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="What's your appointment?"
+                placeholderTextColor={colors.placeholderText}
                 value={formData.title}
                 onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
               />
@@ -1202,6 +1203,7 @@ export default function CalendarScreen() {
               <TextInput
                 style={[styles.input, styles.textArea]}
                 placeholder="Add any notes..."
+                placeholderTextColor={colors.placeholderText}
                 multiline
                 value={formData.description}
                 onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))}
