@@ -115,7 +115,7 @@ class NotificationService {
         try {
           const notificationId = await Notifications.scheduleNotificationAsync({
             content: {
-              title: '💕 Appointment Reminder',
+              title: '🌸 Appointment Reminder',
               body: `${appointment.title} ${timing === 60 ? 'in 1 hour' : `in ${timing} minutes`}`,
               data: {
                 appointmentId: appointment.id,
@@ -215,7 +215,7 @@ class NotificationService {
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '💕 Test Notification',
+          title: '🌸 Test Notification',
           body: 'This is a test notification from Glowgetter! 🌸',
           data: { type: 'test' },
           sound: this.settings.soundEnabled ? 'default' : false,

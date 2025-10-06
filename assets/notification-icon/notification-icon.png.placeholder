@@ -1,0 +1,8 @@
+# This is a placeholder for the notification icon
+# You'll need to replace this with actual PNG files:
+# - notification-icon.png (24x24 pixels)
+# - notification-icon@2x.png (48x48 pixels) 
+# - notification-icon@3x.png (72x72 pixels)
+
+# For now, you can use any small PNG file as a placeholder
+# The icon should be white/transparent design that will be tinted pink by Android

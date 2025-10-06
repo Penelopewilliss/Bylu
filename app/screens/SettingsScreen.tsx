@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
+import NotificationService from '../services/NotificationService';
 
 export default function SettingsScreen() {
   const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime } = useTheme();
@@ -31,6 +32,40 @@ export default function SettingsScreen() {
     } catch (error) {
       console.error('Error resetting onboarding:', error);
       Alert.alert('Error', 'Failed to reset onboarding');
+    }
+  };
+
+  const testNotification = async () => {
+    try {
+      console.log('🔔 Testing notification...');
+      const notificationService = NotificationService.getInstance();
+      
+      // Request permissions first
+      const hasPermission = await notificationService.requestPermissions();
+      if (!hasPermission) {
+        Alert.alert(
+          '❌ Permission Required',
+          'Please allow notifications to test your pink flower icon!',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      // Send test notification
+      await notificationService.testNotification();
+      
+      Alert.alert(
+        '🌸 Test Notification Sent!',
+        'Check your notification bar for your beautiful pink flower icon!',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error testing notification:', error);
+      Alert.alert(
+        '❌ Error',
+        'Failed to send test notification. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
@@ -77,6 +112,19 @@ export default function SettingsScreen() {
               thumbColor={isMilitaryTime ? colors.background : colors.textLight}
             />
           </View>
+        </View>
+
+        {/* Notifications Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          
+          <TouchableOpacity style={styles.settingItem} onPress={testNotification}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>🌸 Test Notification</Text>
+              <Text style={styles.settingDescription}>Test your beautiful pink flower notification icon</Text>
+            </View>
+            <Text style={styles.chevron}>🔔</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Developer Section */}

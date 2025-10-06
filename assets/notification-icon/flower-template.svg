@@ -1,0 +1,14 @@
+<!-- Simple Pink Flower Notification Icon Template -->
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- For Android notifications, this should be white on transparent background -->
+  <!-- This is just a template - you'll need to convert to PNG -->
+  
+  <!-- Flower petals -->
+  <circle cx="12" cy="7" r="3" fill="white" opacity="0.9"/>  <!-- Top petal -->
+  <circle cx="17" cy="12" r="3" fill="white" opacity="0.9"/> <!-- Right petal -->
+  <circle cx="12" cy="17" r="3" fill="white" opacity="0.9"/> <!-- Bottom petal -->
+  <circle cx="7" cy="12" r="3" fill="white" opacity="0.9"/>  <!-- Left petal -->
+  
+  <!-- Center -->
+  <circle cx="12" cy="12" r="2" fill="white"/>
+</svg>

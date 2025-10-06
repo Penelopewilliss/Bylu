@@ -1,0 +1,16 @@
+<!-- Simple Flower Icon for Notifications (24x24) -->
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- White flower silhouette for Android notifications -->
+  <g fill="white">
+    <!-- Top petal -->
+    <ellipse cx="12" cy="8" rx="3" ry="4" transform="rotate(0 12 8)"/>
+    <!-- Right petal -->
+    <ellipse cx="16" cy="12" rx="3" ry="4" transform="rotate(90 16 12)"/>
+    <!-- Bottom petal -->
+    <ellipse cx="12" cy="16" rx="3" ry="4" transform="rotate(180 12 16)"/>
+    <!-- Left petal -->
+    <ellipse cx="8" cy="12" rx="3" ry="4" transform="rotate(270 8 12)"/>
+    <!-- Center -->
+    <circle cx="12" cy="12" r="2.5"/>
+  </g>
+</svg>
