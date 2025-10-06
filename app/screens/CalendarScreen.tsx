@@ -449,6 +449,125 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
+  // Duration/End Time styles
+  durationContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    borderRadius: 8,
+    backgroundColor: colors.cardBackground,
+    padding: 4,
+  },
+  durationToggle: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectedDurationToggle: {
+    backgroundColor: colors.primary,
+  },
+  durationToggleText: {
+    fontSize: 14,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  selectedDurationToggleText: {
+    color: colors.buttonText,
+    fontWeight: '600',
+  },
+  durationPickerContainer: {
+    marginBottom: 16,
+  },
+  durationLabel: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '500',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  durationOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  durationOption: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    backgroundColor: colors.cardBackground,
+    borderWidth: 1,
+    borderColor: colors.border,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  selectedDurationOption: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  durationOptionText: {
+    fontSize: 14,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  selectedDurationOptionText: {
+    color: colors.buttonText,
+    fontWeight: '600',
+  },
+  endTimeContainer: {
+    marginBottom: 16,
+  },
+  timeInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: colors.text,
+    backgroundColor: colors.cardBackground,
+  },
+  // Modal improvements
+  modalHeader: {
+    paddingTop: 12,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+    backgroundColor: colors.cardBackground,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    alignItems: 'center',
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: colors.border,
+    borderRadius: 2,
+    marginBottom: 12,
+  },
+  wholeDayContainer: {
+    marginBottom: 16,
+  },
+  wholeDayToggle: {
+    backgroundColor: colors.cardBackground,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  selectedWholeDayToggle: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  wholeDayToggleText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.text,
+  },
+  selectedWholeDayToggleText: {
+    color: colors.background,
+  },
 });
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -500,22 +619,41 @@ export default function CalendarScreen() {
   const [selectedMinute, setSelectedMinute] = useState(0);
   const [selectedAmPm, setSelectedAmPm] = useState<'AM' | 'PM'>('AM');
   
+  // End time picker state (no AM/PM - follows start time format)
+  const [selectedEndHour, setSelectedEndHour] = useState(10);
+  const [selectedEndMinute, setSelectedEndMinute] = useState(0);
+  
   // Form state
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     date: new Date().toISOString().split('T')[0], // Default to today
     time: '',
+    endTime: '',
+    duration: 60, // Default 1 hour in minutes
+    useDuration: true, // true for duration, false for end time
+    isWholeDay: false, // new whole day option
     category: 'personal' as 'work' | 'personal' | 'health' | 'learning' | 'other'
   });
 
-  // PanResponder for swipe to close modal (all directions)
+  // PanResponder for swipe to close modal (horizontal + vertical down from header area)
   const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponder: (evt) => {
+      // Only capture gestures that start in the header area (top 100px) or for horizontal swipes
+      const { locationY } = evt.nativeEvent;
+      return locationY < 100; // Only capture if starting from top area
+    },
     onMoveShouldSetPanResponder: (evt, gestureState) => {
-      // Only activate if we're clearly swiping and not just tapping
       const { dx, dy } = gestureState;
-      return Math.abs(dx) > 20 || Math.abs(dy) > 20;
+      const { locationY } = evt.nativeEvent;
+      
+      // For gestures starting in header area, allow vertical down swipes
+      if (locationY < 100) {
+        return Math.abs(dx) > 20 || (dy > 20 && Math.abs(dy) > Math.abs(dx));
+      }
+      
+      // For other areas, only horizontal swipes
+      return Math.abs(dx) > 20 && Math.abs(dx) > Math.abs(dy);
     },
     onPanResponderGrant: () => {
       // Take control of the gesture
@@ -524,9 +662,16 @@ export default function CalendarScreen() {
       // Optional: Add visual feedback during swipe
     },
     onPanResponderRelease: (evt, gestureState) => {
-      // Close modal if swiped in any direction more than 60px
       const { dx, dy } = gestureState;
-      if (Math.abs(dx) > 60 || Math.abs(dy) > 60) {
+      const { locationY } = evt.nativeEvent;
+      
+      // Close modal for horizontal swipes (any area)
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+        setShowAddModal(false);
+        setShowDayModal(false);
+      }
+      // Close modal for vertical down swipes from header area
+      else if (locationY < 100 && dy > 80 && Math.abs(dy) > Math.abs(dx)) {
         setShowAddModal(false);
         setShowDayModal(false);
       }
@@ -650,6 +795,10 @@ export default function CalendarScreen() {
       description: '', 
       date: initialDate, 
       time: '', 
+      endTime: '',
+      duration: 60,
+      useDuration: true,
+      isWholeDay: false,
       category: 'personal' 
     });
     syncDropdownsWithDate(initialDate);
@@ -661,12 +810,18 @@ export default function CalendarScreen() {
     setIsCreatingFromSpecificDay(false);
     setEditingEvent(event);
     const eventDate = new Date(event.startDate);
+    const endDate = new Date(event.endDate);
     const dateStr = eventDate.toISOString().split('T')[0];
+    const duration = Math.round((endDate.getTime() - eventDate.getTime()) / (1000 * 60)); // Duration in minutes
     setFormData({
       title: event.title,
       description: event.description || '',
       date: dateStr,
       time: eventDate.toTimeString().slice(0, 5),
+      endTime: endDate.toTimeString().slice(0, 5),
+      duration: duration,
+      useDuration: true,
+      isWholeDay: false,
       category: event.category as any
     });
     syncDropdownsWithDate(dateStr);
@@ -689,23 +844,58 @@ export default function CalendarScreen() {
     const [year, month, day] = formData.date.split('-').map(Number);
     const appointmentDate = new Date(year, month - 1, day); // month is 0-indexed
     
-    // Convert time to 24-hour format
-    let hour24 = selectedHour;
-    if (!isMilitaryTime) {
-      // Only convert if we're using 12-hour format
-      if (selectedAmPm === 'PM' && selectedHour !== 12) {
-        hour24 = selectedHour + 12;
-      } else if (selectedAmPm === 'AM' && selectedHour === 12) {
-        hour24 = 0;
+    let startDate: Date;
+    let endDate: Date;
+    
+    if (formData.isWholeDay) {
+      // Whole day appointment: 12:00 AM to 11:59 PM
+      startDate = new Date(appointmentDate);
+      startDate.setHours(0, 0, 0, 0);
+      
+      endDate = new Date(appointmentDate);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      // Regular appointment with specific times
+      // Convert time to 24-hour format
+      let hour24 = selectedHour;
+      if (!isMilitaryTime) {
+        // Only convert if we're using 12-hour format
+        if (selectedAmPm === 'PM' && selectedHour !== 12) {
+          hour24 = selectedHour + 12;
+        } else if (selectedAmPm === 'AM' && selectedHour === 12) {
+          hour24 = 0;
+        }
+      }
+      // If isMilitaryTime is true, selectedHour is already in 24-hour format (0-23)
+      
+      startDate = new Date(appointmentDate);
+      startDate.setHours(hour24, selectedMinute, 0, 0);
+      
+      // Calculate end date based on duration or end time
+      endDate = new Date(startDate);
+      if (formData.useDuration) {
+        // Use duration in minutes
+        endDate.setTime(startDate.getTime() + (formData.duration * 60 * 1000));
+      } else {
+        // Use end time picker values (follows start time AM/PM format)
+        let endHour24 = selectedEndHour;
+        if (!isMilitaryTime) {
+          // Convert 12-hour to 24-hour format using start time AM/PM
+          if (selectedAmPm === 'PM' && selectedEndHour !== 12) {
+            endHour24 = selectedEndHour + 12;
+          } else if (selectedAmPm === 'AM' && selectedEndHour === 12) {
+            endHour24 = 0;
+          }
+        }
+        
+        endDate.setHours(endHour24, selectedEndMinute, 0, 0);
+        
+        // If end time is before start time, assume it's next day
+        if (endDate <= startDate) {
+          endDate.setDate(endDate.getDate() + 1);
+        }
       }
     }
-    // If isMilitaryTime is true, selectedHour is already in 24-hour format (0-23)
-    
-    const startDate = new Date(appointmentDate);
-    startDate.setHours(hour24, selectedMinute, 0, 0);
-    
-    const endDate = new Date(startDate);
-    endDate.setHours(hour24 + 1, selectedMinute, 0, 0); // Default 1 hour duration
 
     const eventData = {
       id: editingEvent?.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -738,6 +928,10 @@ export default function CalendarScreen() {
       description: '', 
       date: new Date().toISOString().split('T')[0], 
       time: '', 
+      endTime: '',
+      duration: 60,
+      useDuration: true,
+      isWholeDay: false,
       category: 'personal' 
     });
     setEditingEvent(null);
@@ -932,6 +1126,10 @@ export default function CalendarScreen() {
                     description: '', 
                     date: dateStr, 
                     time: '', 
+                    endTime: '',
+                    duration: 60,
+                    useDuration: true,
+                    isWholeDay: false,
                     category: 'personal' 
                   });
                   setEditingEvent(null);
@@ -952,13 +1150,22 @@ export default function CalendarScreen() {
         transparent={true}
         onRequestClose={() => setShowAddModal(false)}
       >
-        <View style={styles.modalOverlay} {...panResponder.panHandlers}>
-          <View style={styles.addModalContent}>
+        <View style={styles.modalOverlay}>
+          {/* Header area with PanResponder for swipe-to-close */}
+          <View style={styles.modalHeader} {...panResponder.panHandlers}>
+            <View style={styles.modalHandle} />
             <Text style={styles.addModalTitle}>
               {editingEvent ? 'Edit Appointment' : 'New Appointment'}
             </Text>
-            
-            <ScrollView style={styles.formContainer}>
+          </View>
+          
+          {/* Scrollable form area without PanResponder interference */}
+          <View style={styles.addModalContent}>
+            <ScrollView 
+              style={styles.formContainer}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
               <Text style={styles.label}>Title *</Text>
               <TextInput
                 style={styles.input}
@@ -1178,6 +1385,151 @@ export default function CalendarScreen() {
                 )}
               </View>
               
+              {/* Duration / End Time Section */}
+              <Text style={styles.label}>Duration / End Time</Text>
+              
+              {/* Whole Day Toggle */}
+              <View style={styles.wholeDayContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.wholeDayToggle,
+                    formData.isWholeDay && styles.selectedWholeDayToggle
+                  ]}
+                  onPress={() => setFormData(prev => ({ ...prev, isWholeDay: !prev.isWholeDay }))}
+                >
+                  <Text style={[
+                    styles.wholeDayToggleText,
+                    formData.isWholeDay && styles.selectedWholeDayToggleText
+                  ]}>
+                    {formData.isWholeDay ? '✓ Whole Day' : 'Whole Day'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              
+              {!formData.isWholeDay && (
+              <>
+              <View style={styles.durationContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.durationToggle,
+                    formData.useDuration && styles.selectedDurationToggle
+                  ]}
+                  onPress={() => setFormData(prev => ({ ...prev, useDuration: true }))}
+                >
+                  <Text style={[
+                    styles.durationToggleText,
+                    formData.useDuration && styles.selectedDurationToggleText
+                  ]}>
+                    Duration
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.durationToggle,
+                    !formData.useDuration && styles.selectedDurationToggle
+                  ]}
+                  onPress={() => setFormData(prev => ({ ...prev, useDuration: false }))}
+                >
+                  <Text style={[
+                    styles.durationToggleText,
+                    !formData.useDuration && styles.selectedDurationToggleText
+                  ]}>
+                    End Time
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              
+              {formData.useDuration ? (
+                <View style={styles.durationPickerContainer}>
+                  <Text style={styles.durationLabel}>Duration: {Math.floor(formData.duration / 60)}h {formData.duration % 60}m</Text>
+                  <View style={styles.durationOptions}>
+                    {[15, 30, 45, 60, 90, 120, 180, 240].map((minutes) => (
+                      <TouchableOpacity
+                        key={minutes}
+                        style={[
+                          styles.durationOption,
+                          formData.duration === minutes && styles.selectedDurationOption
+                        ]}
+                        onPress={() => setFormData(prev => ({ ...prev, duration: minutes }))}
+                      >
+                        <Text style={[
+                          styles.durationOptionText,
+                          formData.duration === minutes && styles.selectedDurationOptionText
+                        ]}>
+                          {minutes < 60 ? `${minutes}m` : `${Math.floor(minutes / 60)}h${minutes % 60 > 0 ? ` ${minutes % 60}m` : ''}`}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.endTimeContainer}>
+                  <Text style={styles.label}>End Time</Text>
+                  <View style={styles.timePickerContainer}>
+                    <View style={styles.timePicker}>
+                      <Text style={styles.timePickerLabel}>Hour</Text>
+                      <ScrollView 
+                        style={styles.timeScrollView} 
+                        contentContainerStyle={styles.timeScrollContent}
+                        showsVerticalScrollIndicator={false}
+                        nestedScrollEnabled={true}
+                      >
+                        {(isMilitaryTime ? 
+                          Array.from({ length: 24 }, (_, i) => i) : 
+                          Array.from({ length: 12 }, (_, i) => i + 1)
+                        ).map((hour) => (
+                          <TouchableOpacity
+                            key={hour}
+                            style={[
+                              styles.timeOption,
+                              selectedEndHour === hour && styles.selectedTimeOption
+                            ]}
+                            onPress={() => setSelectedEndHour(hour)}
+                          >
+                            <Text style={[
+                              styles.timeOptionText,
+                              selectedEndHour === hour && styles.selectedTimeOptionText
+                            ]}>
+                              {isMilitaryTime ? String(hour).padStart(2, '0') : hour}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                    
+                    <View style={styles.timePicker}>
+                      <Text style={styles.timePickerLabel}>Minute</Text>
+                      <ScrollView 
+                        style={styles.timeScrollView} 
+                        contentContainerStyle={styles.timeScrollContent}
+                        showsVerticalScrollIndicator={false}
+                        nestedScrollEnabled={true}
+                      >
+                        {[0, 15, 30, 45].map((minute) => (
+                          <TouchableOpacity
+                            key={minute}
+                            style={[
+                              styles.timeOption,
+                              selectedEndMinute === minute && styles.selectedTimeOption
+                            ]}
+                            onPress={() => setSelectedEndMinute(minute)}
+                          >
+                            <Text style={[
+                              styles.timeOptionText,
+                              selectedEndMinute === minute && styles.selectedTimeOptionText
+                            ]}>
+                              {String(minute).padStart(2, '0')}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  </View>
+                </View>
+              )}
+              </>
+              )}
+              
               <Text style={styles.label}>Category</Text>
               <View style={styles.categoryContainer}>
                 {Object.entries(CATEGORY_COLORS).map(([category, color]) => (
@@ -1210,6 +1562,7 @@ export default function CalendarScreen() {
               />
             </ScrollView>
             
+            {/* Button area outside ScrollView */}
             <View style={styles.addModalButtons}>
               <TouchableOpacity
                 style={styles.cancelButton}

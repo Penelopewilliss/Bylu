@@ -43,7 +43,7 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
       <Animated.Image 
         source={require('./assets/icon.png')} 
         style={[styles.splashLogo, { transform: [{ scale: scaleAnim }] }]}
-        resizeMode="contain"
+        resizeMode="cover"
       />
     </Animated.View>
   );
@@ -321,13 +321,12 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
   },
   splashLogo: {
-    width: 200, // Adjust size as needed
-    height: 200, // Keep it square or adjust ratio
-    // Add elegant shadow for depth
-    shadowColor: 'rgba(0, 0, 0, 0.25)',
-    shadowOffset: { width: 3, height: 4 },
-    shadowRadius: 8,
-    shadowOpacity: 1,
+    width: '100%', // Full width of screen
+    height: '100%', // Full height of screen
+    position: 'absolute', // Position absolutely to fill container
+    top: 0,
+    left: 0,
+    // Remove shadow for full-screen effect
   },
   screen: {
     flex: 1,
