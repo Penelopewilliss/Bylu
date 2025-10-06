@@ -4,7 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Font from 'expo-font';
 import { AppProvider } from './app/context/AppContext';
 import { ThemeProvider } from './app/context/ThemeContext';
+import { OfflineProvider } from './app/context/OfflineContext';
 import NotificationService from './app/services/NotificationService';
+import OfflineIndicator from './app/components/OfflineIndicator';
 
 // Import the actual screen components
 import TasksScreen from './app/screens/TasksScreen';
@@ -333,6 +335,7 @@ function MainApp() {
         activeTab={activeTab} 
         onMenuPress={() => setMenuVisible(true)} 
       />
+      <OfflineIndicator />
       <View style={styles.content}>
         <Screen activeTab={activeTab} onNavigate={setActiveTab} />
       </View>
@@ -353,7 +356,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <AppProvider>
-        <MainApp />
+        <OfflineProvider>
+          <MainApp />
+        </OfflineProvider>
       </AppProvider>
     </ThemeProvider>
   );

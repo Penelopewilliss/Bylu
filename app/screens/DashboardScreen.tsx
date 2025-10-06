@@ -2,11 +2,32 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
+import { useOffline } from '../context/OfflineContext';
 
 export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { colors } = useTheme();
-    const { tasks, events, toggleTask } = useApp();
+  const { tasks, events, toggleTask } = useApp();
+  const { isOnline, addToSyncQueue } = useOffline();
   const styles = createStyles(colors);
+
+  // Enhanced task toggle with offline support
+  const handleTaskToggle = async (taskId: string) => {
+    try {
+      // Always update UI immediately for better UX
+      toggleTask(taskId);
+      
+      // Queue for sync if offline or sync immediately if online
+      await addToSyncQueue('UPDATE', 'task', { 
+        id: taskId, 
+        completed: !tasks.find(t => t.id === taskId)?.completed,
+        updatedAt: new Date().toISOString()
+      });
+      
+      console.log(`${isOnline ? '🔄' : '📱'} Task toggle queued: ${taskId}`);
+    } catch (error) {
+      console.error('❌ Failed to toggle task:', error);
+    }
+  };
 
   // Get today's tasks and events
   const todayTasks = tasks.filter(task => !task.completed).slice(0, 3);
@@ -106,7 +127,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
                   <View style={styles.taskContent}>
                     <TouchableOpacity 
                       style={styles.heartCheckbox}
-                      onPress={() => toggleTask(task.id)}
+                      onPress={() => handleTaskToggle(task.id)}
                     >
                       <Text style={styles.heartIcon}>🤍</Text>
                     </TouchableOpacity>
@@ -226,20 +247,25 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   card: {
     backgroundColor: colors.primary,
-    padding: 16,
-    borderRadius: 16,
+    padding: 20,
+    borderRadius: 20,
     alignItems: 'center',
     flex: 1,
-    marginHorizontal: 4,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
+    marginHorizontal: 6,
+    shadowColor: '#FF69B4',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(247, 209, 218, 0.3)',
   },
   cardEmoji: {
-    fontSize: 28,
-    marginBottom: 8,
+    fontSize: 32,
+    marginBottom: 12,
+    textShadowColor: 'rgba(255, 255, 255, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   cardTitle: {
     fontSize: 13,
@@ -457,15 +483,17 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: 0,
   },
   smallAddButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     backgroundColor: colors.primary,
-    borderRadius: 12,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    borderRadius: 16,
+    shadowColor: '#FF69B4',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(247, 209, 218, 0.5)',
   },
   smallAddButtonText: {
     color: colors.buttonText,
