@@ -25,14 +25,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    paddingVertical: 12,
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 24,
@@ -41,17 +36,20 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontFamily: Fonts.header?.fontFamily || 'System',
   },
   addButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     backgroundColor: colors.primary,
-    width: 40,
-    height: 40,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
+  },
+  addButtonContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   content: {
     flex: 1,
@@ -222,8 +220,8 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   addButtonText: {
     color: colors.buttonText,
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: '600',
   },
   emptyContainer: {
     flex: 1,
@@ -293,6 +291,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '600',
     color: colors.textSecondary,
     marginBottom: 8,
+    textAlign: 'center',
     fontFamily: Fonts.body?.fontFamily || 'System',
   },
   progressStats: {
@@ -300,6 +299,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
     marginBottom: 12,
+    textAlign: 'center',
     fontFamily: Fonts.header?.fontFamily || 'System',
   },
   progressBar: {
@@ -497,13 +497,6 @@ export default function TasksScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setShowAddModal(true)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Progress Card */}
@@ -520,6 +513,17 @@ export default function TasksScreen() {
             ]} 
           />
         </View>
+      </View>
+
+      {/* Add Task Button */}
+      <View style={styles.addButtonContainer}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setShowAddModal(true)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.addButtonText}>+ Add Task</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Tasks List */}

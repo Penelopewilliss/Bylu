@@ -294,21 +294,9 @@ export default function GoalsScreen() {
       >
         <View style={styles.modalContainer} {...panResponder.panHandlers}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
             <Text style={styles.modalTitle}>
               {editingGoal ? 'Edit Goal' : 'Add Goal'}
             </Text>
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={saveGoal}
-            >
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
           </View>
 
           <ScrollView style={styles.modalContent}>
@@ -387,6 +375,22 @@ export default function GoalsScreen() {
               />
             </View>
           </ScrollView>
+          
+          {/* Bottom Button Container */}
+          <View style={styles.modalButtonContainer}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={saveGoal}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </View>
@@ -559,7 +563,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
@@ -571,18 +575,29 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.text,
   },
   cancelButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    backgroundColor: colors.cardBackground,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   cancelButtonText: {
     color: colors.textSecondary,
     fontSize: 16,
+    fontWeight: '600',
   },
   saveButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginLeft: 8,
     backgroundColor: colors.primary,
     borderRadius: 8,
+    alignItems: 'center',
   },
   saveButtonText: {
     color: colors.buttonText,
@@ -593,6 +608,15 @@ const createStyles = (colors: any) => StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingVertical: 20,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.background,
   },
   section: {
     marginBottom: 24,

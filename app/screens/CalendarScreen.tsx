@@ -451,14 +451,14 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
 });
 
-const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
 export default function CalendarScreen() {
-  const { events } = useApp();
+  const { events, addEvent, deleteEvent } = useApp();
   const { colors, formatTime, isMilitaryTime } = useTheme();
   
   const styles = createStyles(colors);
@@ -472,11 +472,8 @@ export default function CalendarScreen() {
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isCreatingFromSpecificDay, setIsCreatingFromSpecificDay] = useState(false);
   
-  // Local events state (since AppContext doesn't have addEvent/deleteEvent)
-  const [localEvents, setLocalEvents] = useState<CalendarEvent[]>([]);
-  
-  // Combined events from AppContext and local state
-  const allEvents = [...events, ...localEvents];
+  // Use global events from AppContext
+  const allEvents = events;
   
   // Date picker state
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -491,10 +488,11 @@ export default function CalendarScreen() {
 
   // Sync dropdowns with form date
   const syncDropdownsWithDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    setSelectedMonth(date.getMonth());
-    setSelectedDay(date.getDate());
-    setSelectedYear(date.getFullYear());
+    // Parse date string manually to avoid timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    setSelectedMonth(month - 1); // Month is 0-indexed
+    setSelectedDay(day);
+    setSelectedYear(year);
   };
   
   // Time picker state
@@ -542,24 +540,41 @@ export default function CalendarScreen() {
     const month = currentDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
     
-    // Adjust to start on Monday (1) instead of Sunday (0)
+    // Create start date for calendar grid (Sunday-first week)
     const dayOfWeek = firstDay.getDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    startDate.setDate(startDate.getDate() + diff);
+    const diff = -dayOfWeek; // Sunday = 0, so we go back dayOfWeek days
+    const startDate = new Date(year, month, 1 + diff);
     
     const calendar = [];
-    const current = new Date(startDate);
+    let currentYear = startDate.getFullYear();
+    let currentMonth = startDate.getMonth();
+    let currentDay = startDate.getDate();
     
     for (let week = 0; week < 6; week++) {
       const weekDays = [];
       for (let day = 0; day < 7; day++) {
-        weekDays.push(new Date(current));
-        current.setDate(current.getDate() + 1);
+        // Create date using explicit year, month, day to avoid timezone issues
+        const cellDate = new Date(currentYear, currentMonth, currentDay);
+        weekDays.push(cellDate);
+        
+        // Move to next day
+        currentDay++;
+        const tempDate = new Date(currentYear, currentMonth, currentDay);
+        if (tempDate.getMonth() !== currentMonth) {
+          // Month rolled over
+          currentMonth++;
+          currentDay = 1;
+          if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+          }
+        }
       }
       calendar.push(weekDays);
-      if (current > lastDay && current.getDay() === 1) break; // Stop on Monday
+      
+      // Check if we should stop (after showing some of next month)
+      if (currentMonth !== month && currentDay > 7) break;
     }
     
     return calendar;
@@ -567,10 +582,15 @@ export default function CalendarScreen() {
 
   // Get events for a specific date
   const getEventsForDate = (date: Date) => {
-    const dateStr = date.toDateString();
+    const targetYear = date.getFullYear();
+    const targetMonth = date.getMonth();
+    const targetDay = date.getDate();
+    
     return allEvents.filter(event => {
       const eventDate = new Date(event.startDate);
-      return eventDate.toDateString() === dateStr;
+      return eventDate.getFullYear() === targetYear &&
+             eventDate.getMonth() === targetMonth &&
+             eventDate.getDate() === targetDay;
     });
   };
 
@@ -601,14 +621,30 @@ export default function CalendarScreen() {
 
   // Handle day press
   const handleDayPress = (date: Date) => {
-    setSelectedDate(date);
+    // Create a new date using the exact components to avoid timezone issues
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    const cleanDate = new Date(year, month, day, 12, 0, 0); // Use noon to avoid DST issues
+    
+    setSelectedDate(cleanDate);
     setShowDayModal(true);
   };
 
   // Handle add appointment
   const handleAddAppointment = () => {
     setEditingEvent(null);
-    const initialDate = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    
+    // Use local date formatting to avoid timezone issues
+    const getLocalDateString = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const initialDate = selectedDate ? getLocalDateString(selectedDate) : getLocalDateString(new Date());
+    
     setFormData({ 
       title: '', 
       description: '', 
@@ -638,7 +674,7 @@ export default function CalendarScreen() {
   };
 
   // Save appointment
-  const saveAppointment = () => {
+  const saveAppointment = async () => {
     if (!formData.title.trim()) {
       Alert.alert('Error', 'Please enter a title for your appointment');
       return;
@@ -649,7 +685,9 @@ export default function CalendarScreen() {
       return;
     }
     
-    const appointmentDate = new Date(formData.date);
+    // Parse date manually to avoid timezone issues
+    const [year, month, day] = formData.date.split('-').map(Number);
+    const appointmentDate = new Date(year, month - 1, day); // month is 0-indexed
     
     // Convert time to 24-hour format
     let hour24 = selectedHour;
@@ -679,15 +717,19 @@ export default function CalendarScreen() {
       category: formData.category
     };
 
-    // Add to local events state
-    if (editingEvent) {
-      // Update existing event
-      setLocalEvents(prev => prev.map(event => 
-        event.id === editingEvent.id ? eventData : event
-      ));
-    } else {
-      // Add new event
-      setLocalEvents(prev => [...prev, eventData]);
+    try {
+      if (editingEvent) {
+        // For editing, delete the old event and add the updated one
+        await deleteEvent(editingEvent.id);
+        await addEvent(eventData);
+      } else {
+        // Add new event
+        await addEvent(eventData);
+      }
+    } catch (error) {
+      console.error('Error saving event:', error);
+      Alert.alert('Error', 'Failed to save event. Please try again.');
+      return;
     }
 
     setShowAddModal(false);
@@ -708,9 +750,13 @@ export default function CalendarScreen() {
       'Are you sure you want to delete this appointment?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
-          // Remove from local events
-          setLocalEvents(prev => prev.filter(event => event.id !== eventId));
+        { text: 'Delete', style: 'destructive', onPress: async () => {
+          try {
+            await deleteEvent(eventId);
+          } catch (error) {
+            console.error('Error deleting event:', error);
+            Alert.alert('Error', 'Failed to delete event. Please try again.');
+          }
         }}
       ]
     );

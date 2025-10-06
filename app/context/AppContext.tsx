@@ -104,7 +104,30 @@ export const [AppProvider, useApp] = createContextHook(() => {
 	const deleteTask = useCallback(async (taskId: string) => {
 		const updatedTasks = tasks.filter(task => task.id !== taskId);
 		await saveTasks(updatedTasks);
-	}, [tasks]);	return useMemo(() => ({
+	}, [tasks]);
+
+	// Event management functions
+	const saveEvents = async (newEvents: CalendarEvent[]) => {
+		setEvents(newEvents);
+		await AsyncStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(newEvents));
+	};
+
+	const addEvent = useCallback(async (event: Omit<CalendarEvent, 'id'>) => {
+		const newEvent: CalendarEvent = {
+			...event,
+			id: Date.now().toString(),
+		};
+		const updatedEvents = [...events, newEvent];
+		await saveEvents(updatedEvents);
+		return newEvent;
+	}, [events]);
+
+	const deleteEvent = useCallback(async (eventId: string) => {
+		const updatedEvents = events.filter(event => event.id !== eventId);
+		await saveEvents(updatedEvents);
+	}, [events]);
+
+	return useMemo(() => ({
 		tasks,
 		events,
 		moods,
@@ -119,5 +142,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		addTask,
 		toggleTask,
 		deleteTask,
-	}), [tasks, events, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, addTask, toggleTask, deleteTask]);
+		addEvent,
+		deleteEvent,
+	}), [tasks, events, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, addTask, toggleTask, deleteTask, addEvent, deleteEvent]);
 });
