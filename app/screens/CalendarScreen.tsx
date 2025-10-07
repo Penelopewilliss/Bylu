@@ -752,10 +752,11 @@ export default function CalendarScreen() {
 
   // PanResponder for calendar month navigation (horizontal swipes)
   const calendarPanResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponder: () => false, // Don't capture immediately
     onMoveShouldSetPanResponder: (evt, gestureState) => {
-      // Only capture horizontal swipes (more horizontal than vertical movement)
-      return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 10;
+      // Only capture horizontal swipes that are clearly intended for navigation
+      const { dx, dy } = gestureState;
+      return Math.abs(dx) > 20 && Math.abs(dx) > Math.abs(dy) * 1.5;
     },
     onPanResponderGrant: () => {
       // Gesture started
@@ -766,7 +767,7 @@ export default function CalendarScreen() {
     onPanResponderRelease: (evt, gestureState) => {
       // Gesture ended - check if it was a significant swipe
       const { dx } = gestureState;
-      const swipeThreshold = 50; // Minimum distance for a swipe
+      const swipeThreshold = 60; // Slightly higher threshold
       
       if (Math.abs(dx) > swipeThreshold) {
         if (dx > 0) {
@@ -781,6 +782,7 @@ export default function CalendarScreen() {
     onPanResponderTerminate: () => {
       // Gesture was terminated
     },
+    onPanResponderTerminationRequest: () => false, // Don't allow termination
   });
 
   // PanResponder for swipe to close modal (horizontal + vertical down from header area)
@@ -1173,9 +1175,8 @@ export default function CalendarScreen() {
         style={styles.calendarContainer} 
         contentContainerStyle={styles.calendarScrollContent}
         showsVerticalScrollIndicator={false}
-        {...calendarPanResponder.panHandlers}
       >
-        <View style={styles.calendarContent}>
+        <View style={styles.calendarContent} {...calendarPanResponder.panHandlers}>
           {/* Day Headers */}
           <View style={styles.dayHeaderRow}>
             {DAYS.map((day, index) => (
