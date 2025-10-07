@@ -134,24 +134,8 @@ export default function GoalsScreen() {
 
   // Delete goal - use context function
   const handleDeleteGoal = (goalId: string, goalTitle: string) => {
-    Alert.alert(
-      "Delete Goal",
-      `Are you sure you want to delete "${goalTitle}"? This will permanently remove the goal and all its progress.`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            console.log('Deleting goal:', goalId);
-            deleteGoal(goalId);
-          }
-        }
-      ]
-    );
+    console.log('Deleting goal immediately:', goalId, goalTitle);
+    deleteGoal(goalId);
   };
 
   // Open edit modal
@@ -261,8 +245,12 @@ export default function GoalsScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.deleteButton}
-                  onPress={() => handleDeleteGoal(goal.id, goal.title)}
+                  onPress={() => {
+                    console.log('Delete button pressed for goal:', goal.id);
+                    handleDeleteGoal(goal.id, goal.title);
+                  }}
                   activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <Text style={styles.deleteIcon}>🗑️</Text>
                 </TouchableOpacity>

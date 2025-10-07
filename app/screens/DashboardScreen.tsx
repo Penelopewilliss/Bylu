@@ -335,37 +335,6 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Section Separator */}
       <View style={styles.majorSeparator} />
 
-      {/* Recent Activity Section */}
-      <View style={styles.sectionWrapper}>
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-        </View>
-        
-        <View style={styles.sectionCard}>
-          {tasks.filter(t => t.completed).slice(0, 3).length > 0 ? (
-            <View style={styles.contentList}>
-              {tasks.filter(t => t.completed).slice(0, 3).map((task, index) => (
-                <View key={task.id} style={styles.activityItem}>
-                  <Text style={styles.activityEmoji}>✅</Text>
-                  <View style={styles.itemDetails}>
-                    <Text style={styles.itemTitle}>Completed "{task.title}"</Text>
-                    <Text style={styles.itemSubtitle}>Today</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyContent}>
-              <Text style={styles.emptyTitle}>Ready to start your day!</Text>
-              <Text style={styles.emptySubtitle}>Complete tasks to see activity 🎯</Text>
-            </View>
-          )}
-        </View>
-      </View>
-
-      {/* Section Separator */}
-      <View style={styles.majorSeparator} />
-
       {/* Tomorrow's Preview Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
@@ -393,6 +362,37 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
               </View>
             </View>
           </View>
+        </View>
+      </View>
+
+      {/* Section Separator */}
+      <View style={styles.majorSeparator} />
+
+      {/* Recent Activity Section */}
+      <View style={styles.sectionWrapper}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+        </View>
+        
+        <View style={styles.sectionCard}>
+          {tasks.filter(t => t.completed).slice(0, 3).length > 0 ? (
+            <View style={styles.contentList}>
+              {tasks.filter(t => t.completed).slice(0, 3).map((task, index) => (
+                <View key={task.id} style={styles.activityItem}>
+                  <Text style={styles.activityEmoji}>✅</Text>
+                  <View style={styles.itemDetails}>
+                    <Text style={styles.itemTitle}>Completed "{task.title}"</Text>
+                    <Text style={styles.itemSubtitle}>Today</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyContent}>
+              <Text style={styles.emptyTitle}>Ready to start your day!</Text>
+              <Text style={styles.emptySubtitle}>Complete tasks to see activity 🎯</Text>
+            </View>
+          )}
         </View>
       </View>
 

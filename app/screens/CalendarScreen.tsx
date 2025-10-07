@@ -1746,7 +1746,8 @@ export default function CalendarScreen() {
                     <Text style={styles.categoryText} numberOfLines={1}>
                       {category === 'work' ? '💼 Work' :
                        category === 'personal' ? '💖 Personal' :
-                       category === 'health' ? '✨ Health' : '📚 Learning'}
+                       category === 'health' ? '✨ Health' :
+                       category === 'learning' ? '📚 Learning' : '📝 Other'}
                     </Text>
                   </TouchableOpacity>
                 ))}

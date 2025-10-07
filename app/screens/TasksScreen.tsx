@@ -36,6 +36,7 @@ export default function TasksScreen() {
   const [viewHighPriority, setViewHighPriority] = useState(false);
   const [scrollX, setScrollX] = useState(0);
   const categoryScrollRef = useRef<FlatList>(null);
+  const modalScrollRef = useRef<ScrollView>(null);
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -205,6 +206,10 @@ export default function TasksScreen() {
 
     const openAddModal = () => {
     setModalVisible(true);
+    // Reset scroll position to top when modal opens
+    setTimeout(() => {
+      modalScrollRef.current?.scrollTo({ y: 0, animated: false });
+    }, 100);
   };
 
   const toggleViewAllTasks = () => {
@@ -617,7 +622,7 @@ export default function TasksScreen() {
     modalContent: {
       flex: 1,
       padding: 20,
-      paddingTop: 40,
+      paddingTop: 0,
     },
     section: {
       marginBottom: 24,
@@ -1070,9 +1075,15 @@ export default function TasksScreen() {
             <Text style={styles.modalTitle}>Add Task</Text>
           </View>
 
-          <ScrollView style={styles.modalContent}>
+          <ScrollView 
+            ref={modalScrollRef}
+            style={styles.modalContent}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
             {/* Category */}
-            <View style={styles.section}>
+            <View style={[styles.section, { marginTop: 20 }]}>
               <Text style={styles.sectionTitle}>Category</Text>
               <View style={styles.pickerContainer}>
                 {Object.entries(TASK_CATEGORIES).map(([category, data]) => (
