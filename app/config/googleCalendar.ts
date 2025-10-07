@@ -15,6 +15,9 @@ export const GOOGLE_CALENDAR_CONFIG = {
   // Replace with your actual Google OAuth client secret (only for server-side)
   CLIENT_SECRET: 'YOUR_GOOGLE_CLIENT_SECRET',
   
+  // Demo mode (set to false when you have real credentials)
+  DEMO_MODE: true,
+  
   // OAuth scopes for calendar access
   SCOPES: [
     'https://www.googleapis.com/auth/calendar',

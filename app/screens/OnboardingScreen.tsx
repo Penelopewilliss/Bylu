@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useCalendarSync } from '../context/CalendarSyncContext';
+import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
 
 const { width } = Dimensions.get('window');
 
@@ -69,13 +70,17 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       if (success) {
         Alert.alert(
           '✅ Connected!',
-          'Successfully connected to Google Calendar!',
+          GOOGLE_CALENDAR_CONFIG.DEMO_MODE 
+            ? 'Demo calendar connected! You can now test sync features with sample data.'
+            : 'Successfully connected to Google Calendar!',
           [{ text: 'Continue', onPress: onComplete }]
         );
       } else {
         Alert.alert(
           'Connection Failed',
-          'No worries! You can connect Google Calendar later in Settings.',
+          GOOGLE_CALENDAR_CONFIG.DEMO_MODE
+            ? 'Demo mode setup failed. You can try again in Settings.'
+            : 'No worries! You can connect Google Calendar later in Settings.',
           [{ text: 'Continue', onPress: onComplete }]
         );
       }
@@ -83,7 +88,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       console.error('Error connecting to Google Calendar:', error);
       Alert.alert(
         'Connection Failed',
-        'No worries! You can connect Google Calendar later in Settings.',
+        GOOGLE_CALENDAR_CONFIG.DEMO_MODE
+          ? 'Demo mode setup failed. You can try again in Settings.'
+          : 'No worries! You can connect Google Calendar later in Settings.',
         [{ text: 'Continue', onPress: onComplete }]
       );
     }

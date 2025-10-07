@@ -13,6 +13,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 import { useCalendarSync } from '../context/CalendarSyncContext';
+import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
 import NotificationService from '../services/NotificationService';
 
 export default function SettingsScreen() {
@@ -193,19 +194,77 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Google Calendar Sync Section - Temporarily Disabled */}
+        {/* Google Calendar Sync Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📅 Google Calendar Sync</Text>
+          <Text style={styles.sectionTitle}>📅 Google Calendar Sync {GOOGLE_CALENDAR_CONFIG.DEMO_MODE ? '(Demo Mode)' : ''}</Text>
           
-          <View style={styles.settingItem}>
-            <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>🔧 Coming Soon</Text>
-              <Text style={styles.settingDescription}>
-                Google Calendar sync requires additional setup. This feature will be available in a future update.
-              </Text>
+          {GOOGLE_CALENDAR_CONFIG.DEMO_MODE && (
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingLabel}>🎭 Demo Mode Active</Text>
+                <Text style={styles.settingDescription}>
+                  Running in demo mode - no Google account required! Try the sync features with sample data.
+                </Text>
+              </View>
+              <Text style={styles.chevron}>🎪</Text>
             </View>
-            <Text style={styles.chevron}>⏳</Text>
-          </View>
+          )}
+          
+          {isConnected ? (
+            <>
+              <View style={styles.settingItem}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>✅ {GOOGLE_CALENDAR_CONFIG.DEMO_MODE ? 'Demo Connected' : 'Connected'}</Text>
+                  <Text style={styles.settingDescription}>
+                    {GOOGLE_CALENDAR_CONFIG.DEMO_MODE 
+                      ? 'Demo calendar is active with sample events and sync functionality'
+                      : 'Your Google Calendar is synced and appointments will appear automatically'
+                    }
+                  </Text>
+                </View>
+                <Text style={styles.chevron}>🟢</Text>
+              </View>
+              
+              <TouchableOpacity style={styles.settingItem} onPress={handleSyncNow}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>🔄 {GOOGLE_CALENDAR_CONFIG.DEMO_MODE ? 'Demo Sync' : 'Sync Now'}</Text>
+                  <Text style={styles.settingDescription}>
+                    {GOOGLE_CALENDAR_CONFIG.DEMO_MODE 
+                      ? 'Test the sync functionality with demo events'
+                      : 'Manually sync your calendar events'
+                    }
+                  </Text>
+                </View>
+                <Text style={styles.chevron}>⚡</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.settingItem} onPress={handleGoogleDisconnect}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>🔌 Disconnect</Text>
+                  <Text style={styles.settingDescription}>
+                    {GOOGLE_CALENDAR_CONFIG.DEMO_MODE 
+                      ? 'Disconnect from demo calendar'
+                      : 'Stop syncing with Google Calendar'
+                    }
+                  </Text>
+                </View>
+                <Text style={styles.chevron}>❌</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity style={styles.settingItem} onPress={handleGoogleSignIn}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingLabel}>🔗 {GOOGLE_CALENDAR_CONFIG.DEMO_MODE ? 'Try Demo Calendar' : 'Connect Google Calendar'}</Text>
+                <Text style={styles.settingDescription}>
+                  {GOOGLE_CALENDAR_CONFIG.DEMO_MODE 
+                    ? 'Test calendar sync with demo data - no Google account needed!'
+                    : 'Sync your appointments and events automatically'
+                  }
+                </Text>
+              </View>
+              <Text style={styles.chevron}>{isAuthenticating ? '⏳' : '→'}</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Notifications Section */}

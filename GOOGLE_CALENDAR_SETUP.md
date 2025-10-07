@@ -8,16 +8,27 @@
 2. **Create or Select Project**: 
    - Create a new project or select an existing one
    - Name it something like "Bylu Calendar App"
+   - **⚠️ IMPORTANT**: Enable billing (required for API access, free tier is usually sufficient)
 
 3. **Enable Google Calendar API**:
    - Go to "APIs & Services" > "Library"
    - Search for "Google Calendar API"
    - Click "Enable"
 
-4. **Create OAuth 2.0 Credentials**:
+4. **Configure OAuth Consent Screen** (Required before creating credentials):
+   - Go to "APIs & Services" > "OAuth consent screen"
+   - Choose "External" user type
+   - Fill in required fields:
+     - **App name**: Bylu
+     - **User support email**: Your email
+     - **Developer contact information**: Your email
+   - **Add Test Users**: Add your email address to test the app during development
+
+5. **Create OAuth 2.0 Credentials**:
    - Go to "APIs & Services" > "Credentials"
-   - Click "Create Credentials" > "OAuth 2.0 Client IDs"
-   - Choose "Application type" > "Web application" (for development)
+   - Click "Create Credentials" > "OAuth client ID"
+   - Choose "Web application" as the application type
+   - **Name**: Bylu Mobile App
    - Add authorized redirect URIs:
      - For development: `exp://127.0.0.1:19000/--`
      - For production: Your actual app redirect URI

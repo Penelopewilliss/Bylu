@@ -47,6 +47,7 @@ class GoogleCalendarService {
   // OAuth configuration - Using config file
   private readonly CLIENT_ID = GOOGLE_CALENDAR_CONFIG.CLIENT_ID;
   private readonly CLIENT_SECRET = GOOGLE_CALENDAR_CONFIG.CLIENT_SECRET;
+  private readonly DEMO_MODE = GOOGLE_CALENDAR_CONFIG.DEMO_MODE || false;
   private readonly REDIRECT_URI = AuthSession.makeRedirectUri({
     scheme: 'exp',
   });
@@ -97,6 +98,16 @@ class GoogleCalendarService {
 
   public async authenticate(): Promise<boolean> {
     try {
+      // Demo mode - simulate successful authentication
+      if (this.DEMO_MODE) {
+        console.log('🎭 Demo mode: Simulating Google Calendar authentication...');
+        this.accessToken = 'demo_access_token';
+        await AsyncStorage.setItem('google_access_token', this.accessToken);
+        await AsyncStorage.setItem('google_auth_time', new Date().toISOString());
+        console.log('✅ Demo authentication successful!');
+        return true;
+      }
+
       const request = new AuthSession.AuthRequest({
         clientId: this.CLIENT_ID,
         scopes: GOOGLE_CALENDAR_CONFIG.SCOPES,
@@ -256,6 +267,33 @@ class GoogleCalendarService {
         updated: 0,
         errors: [] as string[],
       };
+
+      // Demo mode - simulate calendar sync with sample events
+      if (this.DEMO_MODE) {
+        console.log('🎭 Demo mode: Simulating calendar sync...');
+        
+        // Simulate importing some demo events
+        const demoEvents = [
+          {
+            id: 'demo-event-1',
+            summary: 'Team Meeting',
+            start: { dateTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() },
+            end: { dateTime: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString() },
+          },
+          {
+            id: 'demo-event-2',
+            summary: 'Lunch Break',
+            start: { dateTime: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString() },
+            end: { dateTime: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString() },
+          },
+        ];
+
+        result.imported = demoEvents.length;
+        this.syncConfig.lastSyncTime = new Date().toISOString();
+        
+        console.log(`✅ Demo sync complete! Imported ${result.imported} demo events`);
+        return result;
+      }
 
       // Get events from Google Calendar
       const now = new Date();
@@ -461,6 +499,9 @@ class GoogleCalendarService {
   }
 
   public isConnected(): boolean {
+    if (this.DEMO_MODE) {
+      return !!this.accessToken; // In demo mode, check if we have the demo token
+    }
     return !!this.accessToken;
   }
 
