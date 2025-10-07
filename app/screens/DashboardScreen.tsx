@@ -4,9 +4,28 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useOffline } from '../context/OfflineContext';
 
+// Motivational quotes array
+const quotes = [
+  { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+  { text: "Your limitation—it's only your imagination.", author: "Unknown" },
+  { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
+  { text: "Great things never come from comfort zones.", author: "Unknown" },
+  { text: "Dream it. Wish it. Do it.", author: "Unknown" },
+  { text: "Success doesn't just find you. You have to go out and get it.", author: "Unknown" },
+  { text: "The harder you work for something, the greater you'll feel when you achieve it.", author: "Unknown" },
+  { text: "Dream bigger. Do bigger.", author: "Unknown" },
+  { text: "Don't stop when you're tired. Stop when you're done.", author: "Unknown" },
+  { text: "Wake up with determination. Go to bed with satisfaction.", author: "Unknown" },
+  { text: "Do something today that your future self will thank you for.", author: "Sean Patrick Flanery" },
+  { text: "Little things make big things happen.", author: "John Wooden" },
+  { text: "It's going to be hard, but hard does not mean impossible.", author: "Unknown" },
+  { text: "Don't wait for opportunity. Create it.", author: "Unknown" }
+];
+
 export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { colors } = useTheme();
-  const { tasks, events, toggleTask } = useApp();
+  const { tasks, events, goals, toggleTask } = useApp();
   const { isOnline, addToSyncQueue } = useOffline();
   const styles = createStyles(colors);
 
@@ -38,7 +57,11 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
   const todayAppointments = events.filter(event => {
     const eventDate = new Date(event.startDate).toISOString().split('T')[0];
     return eventDate === todayString;
-  }).slice(0, 3); // Limit to 3 appointments
+  }).slice(0, 3);
+
+  // Get daily quote (stable for the day)
+  const dailyQuoteIndex = Math.floor((today.getTime() / (1000 * 60 * 60 * 24)) % quotes.length);
+  const dailyQuote = quotes[dailyQuoteIndex];
   
   const todayEvents = events.slice(0, 2);
 
@@ -166,46 +189,142 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
         </View>
       )}
 
-      {/* Quick Actions */}
-      <Text style={styles.sectionTitle}>Quick Actions</Text>
-      <View style={styles.cardContainer}>
-        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Calendar')}>
-          <Text style={styles.cardEmoji}>📅</Text>
-          <Text style={styles.cardTitle}>Calendar</Text>
-          <Text style={styles.cardSubtitle}>View schedule</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Tasks')}>
-          <Text style={styles.cardEmoji}>📝</Text>
-          <Text style={styles.cardTitle}>Tasks</Text>
-          <Text style={styles.cardSubtitle}>Manage todos</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.cardContainer}>
-        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Goals')}>
-          <Text style={styles.cardEmoji}>✨</Text>
-          <Text style={styles.cardTitle}>Goals</Text>
-          <Text style={styles.cardSubtitle}>Track progress</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.card} onPress={() => onNavigate?.('Settings')}>
-          <Text style={styles.cardEmoji}>🌸</Text>
-          <Text style={styles.cardTitle}>Settings</Text>
-          <Text style={styles.cardSubtitle}>Preferences</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Today's Events Preview */}
-      {todayEvents.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>Upcoming Events</Text>
-          {todayEvents.map((event, index) => (
-            <TouchableOpacity key={event.id || index} style={styles.eventPreview}>
-              <Text style={styles.eventTitle}>{event.title}</Text>
-              <Text style={styles.eventTime}>{event.startDate}</Text>
+      {/* Your Goals Preview */}
+      <View style={styles.goalsSection}>
+        <View style={styles.goalsSectionCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.goalsSectionTitle}>✨ Your Goals</Text>
+            <TouchableOpacity 
+              style={styles.smallAddButton}
+              onPress={() => onNavigate?.('Goals')}
+            >
+              <Text style={styles.smallAddButtonText}>View All</Text>
             </TouchableOpacity>
-          ))}
-        </>
-      )}
+          </View>
+          {goals.length > 0 ? (
+            <View style={styles.goalsContainer}>
+              {goals.slice(0, 4).map((goal) => {
+                const completedTasks = goal.microTasks.filter(task => task.completed).length;
+                const totalTasks = goal.microTasks.length;
+                const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                
+                return (
+                  <TouchableOpacity 
+                    key={goal.id} 
+                    style={styles.goalCard}
+                    onPress={() => onNavigate?.('Goals')}
+                  >
+                    <View style={styles.goalHeader}>
+                      <Text style={styles.goalTitle}>{goal.title}</Text>
+                      <Text style={styles.goalProgress}>{Math.round(progress)}%</Text>
+                    </View>
+                    <View style={styles.goalProgressBar}>
+                      <View 
+                        style={[
+                          styles.goalProgressFill, 
+                          { width: `${progress}%` }
+                        ]} 
+                      />
+                    </View>
+                    <Text style={styles.goalSubtitle}>
+                      {completedTasks} of {totalTasks} steps completed
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={styles.goalCard}
+              onPress={() => onNavigate?.('Goals')}
+            >
+              <Text style={styles.goalTitle}>🎯 Create Your First Goal</Text>
+              <Text style={styles.goalSubtitle}>Tap to start achieving your dreams!</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* Quick Stats Section */}
+      <View style={styles.statsSection}>
+        <View style={styles.statsSectionCard}>
+          <Text style={styles.statsSectionTitle}>📊 This Week</Text>
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{tasks.filter(t => t.completed).length}</Text>
+              <Text style={styles.statLabel}>Completed</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{tasks.filter(t => !t.completed).length}</Text>
+              <Text style={styles.statLabel}>Remaining</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{Math.round((tasks.filter(t => t.completed).length / Math.max(tasks.length, 1)) * 100)}%</Text>
+              <Text style={styles.statLabel}>Progress</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Recent Activity Section */}
+      <View style={styles.activitySection}>
+        <View style={styles.activitySectionCard}>
+          <Text style={styles.activitySectionTitle}>🏃‍♀️ Recent Activity</Text>
+          <View style={styles.activityContainer}>
+            {tasks.filter(t => t.completed).slice(0, 3).length > 0 ? (
+              tasks.filter(t => t.completed).slice(0, 3).map((task, index) => (
+                <View key={task.id} style={styles.activityCard}>
+                  <Text style={styles.activityEmoji}>✅</Text>
+                  <View style={styles.activityInfo}>
+                    <Text style={styles.activityText}>Completed "{task.title}"</Text>
+                    <Text style={styles.activityTime}>Today</Text>
+                  </View>
+                </View>
+              ))
+            ) : (
+              <View style={styles.activityCard}>
+                <Text style={styles.activityEmoji}>🎯</Text>
+                <View style={styles.activityInfo}>
+                  <Text style={styles.activityText}>Ready to start your day!</Text>
+                  <Text style={styles.activityTime}>Complete tasks to see activity</Text>
+                </View>
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
+
+      {/* Tomorrow's Preview Section */}
+      <View style={styles.tomorrowSection}>
+        <View style={styles.tomorrowSectionCard}>
+          <Text style={styles.tomorrowSectionTitle}>🌅 Tomorrow Preview</Text>
+          <View style={styles.tomorrowContainer}>
+            <View style={styles.tomorrowCard}>
+              <Text style={styles.tomorrowEmoji}>📅</Text>
+              <Text style={styles.tomorrowLabel}>Morning Yoga Session</Text>
+              <Text style={styles.tomorrowSubtext}>8:00 AM - 9:00 AM</Text>
+            </View>
+            <View style={[styles.tomorrowCard, { marginTop: 8 }]}>
+              <Text style={styles.tomorrowEmoji}>☕</Text>
+              <Text style={styles.tomorrowLabel}>Coffee with Sarah</Text>
+              <Text style={styles.tomorrowSubtext}>10:30 AM - 11:30 AM</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Motivational Quote Section */}
+      <View style={styles.quoteSection}>
+        <View style={styles.quoteSectionCard}>
+          <Text style={styles.quoteSectionTitle}>💫 Daily Inspiration</Text>
+          <View style={styles.quoteContainer}>
+            <Text style={styles.quoteText}>
+              {dailyQuote.text}
+            </Text>
+            <Text style={styles.quoteAuthor}>— {dailyQuote.author}</Text>
+          </View>
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -499,5 +618,266 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.buttonText,
     fontSize: 12,
     fontWeight: '600',
+  },
+  // Goals section styles
+  goalPreview: {
+    backgroundColor: colors.cardBackground,
+    padding: 18,
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  goalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  goalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    flex: 1,
+    marginRight: 12,
+  },
+  goalProgress: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  goalProgressBar: {
+    height: 6,
+    backgroundColor: colors.border,
+    borderRadius: 3,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  goalProgressFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 3,
+  },
+  goalSubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  // Enhanced Goals section styles
+  goalsSection: {
+    marginBottom: 24,
+  },
+  goalsSectionCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  goalsSectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 0,
+    flex: 1,
+  },
+  goalsContainer: {
+    gap: 12,
+    marginTop: 16,
+  },
+  goalCard: {
+    backgroundColor: colors.background,
+    padding: 18,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  // Stats section styles
+  statsSection: {
+    marginBottom: 24,
+  },
+  statsSectionCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  statsSectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: colors.background,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  // Tomorrow section styles
+  tomorrowSection: {
+    marginBottom: 24,
+  },
+  tomorrowSectionCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  tomorrowSectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  tomorrowContainer: {
+    alignItems: 'center',
+  },
+  tomorrowCard: {
+    backgroundColor: colors.background,
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    width: '100%',
+  },
+  tomorrowEmoji: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  tomorrowLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  tomorrowSubtext: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  // Quote section styles
+  quoteSection: {
+    marginBottom: 24,
+  },
+  quoteSectionCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  quoteSectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  quoteContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  quoteText: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: 12,
+    lineHeight: 24,
+  },
+  quoteAuthor: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  // Activity section styles
+  activitySection: {
+    marginBottom: 24,
+  },
+  activitySectionCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  activitySectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  activityContainer: {
+    gap: 10,
+  },
+  activityCard: {
+    backgroundColor: colors.background,
+    padding: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  activityEmoji: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  activityInfo: {
+    flex: 1,
+  },
+  activityText: {
+    fontSize: 14,
+    color: colors.text,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  activityTime: {
+    fontSize: 12,
+    color: colors.textSecondary,
   },
 });
