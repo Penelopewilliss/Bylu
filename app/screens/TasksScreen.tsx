@@ -126,7 +126,7 @@ export default function TasksScreen() {
       paddingTop: 8,
       paddingBottom: 16,
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
       alignItems: 'center',
     },
     title: {
@@ -147,6 +147,25 @@ export default function TasksScreen() {
     completedToggleText: {
       fontSize: 12,
       fontWeight: '600',
+    },
+    headerButtons: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    addButton: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: colors.primary,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      minWidth: 40,
+      alignItems: 'center',
+    },
+    addButtonText: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: colors.buttonText,
     },
     categoryTab: {
       alignItems: 'center',
@@ -291,28 +310,6 @@ export default function TasksScreen() {
       fontSize: 14,
       color: colors.placeholderText,
       textAlign: 'center',
-    },
-    // Floating Action Button
-    fab: {
-      position: 'absolute',
-      bottom: 30,
-      right: 30,
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      backgroundColor: colors.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
-      elevation: 8,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 6,
-    },
-    fabText: {
-      fontSize: 24,
-      color: colors.buttonText,
-      fontWeight: 'bold',
     },
     // Modal Styles
     modalContainer: {
@@ -584,15 +581,22 @@ export default function TasksScreen() {
       <View style={styles.rightPanel}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Tasks</Text>
-          <TouchableOpacity 
-            style={styles.completedToggle}
-            onPress={() => setShowCompleted(!showCompleted)}
-          >
-            <Text style={[styles.completedToggleText, { color: colors.text }]}>
-              {showCompleted ? 'Hide' : 'Show'} Completed
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={openAddModal}
+            >
+              <Text style={styles.addButtonText}>+</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.completedToggle}
+              onPress={() => setShowCompleted(!showCompleted)}
+            >
+              <Text style={[styles.completedToggleText, { color: colors.text }]}>
+                {showCompleted ? 'Hide' : 'Show'} Completed
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Tasks List */}
@@ -610,14 +614,6 @@ export default function TasksScreen() {
             </View>
           }
         />
-
-        {/* Floating Action Button */}
-        <TouchableOpacity 
-          style={styles.fab}
-          onPress={openAddModal}
-        >
-          <Text style={styles.fabText}>+</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Add Task Modal */}
