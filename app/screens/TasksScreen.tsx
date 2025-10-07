@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView, Modal, TextInput, Alert, PanResponder } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView, Modal, TextInput, Alert, PanResponder, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Category, Priority } from '../types';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const CATEGORY_ITEM_WIDTH = 100;
+const SPACING = 15;
 
 const TASK_CATEGORIES: Record<Category, { emoji: string; label: string; color: string }> = {
   work: { emoji: '💼', label: 'Work', color: '#3F51B5' },
@@ -27,6 +32,8 @@ export default function TasksScreen() {
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
   const [modalVisible, setModalVisible] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [scrollX, setScrollX] = useState(0);
+  const categoryScrollRef = useRef<FlatList>(null);
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -54,6 +61,110 @@ export default function TasksScreen() {
       }
     },
   });
+
+  // Create all categories array for infinite scroll
+  const allCategories: (Category | 'all')[] = ['all', ...Object.keys(TASK_CATEGORIES) as Category[]];
+  
+  // Create infinite scroll data by duplicating categories
+  const DUPLICATE_COUNT = 3;
+  const duplicatedStart = Array(DUPLICATE_COUNT).fill(null).reduce((acc) => [...acc, ...allCategories], [] as (Category | 'all')[]);
+  const duplicatedEnd = Array(DUPLICATE_COUNT).fill(null).reduce((acc) => [...acc, ...allCategories], [] as (Category | 'all')[]);
+  const infiniteCategories = [...duplicatedStart, ...allCategories, ...duplicatedEnd];
+  const startIndex = DUPLICATE_COUNT * allCategories.length;
+
+  // Real-time selection - select when red line touches category edge
+  const handleScroll = (event: any) => {
+    try {
+      const scrollXValue = event.nativeEvent.contentOffset.x;
+      if (typeof scrollXValue === 'number' && !isNaN(scrollXValue)) {
+        setScrollX(scrollXValue);
+        
+        // Check which category the red line is currently touching
+        const screenCenter = SCREEN_WIDTH / 2;
+        const flatListPadding = (SCREEN_WIDTH - CATEGORY_ITEM_WIDTH) / 2;
+        
+        for (let i = 0; i < infiniteCategories.length; i++) {
+          const itemPositionInContent = i * (CATEGORY_ITEM_WIDTH + SPACING);
+          const itemLeftEdgeOnScreen = flatListPadding + itemPositionInContent - scrollXValue;
+          const itemRightEdgeOnScreen = itemLeftEdgeOnScreen + CATEGORY_ITEM_WIDTH;
+          
+          // If red line is anywhere within this category, select it immediately
+          if (itemLeftEdgeOnScreen <= screenCenter && screenCenter <= itemRightEdgeOnScreen) {
+            const category = infiniteCategories[i];
+            if (category && category !== selectedCategory) {
+              setSelectedCategory(category);
+            }
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Scroll error:', error);
+    }
+  };
+
+  const handleMomentumScrollEnd = (event: any) => {
+    try {
+      const offsetX = event.nativeEvent.contentOffset.x;
+      
+      // Find which category TOUCHES the red center line (edge or center)
+      let selectedIndex = -1;
+      const screenCenter = SCREEN_WIDTH / 2;
+      const flatListPadding = (SCREEN_WIDTH - CATEGORY_ITEM_WIDTH) / 2;
+      
+      for (let i = 0; i < infiniteCategories.length; i++) {
+        const itemPositionInContent = i * (CATEGORY_ITEM_WIDTH + SPACING);
+        const itemLeftEdgeOnScreen = flatListPadding + itemPositionInContent - offsetX;
+        const itemRightEdgeOnScreen = itemLeftEdgeOnScreen + CATEGORY_ITEM_WIDTH;
+        
+        // Check if the red line (screenCenter) is anywhere within this item
+        if (itemLeftEdgeOnScreen <= screenCenter && screenCenter <= itemRightEdgeOnScreen) {
+          selectedIndex = i;
+          break; // Found the item that contains the center line
+        }
+      }
+      
+      // Select the category that the red line is touching
+      if (selectedIndex >= 0 && infiniteCategories[selectedIndex]) {
+        setSelectedCategory(infiniteCategories[selectedIndex]);
+      }
+      
+      // Handle infinite scroll position resets
+      if (allCategories && allCategories.length > 0 && selectedIndex >= 0) {
+        const minSafeIndex = startIndex - allCategories.length;
+        const maxSafeIndex = startIndex + allCategories.length * 2;
+        
+        if (selectedIndex <= minSafeIndex || selectedIndex >= maxSafeIndex) {
+          let realIndex = selectedIndex % allCategories.length;
+          if (realIndex < 0) realIndex += allCategories.length;
+          
+          const resetIndex = startIndex + realIndex;
+          const resetOffset = resetIndex * (CATEGORY_ITEM_WIDTH + SPACING);
+          if (categoryScrollRef.current) {
+            categoryScrollRef.current.scrollToOffset({
+              offset: resetOffset,
+              animated: false,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Scroll end error:', error);
+    }
+  };
+
+  const scrollToCategory = (category: Category | 'all') => {
+    const realIndex = allCategories.indexOf(category);
+    if (realIndex !== -1 && categoryScrollRef.current) {
+      // Gentle scroll to category without fighting user input
+      const targetIndex = startIndex + realIndex;
+      const offset = targetIndex * (CATEGORY_ITEM_WIDTH + SPACING);
+      categoryScrollRef.current.scrollToOffset({
+        offset,
+        animated: true,
+      });
+    }
+  };
 
   const resetForm = () => {
     setNewTask({
@@ -106,7 +217,7 @@ export default function TasksScreen() {
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      flexDirection: 'row',
+      flexDirection: 'column', // Changed to column for top carousel
     },
     leftPanel: {
       width: 70,
@@ -115,10 +226,32 @@ export default function TasksScreen() {
       borderRightColor: colors.border,
     },
     categoryWheel: {
-      flex: 1,
+      height: 120, // Increased height for carousel
       paddingVertical: 10,
     },
-    rightPanel: {
+    categoryWheelContainer: {
+      height: 120,
+      position: 'relative',
+      overflow: 'hidden', // Hide overflow categories
+      marginBottom: 10,
+    },
+    leftGradient: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      bottom: 0,
+      width: 60,
+      zIndex: 1,
+    },
+    rightGradient: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      width: 60,
+      zIndex: 1,
+    },
+    tasksPanel: {
       flex: 1,
       paddingHorizontal: 16,
     },
@@ -169,30 +302,41 @@ export default function TasksScreen() {
     },
     categoryTab: {
       alignItems: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 8,
-      marginVertical: 4,
+      justifyContent: 'center',
+      paddingVertical: 8,
+      paddingHorizontal: 6,
+      marginHorizontal: SPACING / 2,
       borderRadius: 12,
-      backgroundColor: 'transparent',
-      minHeight: 60,
+      backgroundColor: colors.cardBackground,
+      width: CATEGORY_ITEM_WIDTH,
+      height: 80,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.08,
+      shadowRadius: 2,
+      elevation: 2,
     },
     selectedCategoryTab: {
       backgroundColor: colors.primary,
       shadowColor: colors.primary,
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
+      shadowOpacity: 0.2,
       shadowRadius: 4,
       elevation: 4,
+      borderWidth: 2,
     },
     categoryEmoji: {
       fontSize: 20,
-      marginBottom: 4,
+      marginBottom: 3,
     },
     categoryLabel: {
-      fontSize: 10,
+      fontSize: 9,
       fontWeight: '600',
       textAlign: 'center',
-      lineHeight: 12,
+      lineHeight: 10,
+      maxWidth: 80,
     },
     taskCount: {
       borderRadius: 8,
@@ -466,24 +610,78 @@ export default function TasksScreen() {
     ? [...incompleteTasks, ...completedTasks]
     : incompleteTasks;
 
-  const renderCategoryTab = (category: Category | 'all') => {
+  const renderCategoryTab = (category: Category | 'all', index?: number) => {
+    // Safety checks
+    if (!category) return null;
+    
     const isSelected = selectedCategory === category;
     const categoryData = category === 'all' 
       ? { emoji: '📋', label: 'All', color: colors.primary }
       : TASK_CATEGORIES[category];
     
+    // Safety check for category data
+    if (!categoryData) return null;
+    
     const taskCount = category === 'all' 
       ? tasks.filter(t => !t.completed).length
       : tasks.filter(t => t.category === category && !t.completed).length;
 
+    // CONSISTENT CENTER DETECTION - Same scaling for all categories
+    const itemIndex = index !== undefined ? index : 0;
+    
+    // FlatList has padding that shifts everything
+    const flatListPadding = (SCREEN_WIDTH - CATEGORY_ITEM_WIDTH) / 2;
+    
+    // Item's position within the FlatList content
+    const itemPositionInContent = itemIndex * (CATEGORY_ITEM_WIDTH + SPACING);
+    
+    // Item's actual position on screen (accounting for scroll and padding)
+    const itemLeftEdgeOnScreen = flatListPadding + itemPositionInContent - scrollX;
+    const itemCenterOnScreen = itemLeftEdgeOnScreen + (CATEGORY_ITEM_WIDTH / 2);
+    
+    // True screen center
+    const screenCenter = SCREEN_WIDTH / 2;
+    
+    // Distance from screen center - round to avoid floating point issues
+    const distanceFromCenter = Math.round(Math.abs(itemCenterOnScreen - screenCenter));
+    
+    // CONSISTENT scaling - same thresholds for all items
+    let scale = 1;
+    let opacity = 1;
+    
+    if (distanceFromCenter <= 10) {
+      scale = 1.5;      // EXACTLY center - same for ALL categories
+      opacity = 1;
+    } else if (distanceFromCenter <= 30) {
+      scale = 1.2;      // Very close to center
+      opacity = 0.95;
+    } else if (distanceFromCenter <= 60) {
+      scale = 1.0;      // Near center
+      opacity = 0.8;
+    } else if (distanceFromCenter <= 120) {
+      scale = 0.7;      // Adjacent items
+      opacity = 0.6;
+    } else {
+      scale = 0.4;      // Distant items
+      opacity = 0.3;
+    }
+
     return (
       <TouchableOpacity
-        key={category}
+        key={`${category}-${index}`}
         style={[
           styles.categoryTab,
           isSelected && styles.selectedCategoryTab,
+          { 
+            borderColor: isSelected ? categoryData.color : 'transparent',
+            transform: [{ scale }],
+            opacity,
+          }
         ]}
-        onPress={() => setSelectedCategory(category)}
+        onPress={() => {
+          setSelectedCategory(category);
+          scrollToCategory(category);
+        }}
       >
         <Text style={styles.categoryEmoji}>{categoryData.emoji}</Text>
         <Text style={[
@@ -563,22 +761,64 @@ export default function TasksScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Left Category Wheel */}
-      <View style={styles.leftPanel}>
-        <ScrollView 
+      {/* Category Carousel */}
+      <View style={styles.categoryWheelContainer}>
+        <FlatList 
+          ref={categoryScrollRef}
+          data={infiniteCategories}
+          horizontal
           style={styles.categoryWheel}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingVertical: 10 }}
-        >
-          {renderCategoryTab('all')}
-          {Object.keys(TASK_CATEGORIES).map(category => 
-            renderCategoryTab(category as Category)
-          )}
-        </ScrollView>
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: (SCREEN_WIDTH - CATEGORY_ITEM_WIDTH) / 2 }}
+          decelerationRate={0.95} // Much faster deceleration
+          onScroll={handleScroll}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          scrollEventThrottle={8} // Faster updates for smoother visual
+          removeClippedSubviews={false}
+          renderItem={({ item, index }) => renderCategoryTab(item, index)}
+          keyExtractor={(item, index) => `${item}-${index}`}
+          getItemLayout={(data, index) => ({
+            length: CATEGORY_ITEM_WIDTH + SPACING,
+            offset: (CATEGORY_ITEM_WIDTH + SPACING) * index,
+            index,
+          })}
+          initialScrollIndex={startIndex}
+          // Performance improvements for smooth scrolling
+          maxToRenderPerBatch={20}
+          windowSize={10}
+          initialNumToRender={15}
+          updateCellsBatchingPeriod={50}
+        />
+        
+        {/* DEBUG: Center line to see where middle actually is */}
+        <View style={{
+          position: 'absolute',
+          left: SCREEN_WIDTH / 2 - 1,
+          top: 0,
+          bottom: 0,
+          width: 2,
+          backgroundColor: 'red',
+          opacity: 0.8,
+          zIndex: 100,
+        }} />
+        
+        {/* Left Gradient Fade */}
+        <LinearGradient
+          colors={[colors.background, 'transparent']}
+          style={styles.leftGradient}
+          pointerEvents="none"
+        />
+        
+        {/* Right Gradient Fade */}
+        <LinearGradient
+          colors={['transparent', colors.background]}
+          style={styles.rightGradient}
+          pointerEvents="none"
+        />
       </View>
 
-      {/* Right Panel with Tasks */}
-      <View style={styles.rightPanel}>
+      {/* Tasks Panel */}
+      <View style={styles.tasksPanel}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerButtons}>
