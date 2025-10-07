@@ -135,22 +135,32 @@ export default function TasksScreen() {
       fontWeight: '600',
     },
     categoryContainer: {
-      maxHeight: 60,
-      marginBottom: 16,
+      maxHeight: 70,
+      marginBottom: 20,
+      paddingVertical: 5,
     },
     categoryTab: {
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingVertical: 10,
       marginHorizontal: 4,
-      borderRadius: 20,
-      borderWidth: 2,
+      borderRadius: 25,
       backgroundColor: colors.cardBackground,
       minWidth: 100,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
     },
     selectedCategoryTab: {
       backgroundColor: colors.primary,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 4,
     },
     categoryEmoji: {
       fontSize: 18,
@@ -162,14 +172,16 @@ export default function TasksScreen() {
       flex: 1,
     },
     taskCount: {
-      borderRadius: 12,
+      borderRadius: 10,
       paddingHorizontal: 6,
       paddingVertical: 2,
       marginLeft: 6,
+      backgroundColor: colors.text,
+      opacity: 0.8,
     },
     taskCountText: {
-      color: colors.buttonText,
-      fontSize: 12,
+      color: colors.background,
+      fontSize: 11,
       fontWeight: 'bold',
     },
     tasksContainer: {
@@ -277,8 +289,9 @@ export default function TasksScreen() {
     // Floating Action Button
     fab: {
       position: 'absolute',
-      bottom: 20,
-      right: 20,
+      bottom: 30,
+      left: '50%',
+      marginLeft: -28, // Half of width to center
       width: 56,
       height: 56,
       borderRadius: 28,
@@ -467,7 +480,6 @@ export default function TasksScreen() {
         style={[
           styles.categoryTab,
           isSelected && styles.selectedCategoryTab,
-          { borderColor: categoryData.color }
         ]}
         onPress={() => setSelectedCategory(category)}
       >
@@ -479,7 +491,7 @@ export default function TasksScreen() {
           {categoryData.label}
         </Text>
         {taskCount > 0 && (
-          <View style={[styles.taskCount, { backgroundColor: categoryData.color }]}>
+          <View style={styles.taskCount}>
             <Text style={styles.taskCountText}>{taskCount}</Text>
           </View>
         )}
