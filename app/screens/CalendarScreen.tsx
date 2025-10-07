@@ -7,10 +7,10 @@ import {
   Modal, 
   TextInput, 
   ScrollView,
-  SafeAreaView,
   Alert,
   PanResponder 
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import type { CalendarEvent } from '../types';

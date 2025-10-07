@@ -8,11 +8,11 @@ import {
   TextInput,
   Modal,
   ScrollView,
-  SafeAreaView,
   PanResponder,
   Alert,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Fonts from '../constants/fonts';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';

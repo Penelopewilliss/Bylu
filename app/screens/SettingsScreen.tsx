@@ -4,12 +4,12 @@ import {
   Text, 
   StyleSheet,
   TouchableOpacity, 
-  SafeAreaView, 
   ScrollView,
   Switch,
   Alert,
   Modal
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 import { useCalendarSync } from '../context/CalendarSyncContext';

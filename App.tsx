@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Dimensions, PanResponder, Animated, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Dimensions, PanResponder, Animated, Image, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Font from 'expo-font';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProvider } from './app/context/AppContext';
 import { ThemeProvider } from './app/context/ThemeContext';
 import { OfflineProvider } from './app/context/OfflineContext';
@@ -49,7 +50,7 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
         duration: 800,
         useNativeDriver: true,
       }).start(() => onFinish());
-    }, 3500); // Increased to 3500ms for better visibility
+    }, Platform.OS === 'web' ? 3500 : 5000); // 5 seconds for mobile, 3.5 seconds for web
     return () => clearTimeout(timer);
   }, [fadeAnim, scaleAnim, rotateAnim, onFinish]);
 
@@ -68,9 +69,8 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
       {/* Loading indicator */}
       <View style={styles.loadingContainer}>
         <Animated.View style={[styles.loadingSpinner, { transform: [{ rotate: spin }] }]}>
-          <Text style={styles.loadingEmoji}>🦋</Text>
+          <Text style={styles.loadingEmoji}>🌸</Text>
         </Animated.View>
-        <Text style={styles.loadingText}>Bylu</Text>
       </View>
     </Animated.View>
   );
@@ -401,15 +401,17 @@ export default function App() {
   console.log('Glowgetter App is rendering!');
   
   return (
-    <ThemeProvider>
-      <AppProvider>
-        <OfflineProvider>
-          <CalendarSyncProvider>
-            <MainApp />
-          </CalendarSyncProvider>
-        </OfflineProvider>
-      </AppProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AppProvider>
+          <OfflineProvider>
+            <CalendarSyncProvider>
+              <MainApp />
+            </CalendarSyncProvider>
+          </OfflineProvider>
+        </AppProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

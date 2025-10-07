@@ -152,10 +152,12 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         </View>
 
         <View style={styles.buttons}>
-          {currentPage > 0 && (
+          {currentPage > 0 ? (
             <TouchableOpacity style={styles.backButton} onPress={goToPrevious}>
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
+          ) : (
+            <View style={styles.spacer} />
           )}
           
           {currentPage === pages.length - 1 ? (
@@ -238,6 +240,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  spacer: {
+    flex: 1, // Takes up space on the left when there's no back button
   },
   backButton: {
     paddingVertical: 12,
