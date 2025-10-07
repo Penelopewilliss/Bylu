@@ -76,8 +76,8 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
     }
   };
 
-  // Get today's tasks and events
-  const todayTasks = tasks.filter(task => !task.completed).slice(0, 3);
+  // Get high priority tasks
+  const highPriorityTasks = tasks.filter(task => !task.completed && task.priority === 'high').slice(0, 3);
   
   // Get today's appointments (filter events for today)
   const today = new Date();
@@ -195,16 +195,16 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Section Separator */}
       <View style={styles.majorSeparator} />
 
-      {/* Today's Tasks Section */}
+      {/* High Priority Tasks Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Today's Tasks</Text>
+          <Text style={styles.sectionTitle}>High Priority Tasks</Text>
         </View>
         
         <View style={styles.sectionCard}>
-          {todayTasks.length > 0 ? (
+          {highPriorityTasks.length > 0 ? (
             <View style={styles.contentList}>
-              {todayTasks.map((task, index) => (
+              {highPriorityTasks.map((task, index) => (
                 <View key={task.id} style={styles.contentItem}>
                   <View style={styles.itemContent}>
                     <TouchableOpacity 
@@ -217,12 +217,9 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
                       <Text style={styles.itemTitle}>{task.title}</Text>
                       <Text style={styles.itemSubtitle}>Priority: {task.priority}</Text>
                     </View>
-                    <View style={[styles.priorityBadge, { backgroundColor: 
-                      task.priority === 'high' ? colors.peach : 
-                      task.priority === 'medium' ? colors.accent : colors.lavender 
-                    }]}>
-                      <Text style={styles.priorityText}>{task.priority}</Text>
-                    </View>
+                    {task.priority === 'high' && (
+                      <Text style={styles.electricEmoji}>⚡</Text>
+                    )}
                   </View>
                 </View>
               ))}
@@ -513,6 +510,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#000000',
+  },
+  electricEmoji: {
+    fontSize: 24,
+    color: '#FFD700', // Gold color for the lightning
   },
   taskPreview: {
     backgroundColor: colors.cardBackground,

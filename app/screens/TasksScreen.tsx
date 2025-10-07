@@ -32,6 +32,8 @@ export default function TasksScreen() {
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
   const [modalVisible, setModalVisible] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [viewAllTasks, setViewAllTasks] = useState(false);
+  const [viewHighPriority, setViewHighPriority] = useState(false);
   const [scrollX, setScrollX] = useState(0);
   const categoryScrollRef = useRef<FlatList>(null);
   const [newTask, setNewTask] = useState({
@@ -201,13 +203,29 @@ export default function TasksScreen() {
     }
   };
 
-  const openAddModal = () => {
-    resetForm();
-    // If we're on a specific category, pre-select it
-    if (selectedCategory !== 'all') {
-      setNewTask(prev => ({ ...prev, category: selectedCategory }));
-    }
+    const openAddModal = () => {
     setModalVisible(true);
+  };
+
+  const toggleViewAllTasks = () => {
+    setViewAllTasks(!viewAllTasks);
+    // If we're entering view all mode, show completed tasks
+    // If we're exiting view all mode, hide completed tasks
+    if (!viewAllTasks) {
+      setShowCompleted(true);
+      setViewHighPriority(false); // Disable high priority when entering view all
+    } else {
+      setShowCompleted(false);
+    }
+  };
+
+  const toggleViewHighPriority = () => {
+    setViewHighPriority(!viewHighPriority);
+    // If we're entering high priority mode, disable view all mode
+    if (!viewHighPriority) {
+      setViewAllTasks(false);
+      setShowCompleted(false); // Focus on active high priority tasks
+    }
   };
 
   const styles = StyleSheet.create({
@@ -253,7 +271,7 @@ export default function TasksScreen() {
       paddingHorizontal: 16,
     },
     header: {
-      paddingTop: 8,
+      paddingTop: 20,
       paddingBottom: 16,
       flexDirection: 'row',
       justifyContent: 'center',
@@ -280,22 +298,67 @@ export default function TasksScreen() {
     },
     headerButtons: {
       flexDirection: 'row',
-      gap: 8,
+      gap: 12,
+      alignItems: 'center',
     },
     addButton: {
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 16,
-      backgroundColor: colors.primary,
+      backgroundColor: 'transparent',
       borderWidth: 1,
-      borderColor: colors.primary,
-      minWidth: 40,
+      borderColor: colors.border,
+      width: 110,
       alignItems: 'center',
     },
     addButtonText: {
       fontSize: 16,
       fontWeight: '500',
+      color: colors.text,
+    },
+    viewAllButton: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.border,
+      width: 110,
+      alignItems: 'center',
+    },
+    viewAllButtonActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    viewAllButtonText: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: colors.text,
+    },
+    viewAllButtonTextActive: {
       color: colors.buttonText,
+    },
+    highPriorityButton: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: '#ff4757',
+      width: 110,
+      alignItems: 'center',
+    },
+    highPriorityButtonActive: {
+      backgroundColor: '#ff4757',
+      borderColor: '#ff4757',
+    },
+    highPriorityButtonText: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: '#ff4757',
+    },
+    highPriorityButtonTextActive: {
+      color: 'white',
     },
     categoryTab: {
       alignItems: 'center',
@@ -419,9 +482,36 @@ export default function TasksScreen() {
       fontSize: 10,
       fontWeight: 'bold',
     },
+    priorityBadgeHighlighted: {
+      borderWidth: 2,
+      borderColor: '#ff4757',
+      shadowColor: '#ff4757',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 4,
+    },
     categoryTag: {
       fontSize: 10,
       fontWeight: '600',
+    },
+    categoryTagContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    categoryTagContainerAll: {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderWidth: 1,
+    },
+    categoryTagAll: {
+      fontSize: 11,
+      fontWeight: '700',
+      marginLeft: 4,
     },
     deleteButton: {
       padding: 6,
@@ -434,11 +524,12 @@ export default function TasksScreen() {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      paddingVertical: 60,
+      paddingVertical: 80,
+      paddingTop: 120,
     },
     emptyStateEmoji: {
       fontSize: 64,
-      marginBottom: 16,
+      marginBottom: 4,
     },
     emptyStateText: {
       fontSize: 18,
@@ -450,6 +541,23 @@ export default function TasksScreen() {
       fontSize: 14,
       color: colors.placeholderText,
       textAlign: 'center',
+    },
+    viewAllHeader: {
+      paddingVertical: 16,
+      paddingHorizontal: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      marginBottom: 8,
+    },
+    viewAllHeaderText: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 4,
+    },
+    viewAllHeaderSubtext: {
+      fontSize: 14,
+      color: colors.placeholderText,
     },
     // Modal Styles
     modalContainer: {
@@ -472,6 +580,7 @@ export default function TasksScreen() {
     modalContent: {
       flex: 1,
       padding: 20,
+      paddingTop: 40,
     },
     section: {
       marginBottom: 24,
@@ -481,6 +590,7 @@ export default function TasksScreen() {
       fontWeight: '600',
       color: colors.text,
       marginBottom: 8,
+      textAlign: 'center',
     },
     textInput: {
       backgroundColor: colors.cardBackground,
@@ -582,10 +692,17 @@ export default function TasksScreen() {
     },
   });
 
-  // Filter tasks by category
-  const filteredTasks = selectedCategory === 'all' 
-    ? tasks 
-    : tasks.filter(task => task.category === selectedCategory);
+  // Filter tasks by category and priority
+  let filteredTasks = viewAllTasks 
+    ? tasks // Show all tasks regardless of category when in "View All" mode
+    : selectedCategory === 'all' 
+      ? tasks 
+      : tasks.filter(task => task.category === selectedCategory);
+
+  // Filter by high priority if in high priority mode
+  if (viewHighPriority) {
+    filteredTasks = filteredTasks.filter(task => task.priority === 'high');
+  }
 
   // Separate completed and incomplete tasks
   const incompleteTasks = filteredTasks.filter(t => !t.completed);
@@ -725,6 +842,7 @@ export default function TasksScreen() {
             <View style={styles.taskMeta}>
               <View style={[
                 styles.priorityBadge,
+                viewHighPriority && styles.priorityBadgeHighlighted,
                 { backgroundColor: 
                   item.priority === 'high' ? '#ff4757' : 
                   item.priority === 'medium' ? '#ffa502' : '#2ed573'
@@ -732,9 +850,20 @@ export default function TasksScreen() {
               ]}>
                 <Text style={styles.priorityText}>{item.priority}</Text>
               </View>
-              <Text style={[styles.categoryTag, { color: categoryData.color }]}>
-                {categoryData.label}
-              </Text>
+              <View style={[
+                styles.categoryTagContainer,
+                viewAllTasks && styles.categoryTagContainerAll,
+                { borderColor: categoryData.color }
+              ]}>
+                <Text style={styles.categoryEmoji}>{categoryData.emoji}</Text>
+                <Text style={[
+                  styles.categoryTag, 
+                  { color: categoryData.color },
+                  viewAllTasks && styles.categoryTagAll
+                ]}>
+                  {categoryData.label}
+                </Text>
+              </View>
             </View>
           </View>
           
@@ -757,6 +886,34 @@ export default function TasksScreen() {
         <View style={styles.header}>
           <View style={styles.headerButtons}>
             <TouchableOpacity 
+              style={[
+                styles.viewAllButton,
+                viewAllTasks && styles.viewAllButtonActive
+              ]}
+              onPress={toggleViewAllTasks}
+            >
+              <Text style={[
+                styles.viewAllButtonText,
+                viewAllTasks && styles.viewAllButtonTextActive
+              ]}>
+                {viewAllTasks ? '📋 All Tasks' : '👁️ View All'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[
+                styles.highPriorityButton,
+                viewHighPriority && styles.highPriorityButtonActive
+              ]}
+              onPress={toggleViewHighPriority}
+            >
+              <Text style={[
+                styles.highPriorityButtonText,
+                viewHighPriority && styles.highPriorityButtonTextActive
+              ]}>
+                {viewHighPriority ? '🔥 High Priority' : '⚡ Urgent'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
               style={styles.addButton}
               onPress={openAddModal}
             >
@@ -772,18 +929,36 @@ export default function TasksScreen() {
           renderItem={renderTaskItem}
           style={styles.tasksContainer}
           showsVerticalScrollIndicator={false}
+          ListHeaderComponent={viewAllTasks ? (
+            <View style={styles.viewAllHeader}>
+              <Text style={styles.viewAllHeaderText}>📋 All Tasks ({displayTasks.length})</Text>
+              <Text style={styles.viewAllHeaderSubtext}>
+                Showing {incompleteTasks.length} active, {completedTasks.length} completed
+              </Text>
+            </View>
+          ) : viewHighPriority ? (
+            <View style={styles.viewAllHeader}>
+              <Text style={[styles.viewAllHeaderText, { color: '#ff4757' }]}>
+                🔥 High Priority Tasks ({displayTasks.length})
+              </Text>
+              <Text style={styles.viewAllHeaderSubtext}>
+                Showing {incompleteTasks.length} urgent tasks that need immediate attention
+              </Text>
+            </View>
+          ) : null}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateEmoji}>✨</Text>
-              <Text style={styles.emptyStateText}>No tasks yet</Text>
-              <Text style={styles.emptyStateSubtext}>Create some tasks to get started!</Text>
+              <Text style={styles.emptyStateEmoji}>🪷</Text>
+              <Text style={styles.emptyStateText}>MAKE IT ZEN!</Text>
+              <Text style={styles.emptyStateSubtext}>Declutter your life!</Text>
             </View>
           }
         />
       </View>
 
-      {/* Category Carousel - Moved to Bottom */}
-      <View style={styles.categoryWheelContainer}>
+      {/* Category Carousel - Hidden when viewing all tasks or high priority */}
+      {!viewAllTasks && !viewHighPriority && (
+        <View style={styles.categoryWheelContainer}>
         <FlatList 
           ref={categoryScrollRef}
           data={infiniteCategories}
@@ -836,7 +1011,8 @@ export default function TasksScreen() {
           style={styles.rightGradient}
           pointerEvents="none"
         />
-      </View>
+        </View>
+      )}
 
       {/* Add Task Modal */}
       <Modal

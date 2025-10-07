@@ -386,7 +386,10 @@ function MainApp() {
       {/* Floating Home Button - Bottom Right */}
       {activeTab !== 'Dashboard' && (
         <TouchableOpacity 
-          style={styles.floatingHomeButton} 
+          style={[
+            styles.floatingHomeButton,
+            activeTab === 'Tasks' && styles.floatingHomeButtonTasks
+          ]} 
           onPress={() => setActiveTab('Dashboard')}
           activeOpacity={0.8}
         >
@@ -655,6 +658,10 @@ const styles = StyleSheet.create({
     elevation: 8,
     borderWidth: 2,
     borderColor: '#fff', // White border for contrast
+  },
+  floatingHomeButtonTasks: {
+    bottom: 120, // Higher position for Tasks page only
+    left: 20,    // Move to left side for Tasks page
   },
   floatingHomeIcon: {
     fontSize: 20,
