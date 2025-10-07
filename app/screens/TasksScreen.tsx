@@ -106,6 +106,20 @@ export default function TasksScreen() {
     container: {
       flex: 1,
       backgroundColor: colors.background,
+      flexDirection: 'row',
+    },
+    leftPanel: {
+      width: 70,
+      backgroundColor: colors.cardBackground,
+      borderRightWidth: 1,
+      borderRightColor: colors.border,
+    },
+    categoryWheel: {
+      flex: 1,
+      paddingVertical: 10,
+    },
+    rightPanel: {
+      flex: 1,
       paddingHorizontal: 16,
     },
     header: {
@@ -134,25 +148,14 @@ export default function TasksScreen() {
       fontSize: 12,
       fontWeight: '600',
     },
-    categoryContainer: {
-      maxHeight: 70,
-      marginBottom: 20,
-      paddingVertical: 5,
-    },
     categoryTab: {
-      flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      marginHorizontal: 4,
-      borderRadius: 25,
-      backgroundColor: colors.cardBackground,
-      minWidth: 100,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-      elevation: 2,
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      marginVertical: 4,
+      borderRadius: 12,
+      backgroundColor: 'transparent',
+      minHeight: 60,
     },
     selectedCategoryTab: {
       backgroundColor: colors.primary,
@@ -163,25 +166,28 @@ export default function TasksScreen() {
       elevation: 4,
     },
     categoryEmoji: {
-      fontSize: 18,
-      marginRight: 6,
+      fontSize: 20,
+      marginBottom: 4,
     },
     categoryLabel: {
-      fontSize: 14,
+      fontSize: 10,
       fontWeight: '600',
-      flex: 1,
+      textAlign: 'center',
+      lineHeight: 12,
     },
     taskCount: {
-      borderRadius: 10,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      marginLeft: 6,
+      borderRadius: 8,
+      paddingHorizontal: 4,
+      paddingVertical: 1,
+      marginTop: 2,
       backgroundColor: colors.text,
       opacity: 0.8,
+      minWidth: 16,
+      alignItems: 'center',
     },
     taskCountText: {
       color: colors.background,
-      fontSize: 11,
+      fontSize: 9,
       fontWeight: 'bold',
     },
     tasksContainer: {
@@ -290,8 +296,7 @@ export default function TasksScreen() {
     fab: {
       position: 'absolute',
       bottom: 30,
-      left: '50%',
-      marginLeft: -28, // Half of width to center
+      right: 30,
       width: 56,
       height: 56,
       borderRadius: 28,
@@ -467,7 +472,7 @@ export default function TasksScreen() {
   const renderCategoryTab = (category: Category | 'all') => {
     const isSelected = selectedCategory === category;
     const categoryData = category === 'all' 
-      ? { emoji: '📋', label: 'All Tasks', color: colors.primary }
+      ? { emoji: '📋', label: 'All', color: colors.primary }
       : TASK_CATEGORIES[category];
     
     const taskCount = category === 'all' 
@@ -487,7 +492,7 @@ export default function TasksScreen() {
         <Text style={[
           styles.categoryLabel,
           { color: isSelected ? colors.buttonText : colors.text }
-        ]}>
+        ]} numberOfLines={2}>
           {categoryData.label}
         </Text>
         {taskCount > 0 && (
@@ -561,54 +566,59 @@ export default function TasksScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Tasks</Text>
-        <TouchableOpacity 
-          style={styles.completedToggle}
-          onPress={() => setShowCompleted(!showCompleted)}
+      {/* Left Category Wheel */}
+      <View style={styles.leftPanel}>
+        <ScrollView 
+          style={styles.categoryWheel}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingVertical: 10 }}
         >
-          <Text style={[styles.completedToggleText, { color: colors.text }]}>
-            {showCompleted ? 'Hide' : 'Show'} Completed
-          </Text>
-        </TouchableOpacity>
+          {renderCategoryTab('all')}
+          {Object.keys(TASK_CATEGORIES).map(category => 
+            renderCategoryTab(category as Category)
+          )}
+        </ScrollView>
       </View>
 
-      {/* Category Tabs */}
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryContainer}
-      >
-        {renderCategoryTab('all')}
-        {Object.keys(TASK_CATEGORIES).map(category => 
-          renderCategoryTab(category as Category)
-        )}
-      </ScrollView>
+      {/* Right Panel with Tasks */}
+      <View style={styles.rightPanel}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Tasks</Text>
+          <TouchableOpacity 
+            style={styles.completedToggle}
+            onPress={() => setShowCompleted(!showCompleted)}
+          >
+            <Text style={[styles.completedToggleText, { color: colors.text }]}>
+              {showCompleted ? 'Hide' : 'Show'} Completed
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Tasks List */}
-      <FlatList
-        data={displayTasks}
-        keyExtractor={(item) => item.id}
-        renderItem={renderTaskItem}
-        style={styles.tasksContainer}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateEmoji}>✨</Text>
-            <Text style={styles.emptyStateText}>No tasks yet</Text>
-            <Text style={styles.emptyStateSubtext}>Create some tasks to get started!</Text>
-          </View>
-        }
-      />
+        {/* Tasks List */}
+        <FlatList
+          data={displayTasks}
+          keyExtractor={(item) => item.id}
+          renderItem={renderTaskItem}
+          style={styles.tasksContainer}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateEmoji}>✨</Text>
+              <Text style={styles.emptyStateText}>No tasks yet</Text>
+              <Text style={styles.emptyStateSubtext}>Create some tasks to get started!</Text>
+            </View>
+          }
+        />
 
-      {/* Floating Action Button */}
-      <TouchableOpacity 
-        style={styles.fab}
-        onPress={openAddModal}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+        {/* Floating Action Button */}
+        <TouchableOpacity 
+          style={styles.fab}
+          onPress={openAddModal}
+        >
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Add Task Modal */}
       <Modal
