@@ -164,14 +164,7 @@ export default function GoalsScreen() {
       {/* Goals List */}
       {goals.length === 0 ? (
         <>
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>🎯</Text>
-            <Text style={styles.emptyTitle}>No goals yet!</Text>
-            <Text style={styles.emptySubtitle}>
-              Start your journey! Tap + to add your first goal and unlock your potential.
-            </Text>
-          </View>
-          {/* Add Goal Button - Also shown in empty state */}
+          {/* Add Goal Button - At the top in empty state */}
           <View style={styles.addButtonContainer}>
             <TouchableOpacity
               style={styles.addButton}
@@ -180,6 +173,14 @@ export default function GoalsScreen() {
               <Text style={styles.addButtonText}>+ Add Goal</Text>
             </TouchableOpacity>
           </View>
+          
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>🎯</Text>
+            <Text style={styles.emptyTitle}>No goals yet!</Text>
+            <Text style={styles.emptySubtitle}>
+              Start your journey! Tap + to add your first goal and unlock your potential.
+            </Text>
+          </View>
         </>
       ) : (
         <ScrollView 
@@ -187,6 +188,16 @@ export default function GoalsScreen() {
           contentContainerStyle={styles.goalsListContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Add Goal Button - At the top when there are goals */}
+          <View style={styles.addButtonContainer}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={openAddModal}
+            >
+              <Text style={styles.addButtonText}>+ Add Goal</Text>
+            </TouchableOpacity>
+          </View>
+
           {goals.map((goal) => {
           const progress = calculateProgress(goal);
           return (
@@ -258,16 +269,6 @@ export default function GoalsScreen() {
             </View>
           );
         })}
-        
-        {/* Add Goal Button - Inside ScrollView, directly under goals */}
-        <View style={styles.addButtonContainer}>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={openAddModal}
-          >
-            <Text style={styles.addButtonText}>+ Add Goal</Text>
-          </TouchableOpacity>
-        </View>
         </ScrollView>
       )}
 

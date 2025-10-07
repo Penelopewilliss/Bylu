@@ -145,7 +145,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   header: {
     padding: 20,
-    paddingBottom: 10,
+    paddingBottom: 30,
   },
   title: {
     fontSize: 28,
@@ -157,17 +157,18 @@ const createStyles = (colors: any) => StyleSheet.create({
   subtitle: {
     textAlign: 'center',
     alignItems: 'center',
+    marginBottom: 20,
   },
   cloudEmoji: {
     fontSize: 42,
     marginRight: 8,
   },
   subtitleText: {
-    fontSize: 28,
+    fontSize: 26,
     color: colors.textSecondary,
     fontFamily: 'GreatVibes_400Regular',
     textAlign: 'center',
-    lineHeight: 40,
+    lineHeight: 36,
     letterSpacing: 0.5,
   },
   captureSection: {

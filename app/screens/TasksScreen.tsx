@@ -622,7 +622,7 @@ export default function TasksScreen() {
     modalContent: {
       flex: 1,
       padding: 20,
-      paddingTop: 0,
+      paddingTop: 10,
     },
     section: {
       marginBottom: 24,
@@ -1083,7 +1083,7 @@ export default function TasksScreen() {
             contentContainerStyle={{ flexGrow: 1 }}
           >
             {/* Category */}
-            <View style={[styles.section, { marginTop: 20 }]}>
+            <View style={[styles.section, { marginTop: 30 }]}>
               <Text style={styles.sectionTitle}>Category</Text>
               <View style={styles.pickerContainer}>
                 {Object.entries(TASK_CATEGORIES).map(([category, data]) => (
