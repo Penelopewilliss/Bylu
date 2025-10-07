@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 const lightColors = {
-  background: '#FFFFFF',
-  cardBackground: '#FEFEFE',
+  background: '#FDF2F8', // Very light pink background
+  cardBackground: '#FFFFFF', // Keep cards white for contrast
   primary: '#E8B4C4',
   secondary: '#F7D1DA',
   accent: '#B4E8D1',
@@ -11,8 +11,8 @@ const lightColors = {
   text: '#2D2D2D',
   textSecondary: '#6B6B6B',
   textLight: '#9CA3AF',
-  border: '#F3F4F6',
-  shadow: 'rgba(0, 0, 0, 0.1)',
+  border: '#F3E8FF', // Slightly pink-tinted border
+  shadow: 'rgba(232, 180, 196, 0.15)', // Pink-tinted shadow
   buttonBackground: '#E8B4C4',
   buttonText: '#FFFFFF',
   modalBackground: 'rgba(0, 0, 0, 0.5)',

@@ -29,6 +29,14 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
   const { isOnline, addToSyncQueue } = useOffline();
   const styles = createStyles(colors);
 
+  // Helper function for time-based greeting
+  const getTimeOfDay = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'morning';
+    if (hour < 17) return 'afternoon';
+    return 'evening';
+  };
+
   // Enhanced task toggle with offline support
   const handleTaskToggle = async (taskId: string) => {
     try {
@@ -70,28 +78,41 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
     >
+      {/* Dashboard Header */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.welcomeText}>Good {getTimeOfDay()}, beautiful! ✨</Text>
+        <Text style={styles.dateText}>{today.toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        })}</Text>
+      </View>
+
+      {/* Section Separator */}
+      <View style={styles.majorSeparator} />
+
       {/* Today's Appointments Section */}
-      {todayAppointments.length > 0 ? (
-        <View style={styles.appointmentsSection}>
-          <View style={styles.appointmentsSectionCard}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.appointmentsSectionTitle}>Today's Appointments</Text>
-              <TouchableOpacity 
-                style={styles.smallAddButton}
-                onPress={() => onNavigate?.('Calendar')}
-              >
-                <Text style={styles.smallAddButtonText}>+ Add</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.appointmentsContainer}>
+      <View style={styles.sectionWrapper}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>📅 Today's Appointments</Text>
+          <TouchableOpacity 
+            style={styles.viewAllButton}
+            onPress={() => onNavigate?.('Calendar')}
+          >
+            <Text style={styles.viewAllText}>View All</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.sectionCard}>
+          {todayAppointments.length > 0 ? (
+            <View style={styles.contentList}>
               {todayAppointments.map((appointment, index) => (
-                <View key={appointment.id} style={styles.appointmentCard}>
-                  <View style={styles.appointmentContent}>
-                    <View style={styles.appointmentInfo}>
-                      <Text style={styles.appointmentTitle}>
-                        {appointment.title}
-                      </Text>
-                      <Text style={styles.appointmentTime}>
+                <View key={appointment.id} style={styles.contentItem}>
+                  <View style={styles.itemContent}>
+                    <View style={styles.itemDetails}>
+                      <Text style={styles.itemTitle}>{appointment.title}</Text>
+                      <Text style={styles.itemSubtitle}>
                         {new Date(appointment.startDate).toLocaleTimeString([], { 
                           hour: '2-digit', 
                           minute: '2-digit' 
@@ -104,59 +125,51 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
                         }
                       </Text>
                     </View>
-                    <View style={[styles.appointmentDot, { backgroundColor: appointment.color }]} />
+                    <View style={[styles.statusDot, { backgroundColor: appointment.color || colors.primary }]} />
                   </View>
                 </View>
               ))}
             </View>
-          </View>
-        </View>
-      ) : (
-        <View style={styles.appointmentsSection}>
-          <View style={styles.appointmentsSectionCard}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.appointmentsSectionTitle}>Today's Appointments</Text>
-              <TouchableOpacity 
-                style={styles.smallAddButton}
-                onPress={() => onNavigate?.('Calendar')}
-              >
-                <Text style={styles.smallAddButtonText}>+ Add</Text>
-              </TouchableOpacity>
+          ) : (
+            <View style={styles.emptyContent}>
+              <Text style={styles.emptyTitle}>No appointments today</Text>
+              <Text style={styles.emptySubtitle}>Enjoy your free time! 🌸</Text>
             </View>
-            <View style={styles.emptyAppointmentsContainer}>
-              <Text style={styles.emptyAppointmentsText}>📅 No appointments today</Text>
-              <Text style={styles.emptyAppointmentsSubtext}>Enjoy your free time!</Text>
-            </View>
-          </View>
+          )}
         </View>
-      )}
+      </View>
 
-      {/* Today's Tasks Preview */}
-      {todayTasks.length > 0 ? (
-        <View style={styles.tasksSection}>
-          <View style={styles.tasksSectionCard}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.tasksSectionTitle}>Today's Tasks</Text>
-              <TouchableOpacity 
-                style={styles.smallAddButton}
-                onPress={() => onNavigate?.('Tasks')}
-              >
-                <Text style={styles.smallAddButtonText}>+ Add</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.tasksContainer}>
+      {/* Section Separator */}
+      <View style={styles.majorSeparator} />
+
+      {/* Today's Tasks Section */}
+      <View style={styles.sectionWrapper}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>✅ Today's Tasks</Text>
+          <TouchableOpacity 
+            style={styles.viewAllButton}
+            onPress={() => onNavigate?.('Tasks')}
+          >
+            <Text style={styles.viewAllText}>View All</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.sectionCard}>
+          {todayTasks.length > 0 ? (
+            <View style={styles.contentList}>
               {todayTasks.map((task, index) => (
-                <TouchableOpacity key={task.id} style={styles.taskCard}>
-                  <View style={styles.taskContent}>
+                <View key={task.id} style={styles.contentItem}>
+                  <View style={styles.itemContent}>
                     <TouchableOpacity 
-                      style={styles.heartCheckbox}
+                      style={styles.taskCheckbox}
                       onPress={() => handleTaskToggle(task.id)}
                     >
                       <Text style={styles.heartIcon}>🤍</Text>
                     </TouchableOpacity>
-                    <Text style={styles.taskTitle}>
-                      {task.title}
-                    </Text>
+                    <View style={styles.itemDetails}>
+                      <Text style={styles.itemTitle}>{task.title}</Text>
+                      <Text style={styles.itemSubtitle}>Priority: {task.priority}</Text>
+                    </View>
                     <View style={[styles.priorityBadge, { backgroundColor: 
                       task.priority === 'high' ? colors.peach : 
                       task.priority === 'medium' ? colors.accent : colors.lavender 
@@ -164,101 +177,93 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
                       <Text style={styles.priorityText}>{task.priority}</Text>
                     </View>
                   </View>
-                </TouchableOpacity>
+                </View>
               ))}
             </View>
-          </View>
-        </View>
-      ) : (
-        <View style={styles.tasksSection}>
-          <View style={styles.tasksSectionCard}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.tasksSectionTitle}>Today's Tasks</Text>
-              <TouchableOpacity 
-                style={styles.smallAddButton}
-                onPress={() => onNavigate?.('Tasks')}
-              >
-                <Text style={styles.smallAddButtonText}>+ Add</Text>
-              </TouchableOpacity>
+          ) : (
+            <View style={styles.emptyContent}>
+              <Text style={styles.emptyTitle}>All tasks completed!</Text>
+              <Text style={styles.emptySubtitle}>Great job staying productive! 🎉</Text>
             </View>
-            <View style={styles.emptyTasksContainer}>
-              <Text style={styles.emptyTasksText}>🎉 All tasks completed!</Text>
-              <Text style={styles.emptyTasksSubtext}>Great job staying productive!</Text>
-            </View>
-          </View>
+          )}
         </View>
-      )}
+      </View>
 
-      {/* Your Goals Preview */}
-      <View style={styles.goalsSection}>
-        <View style={styles.goalsSectionCard}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.goalsSectionTitle}>✨ Your Goals</Text>
-            <TouchableOpacity 
-              style={styles.smallAddButton}
-              onPress={() => onNavigate?.('Goals')}
-            >
-              <Text style={styles.smallAddButtonText}>View All</Text>
-            </TouchableOpacity>
-          </View>
+      {/* Section Separator */}
+      <View style={styles.majorSeparator} />
+
+      {/* Your Goals Section */}
+      <View style={styles.sectionWrapper}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>✨ Your Goals</Text>
+          <TouchableOpacity 
+            style={styles.viewAllButton}
+            onPress={() => onNavigate?.('Goals')}
+          >
+            <Text style={styles.viewAllText}>View All</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.sectionCard}>
           {goals.length > 0 ? (
-            <View style={styles.goalsContainer}>
+            <View style={styles.contentList}>
               {goals.slice(0, 4).map((goal) => {
                 const completedTasks = goal.microTasks.filter(task => task.completed).length;
                 const totalTasks = goal.microTasks.length;
                 const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
                 
                 return (
-                  <TouchableOpacity 
-                    key={goal.id} 
-                    style={styles.goalCard}
-                    onPress={() => onNavigate?.('Goals')}
-                  >
-                    <View style={styles.goalHeader}>
-                      <Text style={styles.goalTitle}>{goal.title}</Text>
-                      <Text style={styles.goalProgress}>{Math.round(progress)}%</Text>
+                  <View key={goal.id} style={styles.contentItem}>
+                    <View style={styles.goalContent}>
+                      <View style={styles.goalHeader}>
+                        <Text style={styles.itemTitle}>{goal.title}</Text>
+                        <Text style={styles.goalProgress}>{Math.round(progress)}%</Text>
+                      </View>
+                      <View style={styles.goalProgressBar}>
+                        <View 
+                          style={[
+                            styles.goalProgressFill, 
+                            { width: `${progress}%` }
+                          ]} 
+                        />
+                      </View>
+                      <Text style={styles.itemSubtitle}>
+                        {completedTasks} of {totalTasks} steps completed
+                      </Text>
                     </View>
-                    <View style={styles.goalProgressBar}>
-                      <View 
-                        style={[
-                          styles.goalProgressFill, 
-                          { width: `${progress}%` }
-                        ]} 
-                      />
-                    </View>
-                    <Text style={styles.goalSubtitle}>
-                      {completedTasks} of {totalTasks} steps completed
-                    </Text>
-                  </TouchableOpacity>
+                  </View>
                 );
               })}
             </View>
           ) : (
-            <TouchableOpacity 
-              style={styles.goalCard}
-              onPress={() => onNavigate?.('Goals')}
-            >
-              <Text style={styles.goalTitle}>🎯 Create Your First Goal</Text>
-              <Text style={styles.goalSubtitle}>Tap to start achieving your dreams!</Text>
-            </TouchableOpacity>
+            <View style={styles.emptyContent}>
+              <Text style={styles.emptyTitle}>Create Your First Goal</Text>
+              <Text style={styles.emptySubtitle}>Tap to start achieving your dreams! 🎯</Text>
+            </View>
           )}
         </View>
       </View>
 
+      {/* Section Separator */}
+      <View style={styles.majorSeparator} />
+
       {/* Quick Stats Section */}
-      <View style={styles.statsSection}>
-        <View style={styles.statsSectionCard}>
-          <Text style={styles.statsSectionTitle}>📊 This Week</Text>
-          <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
+      <View style={styles.sectionWrapper}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>📊 This Week's Progress</Text>
+        </View>
+        
+        <View style={styles.sectionCard}>
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
               <Text style={styles.statNumber}>{tasks.filter(t => t.completed).length}</Text>
               <Text style={styles.statLabel}>Completed</Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={styles.statItem}>
               <Text style={styles.statNumber}>{tasks.filter(t => !t.completed).length}</Text>
               <Text style={styles.statLabel}>Remaining</Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={styles.statItem}>
               <Text style={styles.statNumber}>{Math.round((tasks.filter(t => t.completed).length / Math.max(tasks.length, 1)) * 100)}%</Text>
               <Text style={styles.statLabel}>Progress</Text>
             </View>
@@ -266,61 +271,82 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
         </View>
       </View>
 
+      {/* Section Separator */}
+      <View style={styles.majorSeparator} />
+
       {/* Recent Activity Section */}
-      <View style={styles.activitySection}>
-        <View style={styles.activitySectionCard}>
-          <Text style={styles.activitySectionTitle}>🏃‍♀️ Recent Activity</Text>
-          <View style={styles.activityContainer}>
-            {tasks.filter(t => t.completed).slice(0, 3).length > 0 ? (
-              tasks.filter(t => t.completed).slice(0, 3).map((task, index) => (
-                <View key={task.id} style={styles.activityCard}>
+      <View style={styles.sectionWrapper}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>🏃‍♀️ Recent Activity</Text>
+        </View>
+        
+        <View style={styles.sectionCard}>
+          {tasks.filter(t => t.completed).slice(0, 3).length > 0 ? (
+            <View style={styles.contentList}>
+              {tasks.filter(t => t.completed).slice(0, 3).map((task, index) => (
+                <View key={task.id} style={styles.activityItem}>
                   <Text style={styles.activityEmoji}>✅</Text>
-                  <View style={styles.activityInfo}>
-                    <Text style={styles.activityText}>Completed "{task.title}"</Text>
-                    <Text style={styles.activityTime}>Today</Text>
+                  <View style={styles.itemDetails}>
+                    <Text style={styles.itemTitle}>Completed "{task.title}"</Text>
+                    <Text style={styles.itemSubtitle}>Today</Text>
                   </View>
                 </View>
-              ))
-            ) : (
-              <View style={styles.activityCard}>
-                <Text style={styles.activityEmoji}>🎯</Text>
-                <View style={styles.activityInfo}>
-                  <Text style={styles.activityText}>Ready to start your day!</Text>
-                  <Text style={styles.activityTime}>Complete tasks to see activity</Text>
-                </View>
-              </View>
-            )}
-          </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyContent}>
+              <Text style={styles.emptyTitle}>Ready to start your day!</Text>
+              <Text style={styles.emptySubtitle}>Complete tasks to see activity 🎯</Text>
+            </View>
+          )}
         </View>
       </View>
+
+      {/* Section Separator */}
+      <View style={styles.majorSeparator} />
 
       {/* Tomorrow's Preview Section */}
-      <View style={styles.tomorrowSection}>
-        <View style={styles.tomorrowSectionCard}>
-          <Text style={styles.tomorrowSectionTitle}>🌅 Tomorrow Preview</Text>
-          <View style={styles.tomorrowContainer}>
-            <View style={styles.tomorrowCard}>
-              <Text style={styles.tomorrowEmoji}>📅</Text>
-              <Text style={styles.tomorrowLabel}>Morning Yoga Session</Text>
-              <Text style={styles.tomorrowSubtext}>8:00 AM - 9:00 AM</Text>
+      <View style={styles.sectionWrapper}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>🌅 Tomorrow Preview</Text>
+        </View>
+        
+        <View style={styles.sectionCard}>
+          <View style={styles.contentList}>
+            <View style={styles.contentItem}>
+              <View style={styles.itemContent}>
+                <Text style={styles.previewEmoji}>📅</Text>
+                <View style={styles.itemDetails}>
+                  <Text style={styles.itemTitle}>Morning Yoga Session</Text>
+                  <Text style={styles.itemSubtitle}>8:00 AM - 9:00 AM</Text>
+                </View>
+              </View>
             </View>
-            <View style={[styles.tomorrowCard, { marginTop: 8 }]}>
-              <Text style={styles.tomorrowEmoji}>☕</Text>
-              <Text style={styles.tomorrowLabel}>Coffee with Sarah</Text>
-              <Text style={styles.tomorrowSubtext}>10:30 AM - 11:30 AM</Text>
+            <View style={styles.contentItem}>
+              <View style={styles.itemContent}>
+                <Text style={styles.previewEmoji}>☕</Text>
+                <View style={styles.itemDetails}>
+                  <Text style={styles.itemTitle}>Coffee with Sarah</Text>
+                  <Text style={styles.itemSubtitle}>10:30 AM - 11:30 AM</Text>
+                </View>
+              </View>
             </View>
           </View>
         </View>
       </View>
 
+      {/* Section Separator */}
+      <View style={styles.majorSeparator} />
+
       {/* Motivational Quote Section */}
-      <View style={styles.quoteSection}>
-        <View style={styles.quoteSectionCard}>
-          <Text style={styles.quoteSectionTitle}>💫 Daily Inspiration</Text>
-          <View style={styles.quoteContainer}>
-            <Text style={styles.quoteText}>
-              {dailyQuote.text}
-            </Text>
+      <View style={styles.sectionWrapper}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>💫 Daily Inspiration</Text>
+        </View>
+        
+        <View style={styles.sectionCard}>
+          <View style={styles.quoteContent}>
+            <Text style={styles.quoteText}>"{dailyQuote.text}"</Text>
             <Text style={styles.quoteAuthor}>— {dailyQuote.author}</Text>
           </View>
         </View>
@@ -724,7 +750,139 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
-  statCard: {
+  // Stats section styles (removed - using new clean design)
+  // Tomorrow section styles (removed - using new clean design)
+  // Quote section styles (removed - using new clean design)
+  // Activity section styles (removed - using new clean design)
+  // New Clean Section Design Styles
+  headerContainer: {
+    marginBottom: 16,
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  majorSeparator: {
+    height: 2,
+    backgroundColor: colors.border,
+    marginVertical: 24,
+    marginHorizontal: 16,
+    borderRadius: 1,
+  },
+  sectionWrapper: {
+    marginBottom: 32,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  viewAllButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#FF69B4',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  viewAllText: {
+    color: colors.buttonText,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  sectionCard: {
+    backgroundColor: colors.cardBackground,
+    marginHorizontal: 16,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  contentList: {
+    gap: 12,
+  },
+  contentItem: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  itemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  itemDetails: {
+    flex: 1,
+    marginRight: 12,
+  },
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  itemSubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '400',
+  },
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  emptyContent: {
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  taskCheckbox: {
+    marginRight: 12,
+    paddingHorizontal: 4,
+  },
+  // Additional styles for the new clean design
+  goalContent: {
+    flex: 1,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  statItem: {
     flex: 1,
     backgroundColor: colors.background,
     padding: 16,
@@ -745,77 +903,26 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  // Tomorrow section styles
-  tomorrowSection: {
-    marginBottom: 24,
-  },
-  tomorrowSectionCard: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  tomorrowSectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  tomorrowContainer: {
+  activityItem: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  tomorrowCard: {
+    padding: 12,
     backgroundColor: colors.background,
-    padding: 20,
     borderRadius: 12,
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
-    width: '100%',
   },
-  tomorrowEmoji: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
-  tomorrowLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  tomorrowSubtext: {
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
-  // Quote section styles
-  quoteSection: {
-    marginBottom: 24,
-  },
-  quoteSectionCard: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  quoteSectionTitle: {
+  activityEmoji: {
     fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 16,
-    textAlign: 'center',
+    marginRight: 12,
   },
-  quoteContainer: {
+  previewEmoji: {
+    fontSize: 24,
+    marginRight: 16,
+  },
+  quoteContent: {
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingVertical: 16,
   },
   quoteText: {
     fontSize: 16,
@@ -824,60 +931,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     textAlign: 'center',
     marginBottom: 12,
     lineHeight: 24,
+    paddingHorizontal: 16,
   },
   quoteAuthor: {
     fontSize: 14,
     color: colors.primary,
     fontWeight: '600',
-  },
-  // Activity section styles
-  activitySection: {
-    marginBottom: 24,
-  },
-  activitySectionCard: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  activitySectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  activityContainer: {
-    gap: 10,
-  },
-  activityCard: {
-    backgroundColor: colors.background,
-    padding: 14,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  activityEmoji: {
-    fontSize: 20,
-    marginRight: 12,
-  },
-  activityInfo: {
-    flex: 1,
-  },
-  activityText: {
-    fontSize: 14,
-    color: colors.text,
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  activityTime: {
-    fontSize: 12,
-    color: colors.textSecondary,
   },
 });
