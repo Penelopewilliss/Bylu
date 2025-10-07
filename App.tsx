@@ -14,12 +14,13 @@ import TasksScreen from './app/screens/TasksScreen';
 import DashboardScreen from './app/screens/DashboardScreen';
 import CalendarScreen from './app/screens/CalendarScreen';
 import GoalsScreen from './app/screens/GoalsScreen';
+import BrainDumpScreen from './app/screens/BrainDumpScreen';
 import SettingsScreen from './app/screens/SettingsScreen';
 import OnboardingScreen from './app/screens/OnboardingScreen';
 
 const { width, height } = Dimensions.get('window');
 
-type TabName = 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'Settings';
+type TabName = 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'BrainDump' | 'Settings';
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -87,7 +88,7 @@ function HamburgerMenu({
   isVisible: boolean;
   onClose: () => void;
 }) {
-  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'Settings'];
+  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'Settings'];
 
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
@@ -99,6 +100,8 @@ function HamburgerMenu({
         return '📅';
       case 'Goals':
         return '✨';
+      case 'BrainDump':
+        return '💭';
       case 'Settings':
         return '🌸';
       default:
@@ -182,6 +185,8 @@ function TopBar({
         return '📅';
       case 'Goals':
         return '✨';
+      case 'BrainDump':
+        return '💭';
       case 'Settings':
         return '🌸';
       default:
@@ -228,6 +233,8 @@ function Screen({ activeTab, onNavigate }: { activeTab: TabName; onNavigate: (ta
       return <CalendarScreen />;
     case 'Goals':
       return <GoalsScreen />;
+    case 'BrainDump':
+      return <BrainDumpScreen />;
     case 'Settings':
       return <SettingsScreen />;
     default:
@@ -242,7 +249,7 @@ function MainApp() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean | null>(null);
   
-  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'Settings'];
+  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'Settings'];
 
   const navigateToTab = (direction: 'next' | 'prev') => {
     const currentIndex = tabs.indexOf(activeTab);
@@ -358,7 +365,7 @@ function MainApp() {
   console.log('📱 Showing main app');
 
   const handleNavigate = (tab: string) => {
-    const validTabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'Settings'];
+    const validTabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'Settings'];
     if (validTabs.includes(tab as TabName)) {
       setActiveTab(tab as TabName);
     }
@@ -633,7 +640,7 @@ const styles = StyleSheet.create({
   // Floating Home Button Styles
   floatingHomeButton: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 80, // Reduced from 100 to move button slightly down
     right: 20,
     width: 48,
     height: 48,

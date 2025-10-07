@@ -84,7 +84,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   calendarContainer: {
     flex: 1,
-    paddingTop: 36,
+    paddingTop: 12, // Reduced from 36 to bring calendar much closer to header
     paddingBottom: 120, // Add bottom padding to prevent FAB overlap
   },
   calendarScrollContent: {
@@ -95,9 +95,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     maxWidth: 400,
     paddingHorizontal: 20,
   },
+  calendarGrid: {
+    marginHorizontal: 15, // Reduced margins to make calendar wider while keeping swipe area contained
+  },
   dayHeaderRow: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginBottom: 8, // Reduced from 16 to bring calendar closer to headers
   },
   dayHeader: {
     flex: 1,
@@ -105,21 +108,22 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.textSecondary,
-    paddingVertical: 8,
+    paddingVertical: 4, // Reduced from 8 to compress headers
   },
   weekRow: {
     flexDirection: 'row',
-    marginBottom: 8,
+    marginBottom: 4, // Reduced from 8 to bring weeks closer together
   },
   dayCell: {
     flex: 1,
-    height: 40, // Smaller for more compact calendar
-    margin: 1,
+    height: 60, // Increased from 40 to make cells taller
+    margin: 1, // Reduced back to 1 to bring days closer together
     backgroundColor: colors.cardBackground,
-    borderRadius: 6, // Smaller radius for more compact look
+    borderRadius: 8, // Slightly larger radius for bigger cells
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingTop: 4, // Reduced padding
+    paddingTop: 6, // Increased padding for better proportions
+    paddingHorizontal: 2, // Add horizontal padding
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -147,23 +151,22 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textLight,
   },
   eventDots: {
-    flexDirection: 'row',
-    marginTop: 2,
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    minHeight: 8, // Ensure space for dots
+    flexDirection: 'column', // Changed from 'row' to stack lines vertically
+    marginTop: 4,
+    alignItems: 'stretch', // Make lines stretch full width
+    width: '100%',
+    paddingHorizontal: 2,
   },
   eventDot: {
-    width: 6,        // Bigger dots for better visibility
-    height: 6,
-    borderRadius: 3,
-    marginHorizontal: 1,
-    marginVertical: 1,
+    width: '100%', // Make lines full width of cell
+    height: 2, // Thin line height
+    borderRadius: 1,
+    marginVertical: 0.5, // Small vertical spacing between lines
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 1,
-    elevation: 2, // Android shadow
+    elevation: 1,
   },
   moreEvents: {
     fontSize: 10,
@@ -172,22 +175,22 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   fab: {
     alignSelf: 'center',
-    marginTop: 20,
-    marginBottom: 20,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
+    marginTop: 8, // Reduced from 20 to bring closer to calendar
+    marginBottom: 12, // Reduced from 20 for less bottom space
+    paddingHorizontal: 16, // Reduced from 24 to make narrower
+    paddingVertical: 8, // Reduced from 12 to make shorter
+    borderRadius: 8, // Reduced from 12 for smaller appearance
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 }, // Reduced shadow
+    shadowOpacity: 0.2, // Reduced shadow opacity
+    shadowRadius: 4, // Reduced shadow radius
+    elevation: 4, // Reduced elevation
   },
   fabText: {
-    fontSize: 16,
+    fontSize: 14, // Reduced from 16 for smaller text
     color: colors.buttonText,
     fontWeight: '600',
   },
@@ -682,7 +685,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
 });
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
@@ -835,9 +838,12 @@ export default function CalendarScreen() {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     
-    // Create start date for calendar grid (Sunday-first week)
+    // Create start date for calendar grid (Monday-first week)
     const dayOfWeek = firstDay.getDay();
-    const diff = -dayOfWeek; // Sunday = 0, so we go back dayOfWeek days
+    // Convert Sunday=0 to Monday=0 system: (dayOfWeek + 6) % 7
+    // This makes Monday=0, Tuesday=1, ..., Sunday=6
+    const mondayFirstDayOfWeek = (dayOfWeek + 6) % 7;
+    const diff = -mondayFirstDayOfWeek; // Go back to Monday
     const startDate = new Date(year, month, 1 + diff);
     
     const calendar = [];
@@ -1176,27 +1182,29 @@ export default function CalendarScreen() {
         contentContainerStyle={styles.calendarScrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.calendarContent} {...calendarPanResponder.panHandlers}>
-          {/* Day Headers */}
-          <View style={styles.dayHeaderRow}>
-            {DAYS.map((day, index) => (
-              <Text key={index} style={styles.dayHeader}>
-                {day}
-              </Text>
-            ))}
-          </View>
+        <View style={styles.calendarContent}>
+          {/* Calendar Grid with Swipe Navigation */}
+          <View style={styles.calendarGrid} {...calendarPanResponder.panHandlers}>
+            {/* Day Headers */}
+            <View style={styles.dayHeaderRow}>
+              {DAYS.map((day, index) => (
+                <Text key={index} style={styles.dayHeader}>
+                  {day}
+                </Text>
+              ))}
+            </View>
 
-          {/* Calendar Weeks */}
-          {calendar.map((week, weekIndex) => (
-          <View key={weekIndex} style={styles.weekRow}>
-            {week.map((date, dayIndex) => {
-              const dayEvents = getEventsForDate(date);
-              const isToday_ = isToday(date);
-              const isCurrentMonth_ = isCurrentMonth(date);
-              
-              return (
-                <TouchableOpacity
-                  key={dayIndex}
+            {/* Calendar Weeks */}
+            {calendar.map((week, weekIndex) => (
+            <View key={weekIndex} style={styles.weekRow}>
+              {week.map((date, dayIndex) => {
+                const dayEvents = getEventsForDate(date);
+                const isToday_ = isToday(date);
+                const isCurrentMonth_ = isCurrentMonth(date);
+                
+                return (
+                  <TouchableOpacity
+                    key={dayIndex}
                   style={[
                     styles.dayCell,
                     isToday_ && styles.todayCell,
@@ -1212,9 +1220,9 @@ export default function CalendarScreen() {
                     {date.getDate()}
                   </Text>
                   
-                  {/* Event dots */}
+                  {/* Event lines */}
                   <View style={styles.eventDots}>
-                    {dayEvents.slice(0, 3).map((event, index) => (
+                    {dayEvents.map((event, index) => (
                       <View
                         key={event.id}
                         style={[
@@ -1223,15 +1231,13 @@ export default function CalendarScreen() {
                         ]}
                       />
                     ))}
-                    {dayEvents.length > 3 && (
-                      <Text style={styles.moreEvents}>+{dayEvents.length - 3}</Text>
-                    )}
                   </View>
                 </TouchableOpacity>
               );
             })}
           </View>
         ))}
+          </View>
         
         {/* Add Button underneath calendar */}
         <TouchableOpacity 

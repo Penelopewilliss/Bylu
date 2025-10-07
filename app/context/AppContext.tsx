@@ -223,6 +223,27 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		await saveGoals(updatedGoals);
 	}, [goals]);
 
+	// Brain Dump functions
+	const addBrainDumpEntry = useCallback(async (content: string) => {
+		const newEntry: BrainDumpEntry = {
+			id: Date.now().toString(),
+			content,
+			createdAt: new Date().toISOString(),
+		};
+		const updatedBrainDump = [...brainDump, newEntry];
+		setBrainDump(updatedBrainDump);
+		await AsyncStorage.setItem(STORAGE_KEYS.BRAIN_DUMP, JSON.stringify(updatedBrainDump));
+	}, [brainDump]);
+
+	const deleteBrainDumpEntry = useCallback(async (entryId: string) => {
+		console.log('Deleting brain dump entry:', entryId);
+		console.log('Current brain dump entries:', brainDump.length);
+		const updatedBrainDump = brainDump.filter(entry => entry.id !== entryId);
+		console.log('Updated brain dump entries:', updatedBrainDump.length);
+		setBrainDump(updatedBrainDump);
+		await AsyncStorage.setItem(STORAGE_KEYS.BRAIN_DUMP, JSON.stringify(updatedBrainDump));
+	}, [brainDump]);
+
 	const completeOnboarding = useCallback(async () => {
 		setIsOnboardingCompleted(true);
 		await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, JSON.stringify(true));
@@ -253,5 +274,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		updateGoal,
 		deleteGoal,
 		toggleGoalMicroTask,
-	}), [tasks, events, goals, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, isOnboardingCompleted, completeOnboarding, addTask, toggleTask, deleteTask, addEvent, updateEvent, deleteEvent, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask]);
+		addBrainDumpEntry,
+		deleteBrainDumpEntry,
+	}), [tasks, events, goals, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, isOnboardingCompleted, completeOnboarding, addTask, toggleTask, deleteTask, addEvent, updateEvent, deleteEvent, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask, addBrainDumpEntry, deleteBrainDumpEntry]);
 });

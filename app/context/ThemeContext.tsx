@@ -31,8 +31,8 @@ const lightColors = {
 };
 
 const darkColors = {
-  background: '#1A1A1A',
-  cardBackground: '#2D2D2D',
+  background: '#000000', // Pure black background
+  cardBackground: '#161B22', // Slightly lighter dark color
   primary: '#E8B4C4',
   secondary: '#F7D1DA',
   accent: '#B4E8D1',
@@ -41,12 +41,12 @@ const darkColors = {
   text: '#FFFFFF',
   textSecondary: '#B0B0B0',
   textLight: '#8A8A8A',
-  border: '#404040',
+  border: '#E8B4C4', // Pink border to match theme
   shadow: 'rgba(0, 0, 0, 0.3)',
   buttonBackground: '#E8B4C4',
   buttonText: '#000000',
   modalBackground: 'rgba(0, 0, 0, 0.7)',
-  modalContent: '#2D2D2D',
+  modalContent: '#333333',
   success: '#10B981',
   progressBg: '#404040',
   white: '#FFFFFF',

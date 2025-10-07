@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useOffline } from '../context/OfflineContext';
@@ -27,7 +28,26 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
   const { colors } = useTheme();
   const { tasks, events, goals, toggleTask } = useApp();
   const { isOnline, addToSyncQueue } = useOffline();
+  const [showCloudTutorial, setShowCloudTutorial] = useState(false); // Will be loaded from storage
+  const [showDailyInspiration, setShowDailyInspiration] = useState(false); // Hide daily inspiration initially
   const styles = createStyles(colors);
+
+  // Load tutorial state from storage on component mount
+  useEffect(() => {
+    const loadTutorialState = async () => {
+      try {
+        const tutorialCompleted = await AsyncStorage.getItem('@cloud_tutorial_completed');
+        if (!tutorialCompleted) {
+          setShowCloudTutorial(true); // Show tutorial only if not completed before
+        }
+      } catch (error) {
+        console.log('Error loading tutorial state:', error);
+        setShowCloudTutorial(true); // Show tutorial on error to be safe
+      }
+    };
+    
+    loadTutorialState();
+  }, []);
 
   // Helper function for time-based greeting
   const getTimeOfDay = () => {
@@ -80,7 +100,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
     >
       {/* Dashboard Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.welcomeText}>Good {getTimeOfDay()}, beautiful! ✨</Text>
+        <Text style={styles.welcomeText} numberOfLines={0}>Good {getTimeOfDay()}, beautiful!</Text>
         <Text style={styles.dateText}>{today.toLocaleDateString('en-US', { 
           weekday: 'long', 
           year: 'numeric', 
@@ -89,11 +109,42 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
         })}</Text>
       </View>
 
-      {/* Section Separator */}
-      <View style={styles.majorSeparator} />
-
       {/* Today's Appointments Section */}
       <View style={styles.sectionWrapper}>
+        {/* Cloud and Pink Line Container */}
+        <View style={styles.cloudLineContainer}>
+          {/* Quick Thought Cloud Button - Positioned Right */}
+          <TouchableOpacity 
+            style={styles.quickThoughtCloud}
+            onPress={async () => {
+              if (showCloudTutorial) {
+                // First time clicking - save to storage and hide tutorial permanently
+                try {
+                  await AsyncStorage.setItem('@cloud_tutorial_completed', 'true');
+                } catch (error) {
+                  console.log('Error saving tutorial state:', error);
+                }
+                setShowCloudTutorial(false);
+              }
+              setShowDailyInspiration(!showDailyInspiration);
+              onNavigate?.('BrainDump'); // Navigate to BrainDump page
+            }}
+          >
+            <Text style={styles.cloudIcon}>💭</Text>
+          </TouchableOpacity>
+          
+          {/* Tutorial Arrow for First-Time Users */}
+          {showCloudTutorial && (
+            <View style={styles.tutorialContainer}>
+              <Text style={styles.tutorialText}>Click here!</Text>
+              <Text style={styles.tutorialArrow}>→</Text>
+            </View>
+          )}
+          
+          {/* Pink Line Separator */}
+          <View style={styles.pinkLineSeparator} />
+        </View>
+        
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Today's Appointments</Text>
         </View>
@@ -323,12 +374,20 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
           <Text style={styles.sectionTitle}>Daily Inspiration</Text>
         </View>
         
-        <View style={styles.sectionCard}>
+        {/* Show card background only when cloud is clicked */}
+        {showDailyInspiration ? (
+          <View style={styles.quoteSectionCard}>
+            <View style={styles.quoteContent}>
+              <Text style={styles.quoteText}>"{dailyQuote.text}"</Text>
+              <Text style={styles.quoteAuthor}>— {dailyQuote.author}</Text>
+            </View>
+          </View>
+        ) : (
           <View style={styles.quoteContent}>
             <Text style={styles.quoteText}>"{dailyQuote.text}"</Text>
             <Text style={styles.quoteAuthor}>— {dailyQuote.author}</Text>
           </View>
-        </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -429,11 +488,16 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginTop: 16,
   },
   taskCard: {
-    backgroundColor: colors.background,
-    padding: 18,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.cardBackground,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 0,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    marginBottom: 4,
   },
   taskContent: {
     flexDirection: 'row',
@@ -465,11 +529,13 @@ const createStyles = (colors: any) => StyleSheet.create({
     elevation: 1,
   },
   taskTitle: {
-    fontSize: 18,
+    fontSize: 17,
     color: colors.text,
     flex: 1,
-    fontWeight: '500',
+    fontWeight: '600',
     marginLeft: 12,
+    letterSpacing: 0.2,
+    lineHeight: 24,
   },
   taskTitleCompleted: {
     textDecorationLine: 'line-through',
@@ -553,11 +619,19 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginTop: 16,
   },
   appointmentCard: {
-    backgroundColor: colors.background,
-    padding: 18,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.cardBackground,
+    paddingVertical: 6,
+    paddingHorizontal: 32,
+    borderRadius: 25,
+    borderWidth: 0,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    marginBottom: 4,
+    marginHorizontal: -12, // Make it much wider
+    height: 45, // Fixed height to make it very thin
   },
   appointmentContent: {
     flexDirection: 'row',
@@ -568,21 +642,29 @@ const createStyles = (colors: any) => StyleSheet.create({
     flex: 1,
   },
   appointmentTitle: {
-    fontSize: 18,
+    fontSize: 17,
     color: colors.text,
-    fontWeight: '500',
-    marginBottom: 4,
+    fontWeight: '600',
+    marginBottom: 6,
+    letterSpacing: 0.2,
+    lineHeight: 24,
   },
   appointmentTime: {
-    fontSize: 14,
+    fontSize: 15,
     color: colors.textSecondary,
-    fontWeight: '400',
+    fontWeight: '500',
+    letterSpacing: 0.1,
   },
   appointmentDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     marginLeft: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
   },
   emptyAppointmentsContainer: {
     paddingVertical: 24,
@@ -658,7 +740,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   goalProgressBar: {
     height: 6,
-    backgroundColor: colors.border,
+    backgroundColor: colors.cardBackground,
     borderRadius: 3,
     marginBottom: 8,
     overflow: 'hidden',
@@ -715,11 +797,16 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginTop: 16,
   },
   goalCard: {
-    backgroundColor: colors.background,
-    padding: 18,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.cardBackground,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 0,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    marginBottom: 4,
   },
   // Stats section styles
   statsSection: {
@@ -756,34 +843,124 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: 16,
     paddingVertical: 20,
     alignItems: 'center',
+    paddingHorizontal: 20,
+    width: '100%',
   },
   welcomeText: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 32,
+    fontFamily: 'GreatVibes_400Regular',
     color: colors.text,
-    marginBottom: 8,
     textAlign: 'center',
+    marginBottom: 12,
+    lineHeight: 38,
+    letterSpacing: 0.5,
+    width: '100%',
   },
   dateText: {
     fontSize: 16,
     color: colors.textSecondary,
     fontWeight: '500',
+    marginBottom: 12,
+  },
+  cloudLineContainer: {
+    position: 'relative',
+    marginBottom: 4,
+    minHeight: 30,
+  },
+  quickThoughtCloud: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 4,
+    position: 'absolute',
+    right: 8,
+    top: -65,
+    zIndex: 1,
+  },
+  tutorialContainer: {
+    position: 'absolute',
+    right: 55,
+    top: -55,
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  tutorialArrow: {
+    fontSize: 24,
+    color: colors.primary,
+    marginLeft: 8,
+  },
+  tutorialText: {
+    fontSize: 12,
+    color: colors.primary,
+    fontWeight: '600',
+    backgroundColor: colors.white,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  pinkLineSeparator: {
+    height: 2,
+    backgroundColor: colors.primary, // Pink color
+    marginVertical: 8,
+    marginHorizontal: 8, // Much smaller margins for edge-to-edge
+    borderRadius: 1,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2, // For Android shadow
+    width: '95%',
+    alignSelf: 'center',
+  },
+  quickThoughtButton: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignSelf: 'center',
+    marginTop: 12,
+    minWidth: 80,
+    minHeight: 50,
+  },
+  cloudIcon: {
+    fontSize: 36,
+  },
+  quickThoughtText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: '500',
+    textAlign: 'center',
   },
   majorSeparator: {
     height: 2,
-    backgroundColor: colors.border,
-    marginVertical: 24,
+    backgroundColor: colors.cardBackground,
+    marginVertical: 12,
     marginHorizontal: 16,
     borderRadius: 1,
   },
   sectionWrapper: {
-    marginBottom: 32,
+    marginBottom: 16,
+    marginTop: -4,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
     paddingHorizontal: 20,
   },
   viewAllButton: {
@@ -804,7 +981,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   sectionCard: {
     backgroundColor: colors.cardBackground,
-    marginHorizontal: 16,
+    marginHorizontal: 8,
     borderRadius: 20,
     padding: 20,
     paddingBottom: 60, // Extra padding for add button
@@ -813,18 +990,31 @@ const createStyles = (colors: any) => StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 0,
+    position: 'relative',
+  },
+  quoteSectionCard: {
+    backgroundColor: colors.cardBackground,
+    marginHorizontal: 8,
+    borderRadius: 20,
+    padding: 20,
+    paddingBottom: 20, // No extra padding needed for quote
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 0,
     position: 'relative',
   },
   contentList: {
     gap: 12,
   },
   contentItem: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: colors.border,
   },
   itemContent: {
@@ -921,7 +1111,10 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   quoteContent: {
     alignItems: 'center',
-    paddingVertical: 16,
+    justifyContent: 'center',
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    flex: 1,
   },
   quoteText: {
     fontSize: 28,
@@ -930,7 +1123,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     textAlign: 'center',
     marginBottom: 12,
     lineHeight: 40,
-    paddingHorizontal: 16,
     letterSpacing: 0.5,
   },
   quoteAuthor: {
