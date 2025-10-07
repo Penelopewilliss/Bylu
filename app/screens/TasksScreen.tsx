@@ -6,7 +6,6 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Category, Priority } from '../types';
 import NotificationService from '../services/NotificationService';
-import { useFocusEffect } from '@react-navigation/native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CATEGORY_ITEM_WIDTH = 100;
@@ -47,23 +46,26 @@ export default function TasksScreen() {
     priority: 'medium' as Priority,
   });
 
-  // Load priority notification settings when screen comes into focus
-  useFocusEffect(
-    React.useCallback(() => {
-      const loadNotificationSettings = async () => {
-        try {
-          const notificationService = NotificationService.getInstance();
-          const settings = notificationService.getPriorityReminderSettings();
-          setPriorityNotificationsEnabled(settings.enabled);
-          console.log(`📱 TasksScreen: Loaded priority notifications enabled = ${settings.enabled}`);
-        } catch (error) {
-          console.error('Failed to load priority notification settings:', error);
-        }
-      };
-      
-      loadNotificationSettings();
-    }, [])
-  );
+  // Load priority notification settings on mount and add interval for sync
+  useEffect(() => {
+    const loadNotificationSettings = async () => {
+      try {
+        const notificationService = NotificationService.getInstance();
+        const settings = notificationService.getPriorityReminderSettings();
+        setPriorityNotificationsEnabled(settings.enabled);
+        console.log(`📱 TasksScreen: Loaded priority notifications enabled = ${settings.enabled}`);
+      } catch (error) {
+        console.error('Failed to load priority notification settings:', error);
+      }
+    };
+    
+    loadNotificationSettings();
+    
+    // Set up interval to sync settings every few seconds in case they change in SettingsScreen
+    const syncInterval = setInterval(loadNotificationSettings, 2000);
+    
+    return () => clearInterval(syncInterval);
+  }, []);
 
   const togglePriorityNotifications = async (enabled: boolean) => {
     try {
