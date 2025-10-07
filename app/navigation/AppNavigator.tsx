@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { TouchableOpacity, View, Text } from 'react-native';
 
 // Import screens
 import DashboardScreen from '../screens/DashboardScreen';
@@ -10,6 +11,27 @@ import SettingsScreen from '../screens/SettingsScreen';
 import GoalsScreen from '../screens/GoalsScreen';
 
 const Tab = createBottomTabNavigator();
+
+// Simple Home Button for headers
+const HeaderHomeButton = ({ navigation }: { navigation: any }) => (
+  <TouchableOpacity 
+    onPress={() => navigation.navigate('Dashboard')}
+    style={{
+      marginLeft: 15,
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: '#000000',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: '#FFFFFF',
+    }}
+    activeOpacity={0.7}
+  >
+    <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' }}>🏠</Text>
+  </TouchableOpacity>
+);
 
 const AppNavigator = () => {
   return (
@@ -48,34 +70,38 @@ const AppNavigator = () => {
         <Tab.Screen
           name="Calendar"
           component={CalendarScreen}
-          options={{
-            title: '� Calendar',
-            tabBarLabel: '� Calendar',
-          }}
+          options={({ navigation }) => ({
+            title: '📅 Calendar',
+            tabBarLabel: '📅 Calendar',
+            headerLeft: () => <HeaderHomeButton navigation={navigation} />,
+          })}
         />
         <Tab.Screen
           name="Tasks"
           component={TasksScreen}
-          options={{
+          options={({ navigation }) => ({
             title: '📝 Tasks',
             tabBarLabel: '📝 Tasks',
-          }}
+            headerLeft: () => <HeaderHomeButton navigation={navigation} />,
+          })}
         />
         <Tab.Screen
           name="Goals"
           component={GoalsScreen}
-          options={{
+          options={({ navigation }) => ({
             title: '✨ Goals',
             tabBarLabel: '✨ Goals',
-          }}
+            headerLeft: () => <HeaderHomeButton navigation={navigation} />,
+          })}
         />
         <Tab.Screen
           name="Settings"
           component={SettingsScreen}
-          options={{
+          options={({ navigation }) => ({
             title: '🌸 Settings',
             tabBarLabel: '🌸 Settings',
-          }}
+            headerLeft: () => <HeaderHomeButton navigation={navigation} />,
+          })}
         />
       </Tab.Navigator>
     </NavigationContainer>

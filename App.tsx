@@ -7,7 +7,6 @@ import { ThemeProvider } from './app/context/ThemeContext';
 import { OfflineProvider } from './app/context/OfflineContext';
 import { CalendarSyncProvider } from './app/context/CalendarSyncContext';
 import NotificationService from './app/services/NotificationService';
-import OfflineIndicator from './app/components/OfflineIndicator';
 
 // Import the actual screen components
 import TasksScreen from './app/screens/TasksScreen';
@@ -144,10 +143,12 @@ function HamburgerMenu({
 
 function TopBar({ 
   activeTab, 
-  onMenuPress 
+  onMenuPress,
+  onHomePress 
 }: { 
   activeTab: TabName;
   onMenuPress: () => void;
+  onHomePress: () => void;
 }) {
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
@@ -177,7 +178,12 @@ function TopBar({
 
   return (
     <View style={styles.topBar}>
-      <View style={styles.spacer} />
+      {activeTab !== 'Dashboard' && (
+        <TouchableOpacity style={styles.homeButton} onPress={onHomePress}>
+          <Text style={styles.homeIcon}>⌂</Text>
+        </TouchableOpacity>
+      )}
+      {activeTab === 'Dashboard' && <View style={styles.spacer} />}
       <View style={styles.currentTab}>
         <Text style={styles.currentTabLabel}>{getTabLabel(activeTab)}</Text>
       </View>
@@ -341,12 +347,23 @@ function MainApp() {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <TopBar 
         activeTab={activeTab} 
-        onMenuPress={() => setMenuVisible(true)} 
+        onMenuPress={() => setMenuVisible(true)}
+        onHomePress={() => setActiveTab('Dashboard')} 
       />
-      <OfflineIndicator />
       <View style={styles.content}>
         <Screen activeTab={activeTab} onNavigate={handleNavigate} />
       </View>
+      
+      {/* Floating Home Button - Bottom Right */}
+      {activeTab !== 'Dashboard' && (
+        <TouchableOpacity 
+          style={styles.floatingHomeButton} 
+          onPress={() => setActiveTab('Dashboard')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.floatingHomeIcon}>⌂</Text>
+        </TouchableOpacity>
+      )}
       
       <HamburgerMenu
         activeTab={activeTab}
@@ -467,6 +484,19 @@ const styles = StyleSheet.create({
   spacer: {
     width: 34, // Same width as hamburger button to balance the layout
   },
+  homeButton: {
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)', // Subtle white background
+    width: 34, // Same as hamburger button
+    height: 34,
+  },
+  homeIcon: {
+    fontSize: 18,
+    color: '#2D2D2D',
+  },
   hamburgerButton: {
     padding: 8, // Reduced from 12
     justifyContent: 'center',
@@ -554,5 +584,29 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 10,
     fontWeight: '500',
+  },
+  // Floating Home Button Styles
+  floatingHomeButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F7D1DA', // Match the pink header color
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 2,
+    borderColor: '#fff', // White border for contrast
+  },
+  floatingHomeIcon: {
+    fontSize: 20,
+    color: '#2D2D2D', // Dark color to match header icons
+    fontWeight: 'bold',
   },
 });

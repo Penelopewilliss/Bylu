@@ -1,4 +1,3 @@
-// TasksScreen.tsx - Matching Goals screen design
 import React, { useState } from 'react';
 import { 
   View, 
@@ -527,10 +526,6 @@ export default function TasksScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-      </View>
-
       {/* Progress Card */}
       <View style={styles.progressCard}>
         <Text style={styles.progressTitle}>Progress Today</Text>

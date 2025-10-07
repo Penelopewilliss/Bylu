@@ -13,6 +13,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 import { useCalendarSync } from '../context/CalendarSyncContext';
+import OfflineIndicator from '../components/OfflineIndicator';
 import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
 import NotificationService from '../services/NotificationService';
 
@@ -151,10 +152,6 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-      </View>
-
       {/* Settings Options */}
       <ScrollView style={styles.settingsContainer} showsVerticalScrollIndicator={false}>
         
@@ -267,6 +264,14 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        {/* Sync Status Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sync Status</Text>
+          <View style={styles.syncStatusContainer}>
+            <OfflineIndicator style={styles.subtleOfflineIndicator} />
+          </View>
+        </View>
+
         {/* Notifications Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notifications</Text>
@@ -318,12 +323,6 @@ const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   title: {
     fontSize: 28,
@@ -398,5 +397,17 @@ const createStyles = (colors: any) => StyleSheet.create({
   chevron: {
     fontSize: 18,
     color: colors.textSecondary,
+  },
+  syncStatusContainer: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  subtleOfflineIndicator: {
+    transform: [{ scale: 0.85 }], // Make it smaller
+    opacity: 0.8, // Make it more subtle
+    marginHorizontal: 0, // Remove extra margins
+    marginVertical: 0,
+    shadowOpacity: 0.05, // Reduce shadow
+    elevation: 1, // Reduce elevation
   },
 });

@@ -22,6 +22,7 @@ const getCategoryColors = (colors: any) => ({
   personal: colors.accent,
   health: colors.lavender,
   learning: colors.peach,
+  other: colors.text,
 });
 
 const createStyles = (colors: any) => StyleSheet.create({

@@ -9,7 +9,9 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import NotificationService, { NotificationSettings } from '../services/NotificationService';
+import HomeButton from '../components/HomeButton';
 
 const TIMING_OPTIONS = [
   { value: 5, label: '5 minutes' },
@@ -22,6 +24,7 @@ const TIMING_OPTIONS = [
 ];
 
 export default function NotificationSettingsScreen() {
+  const navigation = useNavigation();
   const [settings, setSettings] = useState<NotificationSettings>({
     enabled: true,
     timings: [15, 60],
@@ -97,6 +100,10 @@ export default function NotificationSettingsScreen() {
     }
   };
 
+  const handleHomePress = () => {
+    navigation.navigate('Dashboard' as never);
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -109,6 +116,7 @@ export default function NotificationSettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <HomeButton onPress={handleHomePress} headerOverlay={true} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>🔔 Notification Settings</Text>

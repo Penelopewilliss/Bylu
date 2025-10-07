@@ -1,13 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import HomeButton from '../components/HomeButton';
 
 export default function SensoryBreaksScreen() {
+  const navigation = useNavigation();
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
+  const handleHomePress = () => {
+    navigation.navigate('Dashboard' as never);
+  };
+
   return (
     <View style={styles.container}>
+      <HomeButton onPress={handleHomePress} headerOverlay={true} />
       <Text style={styles.title}>🌸 Sensory Breaks</Text>
       <Text style={styles.subtitle}>Take a mindful moment</Text>
     </View>

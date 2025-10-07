@@ -1,18 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
-  Modal,
+  StyleSheet,
   TextInput,
-  Dimensions,
-  Alert,
+  Modal,
+  ScrollView,
+  SafeAreaView,
   PanResponder,
+  Alert,
+  Dimensions,
 } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+import Fonts from '../constants/fonts';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 import type { Goal, MicroTask } from '../types';
 
 const { width } = Dimensions.get('window');
