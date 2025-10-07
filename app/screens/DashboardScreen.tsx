@@ -95,7 +95,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Today's Appointments Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>📅 Today's Appointments</Text>
+          <Text style={styles.sectionTitle}>Today's Appointments</Text>
         </View>
         
         <View style={styles.sectionCard}>
@@ -147,7 +147,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Today's Tasks Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>✅ Today's Tasks</Text>
+          <Text style={styles.sectionTitle}>Today's Tasks</Text>
         </View>
         
         <View style={styles.sectionCard}>
@@ -199,7 +199,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Your Goals Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>✨ Your Goals</Text>
+          <Text style={styles.sectionTitle}>Your Goals</Text>
         </View>
         
         <View style={styles.sectionCard}>
@@ -256,7 +256,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Quick Stats Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>📊 This Week's Progress</Text>
+          <Text style={styles.sectionTitle}>This Week's Progress</Text>
         </View>
         
         <View style={styles.sectionCard}>
@@ -283,7 +283,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Recent Activity Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>🏃‍♀️ Recent Activity</Text>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
         </View>
         
         <View style={styles.sectionCard}>
@@ -314,7 +314,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Tomorrow's Preview Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>🌅 Tomorrow Preview</Text>
+          <Text style={styles.sectionTitle}>Tomorrow Preview</Text>
         </View>
         
         <View style={styles.sectionCard}>
@@ -347,7 +347,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Motivational Quote Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>💫 Daily Inspiration</Text>
+          <Text style={styles.sectionTitle}>Daily Inspiration</Text>
         </View>
         
         <View style={styles.sectionCard}>
