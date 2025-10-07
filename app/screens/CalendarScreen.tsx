@@ -32,7 +32,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   header: {
     height: 56,
-    marginTop: 20,
+    marginTop: 0, // Removed margin to bring month navigation to the very top
     backgroundColor: colors.cardBackground,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -84,7 +84,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   calendarContainer: {
     flex: 1,
-    paddingTop: 12, // Reduced from 36 to bring calendar much closer to header
+    paddingTop: 16, // Increased from 4 to add more space between month navigation and day headers
     paddingBottom: 120, // Add bottom padding to prevent FAB overlap
   },
   calendarScrollContent: {
@@ -96,7 +96,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: 20,
   },
   calendarGrid: {
-    marginHorizontal: 15, // Reduced margins to make calendar wider while keeping swipe area contained
+    marginHorizontal: 4, // Reduced from 8 to make calendar grid wider while keeping swipe area contained
   },
   dayHeaderRow: {
     flexDirection: 'row',

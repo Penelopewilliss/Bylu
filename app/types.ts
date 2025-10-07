@@ -1,5 +1,5 @@
 export type Priority = 'high' | 'medium' | 'low';
-export type Category = 'work' | 'personal' | 'health' | 'learning' | 'other';
+export type Category = 'work' | 'personal' | 'health' | 'learning' | 'household' | 'groceries' | 'calls' | 'shopping' | 'errands' | 'finances' | 'fitness' | 'hobbies' | 'other';
 export type MoodType = 'energized' | 'happy' | 'calm' | 'tired' | 'stressed';
 
 export interface MicroStep {
