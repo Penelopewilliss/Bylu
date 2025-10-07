@@ -18,7 +18,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.penelope11.glowgetterapp",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "UIBackgroundModes": ["background-fetch"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,14 +29,26 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.penelope11.glowgetterapp",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "NOTIFICATIONS",
+        "WAKE_LOCK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon/notification-icon.png",
+          "color": "#ffffff",
+          "defaultChannel": "default"
+        }
+      ]
     ],
     "extra": {
       "eas": {
