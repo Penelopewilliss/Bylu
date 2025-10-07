@@ -17,9 +17,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "notification": {
-        "icon": "./assets/notification-icon/notification-icon.png"
-      }
+      "bundleIdentifier": "com.penelope11.glowgetterapp",
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
@@ -27,10 +26,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.penelope11.glowgetterapp",
-      "notification": {
-        "icon": "./assets/notification-icon/notification-icon.png",
-        "color": "#FF69B4"
-      }
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png",
