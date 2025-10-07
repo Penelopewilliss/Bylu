@@ -23,6 +23,7 @@ type TabName = 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'Settings';
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Start with a gentle scale-in animation
@@ -33,15 +34,29 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
       useNativeDriver: true,
     }).start();
 
+    // Add a subtle rotation animation for loading effect
+    Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      })
+    ).start();
+
     const timer = setTimeout(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 1000, // Longer fade out
+        duration: 800,
         useNativeDriver: true,
       }).start(() => onFinish());
-    }, 2500); // Extended to 2500ms for more elegance
+    }, 3500); // Increased to 3500ms for better visibility
     return () => clearTimeout(timer);
-  }, [fadeAnim, scaleAnim, onFinish]);
+  }, [fadeAnim, scaleAnim, rotateAnim, onFinish]);
+
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
 
   return (
     <Animated.View style={[styles.splash, { opacity: fadeAnim }]}>
@@ -50,6 +65,13 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
         style={[styles.splashLogo, { transform: [{ scale: scaleAnim }] }]}
         resizeMode="cover"
       />
+      {/* Loading indicator */}
+      <View style={styles.loadingContainer}>
+        <Animated.View style={[styles.loadingSpinner, { transform: [{ rotate: spin }] }]}>
+          <Text style={styles.loadingEmoji}>🦋</Text>
+        </Animated.View>
+        <Text style={styles.loadingText}>Bylu</Text>
+      </View>
     </Animated.View>
   );
 }
@@ -417,6 +439,29 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     // Remove shadow for full-screen effect
+  },
+  loadingContainer: {
+    position: 'absolute',
+    bottom: 150,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingSpinner: {
+    marginBottom: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingEmoji: {
+    fontSize: 40,
+    textAlign: 'center',
+  },
+  loadingText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontFamily: 'GreatVibes', // Use the beautiful handwritten font
+    letterSpacing: 1,
   },
   screen: {
     flex: 1,

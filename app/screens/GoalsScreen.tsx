@@ -177,25 +177,26 @@ export default function GoalsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header with Add Button */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={openAddModal}
-        >
-          <Text style={styles.addButtonText}>+ Add Goal</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Goals List */}
       {goals.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>🎯</Text>
-          <Text style={styles.emptyTitle}>No goals yet!</Text>
-          <Text style={styles.emptySubtitle}>
-            Start your journey! Tap + to add your first goal and unlock your potential.
-          </Text>
-        </View>
+        <>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>🎯</Text>
+            <Text style={styles.emptyTitle}>No goals yet!</Text>
+            <Text style={styles.emptySubtitle}>
+              Start your journey! Tap + to add your first goal and unlock your potential.
+            </Text>
+          </View>
+          {/* Add Goal Button - Also shown in empty state */}
+          <View style={styles.addButtonContainer}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={openAddModal}
+            >
+              <Text style={styles.addButtonText}>+ Add Goal</Text>
+            </TouchableOpacity>
+          </View>
+        </>
       ) : (
         <ScrollView 
           style={styles.goalsList} 
@@ -269,6 +270,16 @@ export default function GoalsScreen() {
             </View>
           );
         })}
+        
+        {/* Add Goal Button - Inside ScrollView, directly under goals */}
+        <View style={styles.addButtonContainer}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={openAddModal}
+          >
+            <Text style={styles.addButtonText}>+ Add Goal</Text>
+          </TouchableOpacity>
+        </View>
         </ScrollView>
       )}
 
@@ -393,15 +404,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  addButtonContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 16,
+    paddingBottom: 30, // Extra bottom padding
+    alignItems: 'center',
     backgroundColor: colors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   headerTitle: {
     fontSize: 24,
@@ -422,7 +430,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   goalsList: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 0,
+    paddingTop: 20, // Add space from header
   },
   goalsListContent: {
     paddingBottom: 120, // Extra space at bottom for comfortable scrolling
@@ -434,6 +442,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 40,
     paddingVertical: 60,
+    paddingTop: 80, // Add space from header to match goals list
   },
   emptyIcon: {
     fontSize: 48,
