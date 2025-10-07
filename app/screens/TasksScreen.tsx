@@ -277,6 +277,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   progressCard: {
     backgroundColor: colors.cardBackground,
     marginHorizontal: 20,
+    marginTop: 20,
     marginBottom: 20,
     padding: 20,
     borderRadius: 16,
@@ -312,6 +313,38 @@ const createStyles = (colors: any) => StyleSheet.create({
     height: '100%',
     backgroundColor: colors.success,
     borderRadius: 4,
+  },
+  // Goal-style progress styles
+  progressContainer: {
+    marginVertical: 8,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressLabel: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  goalProgress: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  goalProgressBar: {
+    height: 6,
+    backgroundColor: colors.border,
+    borderRadius: 3,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  goalProgressFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 3,
   },
   listContainer: {
     paddingHorizontal: 20,
@@ -529,16 +562,23 @@ export default function TasksScreen() {
       {/* Progress Card */}
       <View style={styles.progressCard}>
         <Text style={styles.progressTitle}>Progress Today</Text>
-        <Text style={styles.progressStats}>
-          {completedCount} of {totalCount} completed
-        </Text>
-        <View style={styles.progressBar}>
-          <View 
-            style={[
-              styles.progressFill, 
-              { width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }
-            ]} 
-          />
+        <View style={styles.progressContainer}>
+          <View style={styles.progressHeader}>
+            <Text style={styles.progressLabel}>
+              {completedCount} of {totalCount} completed
+            </Text>
+            <Text style={styles.goalProgress}>
+              {totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%
+            </Text>
+          </View>
+          <View style={styles.goalProgressBar}>
+            <View 
+              style={[
+                styles.goalProgressFill, 
+                { width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }
+              ]} 
+            />
+          </View>
         </View>
       </View>
 
@@ -562,7 +602,7 @@ export default function TasksScreen() {
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📝</Text>
+            <Text style={styles.emptyIcon}>🌺</Text>
             <Text style={styles.emptyTitle}>No tasks yet!</Text>
             <Text style={styles.emptySubtitle}>
               Tap the + button below to add your first task and start being productive!

@@ -34,6 +34,7 @@ const HeaderHomeButton = ({ navigation }: { navigation: any }) => (
 );
 
 const AppNavigator = () => {
+  // Updated navigation order: Home, Calendar, Tasks, Goals, Settings
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -63,8 +64,8 @@ const AppNavigator = () => {
           name="Dashboard"
           component={DashboardScreen}
           options={{
-            title: '💖 Dashboard',
-            tabBarLabel: '💖 Home',
+            title: '🦋 Dashboard',
+            tabBarLabel: '🦋 Home',
           }}
         />
         <Tab.Screen
@@ -80,8 +81,8 @@ const AppNavigator = () => {
           name="Tasks"
           component={TasksScreen}
           options={({ navigation }) => ({
-            title: '📝 Tasks',
-            tabBarLabel: '📝 Tasks',
+            title: '🌺 Tasks',
+            tabBarLabel: '🌺 Tasks',
             headerLeft: () => <HeaderHomeButton navigation={navigation} />,
           })}
         />

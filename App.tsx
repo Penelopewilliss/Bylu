@@ -65,14 +65,14 @@ function HamburgerMenu({
   isVisible: boolean;
   onClose: () => void;
 }) {
-  const tabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Settings'];
+  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'Settings'];
 
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
       case 'Dashboard':
-        return '💖';
+        return '🦋';
       case 'Tasks':
-        return '📝';
+        return '🌺';
       case 'Calendar':
         return '📅';
       case 'Goals':
@@ -153,9 +153,9 @@ function TopBar({
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
       case 'Dashboard':
-        return '💖';
+        return '🦋';
       case 'Tasks':
-        return '📝';
+        return '🌺';
       case 'Calendar':
         return '📅';
       case 'Goals':
@@ -220,7 +220,7 @@ function MainApp() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean | null>(null);
   
-  const tabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Settings'];
+  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'Settings'];
 
   const navigateToTab = (direction: 'next' | 'prev') => {
     const currentIndex = tabs.indexOf(activeTab);
@@ -336,7 +336,7 @@ function MainApp() {
   console.log('📱 Showing main app');
 
   const handleNavigate = (tab: string) => {
-    const validTabs: TabName[] = ['Dashboard', 'Tasks', 'Calendar', 'Goals', 'Settings'];
+    const validTabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'Settings'];
     if (validTabs.includes(tab as TabName)) {
       setActiveTab(tab as TabName);
     }
@@ -521,8 +521,7 @@ const styles = StyleSheet.create({
   dropdownMenu: {
     backgroundColor: '#F7D1DA', // Match the pink header
     marginTop: 85, // Position perfectly below top bar
-    marginRight: 16,
-    borderRadius: 16, // More rounded for modern look
+    marginRight: 0, // Align with screen edge
     minWidth: 180, // Slightly wider for better text spacing
     shadowColor: '#C2185B', // Pink shadow
     shadowOffset: { width: 0, height: 6 },
@@ -542,7 +541,6 @@ const styles = StyleSheet.create({
   },
   activeMenuItem: {
     backgroundColor: '#F5A3B7', // Darker pink for active state
-    borderRadius: 12, // Rounded active state
     marginHorizontal: 8, // Inset the active item
     marginVertical: 2, // Small margin for floating effect
   },

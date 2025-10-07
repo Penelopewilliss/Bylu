@@ -253,33 +253,6 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       {/* Section Separator */}
       <View style={styles.majorSeparator} />
 
-      {/* Quick Stats Section */}
-      <View style={styles.sectionWrapper}>
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>This Week's Progress</Text>
-        </View>
-        
-        <View style={styles.sectionCard}>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{tasks.filter(t => t.completed).length}</Text>
-              <Text style={styles.statLabel}>Completed</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{tasks.filter(t => !t.completed).length}</Text>
-              <Text style={styles.statLabel}>Remaining</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{Math.round((tasks.filter(t => t.completed).length / Math.max(tasks.length, 1)) * 100)}%</Text>
-              <Text style={styles.statLabel}>Progress</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* Section Separator */}
-      <View style={styles.majorSeparator} />
-
       {/* Recent Activity Section */}
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
@@ -694,6 +667,21 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 3,
   },
   goalSubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  // Progress Today section styles
+  progressContainer: {
+    marginVertical: 8,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressLabel: {
     fontSize: 14,
     color: colors.textSecondary,
     fontWeight: '500',
