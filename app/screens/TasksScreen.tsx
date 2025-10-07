@@ -11,18 +11,18 @@ const CATEGORY_ITEM_WIDTH = 100;
 const SPACING = 15;
 
 const TASK_CATEGORIES: Record<Category, { emoji: string; label: string; color: string }> = {
-  work: { emoji: '💼', label: 'Work', color: '#3F51B5' },
-  personal: { emoji: '👤', label: 'Personal', color: '#9C27B0' },
-  household: { emoji: '🏠', label: 'Household', color: '#FF9800' },
-  groceries: { emoji: '🛒', label: 'Groceries', color: '#4CAF50' },
-  calls: { emoji: '📞', label: 'Calls', color: '#2196F3' },
-  shopping: { emoji: '🛍️', label: 'Shopping', color: '#E91E63' },
-  errands: { emoji: '🚗', label: 'Errands', color: '#9C27B0' },
-  finances: { emoji: '💰', label: 'Finances', color: '#795548' },
-  health: { emoji: '🏥', label: 'Health', color: '#F44336' },
-  fitness: { emoji: '💪', label: 'Fitness', color: '#8BC34A' },
-  learning: { emoji: '📚', label: 'Learning', color: '#673AB7' },
-  hobbies: { emoji: '🎨', label: 'Hobbies', color: '#009688' },
+  work: { emoji: '💼', label: 'Work', color: '#B8C5F2' },
+  personal: { emoji: '👤', label: 'Personal', color: '#E8B4F0' },
+  household: { emoji: '🏠', label: 'Household', color: '#FFD19A' },
+  groceries: { emoji: '🛒', label: 'Groceries', color: '#B8E6B8' },
+  calls: { emoji: '📞', label: 'Calls', color: '#A8D4FF' },
+  shopping: { emoji: '🛍️', label: 'Shopping', color: '#FFB3D1' },
+  errands: { emoji: '🚗', label: 'Errands', color: '#E8B4F0' },
+  finances: { emoji: '💰', label: 'Finances', color: '#D4B5A0' },
+  health: { emoji: '🏥', label: 'Health', color: '#FFB3B3' },
+  fitness: { emoji: '💪', label: 'Fitness', color: '#D4E8B8' },
+  learning: { emoji: '📚', label: 'Learning', color: '#C8B4E8' },
+  hobbies: { emoji: '🎨', label: 'Hobbies', color: '#A3D4D0' },
   other: { emoji: '📝', label: 'Other', color: '#607D8B' },
 };
 
@@ -39,7 +39,6 @@ export default function TasksScreen() {
     description: '',
     category: 'personal' as Category,
     priority: 'medium' as Priority,
-    estimatedTime: 30,
   });
 
   // PanResponder for swipe to close modal
@@ -172,7 +171,6 @@ export default function TasksScreen() {
       description: '',
       category: 'personal',
       priority: 'medium',
-      estimatedTime: 30,
     });
   };
 
@@ -188,7 +186,6 @@ export default function TasksScreen() {
         description: newTask.description.trim(),
         category: newTask.category,
         priority: newTask.priority,
-        estimatedTime: newTask.estimatedTime,
         microSteps: [],
       });
       
@@ -259,7 +256,7 @@ export default function TasksScreen() {
       paddingTop: 8,
       paddingBottom: 16,
       flexDirection: 'row',
-      justifyContent: 'flex-end',
+      justifyContent: 'center',
       alignItems: 'center',
     },
     title: {
@@ -297,19 +294,19 @@ export default function TasksScreen() {
     },
     addButtonText: {
       fontSize: 16,
-      fontWeight: 'bold',
+      fontWeight: '500',
       color: colors.buttonText,
     },
     categoryTab: {
       alignItems: 'center',
       justifyContent: 'center',
       paddingVertical: 8,
-      paddingHorizontal: 6,
+      paddingHorizontal: 4,
       marginHorizontal: SPACING / 2,
-      borderRadius: 12,
+      borderRadius: 16,
       backgroundColor: colors.cardBackground,
       width: CATEGORY_ITEM_WIDTH,
-      height: 80,
+      height: CATEGORY_ITEM_WIDTH,
       borderWidth: 2,
       borderColor: 'transparent',
       shadowColor: '#000',
@@ -325,18 +322,17 @@ export default function TasksScreen() {
       shadowOpacity: 0.2,
       shadowRadius: 4,
       elevation: 4,
-      borderWidth: 2,
     },
     categoryEmoji: {
-      fontSize: 20,
-      marginBottom: 3,
+      fontSize: 22,
+      marginBottom: 2,
     },
     categoryLabel: {
-      fontSize: 9,
+      fontSize: 8,
       fontWeight: '600',
       textAlign: 'center',
-      lineHeight: 10,
-      maxWidth: 80,
+      lineHeight: 9,
+      width: CATEGORY_ITEM_WIDTH - 8,
     },
     taskCount: {
       borderRadius: 8,
@@ -373,9 +369,9 @@ export default function TasksScreen() {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.cardBackground,
-      padding: 16,
-      marginVertical: 4,
-      borderRadius: 12,
+      padding: 10,
+      marginVertical: 3,
+      borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.border,
     },
@@ -383,10 +379,10 @@ export default function TasksScreen() {
       opacity: 0.6,
     },
     taskCheckbox: {
-      marginRight: 12,
+      marginRight: 8,
     },
     heartIcon: {
-      fontSize: 24,
+      fontSize: 20,
     },
     taskContent: {
       flex: 1,
@@ -394,13 +390,13 @@ export default function TasksScreen() {
     taskHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 4,
+      marginBottom: 2,
     },
     taskTitle: {
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: '600',
       color: colors.text,
-      marginLeft: 8,
+      marginLeft: 6,
       flex: 1,
     },
     completedTask: {
@@ -410,28 +406,28 @@ export default function TasksScreen() {
     taskMeta: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: 4,
+      marginTop: 2,
     },
     priorityBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      borderRadius: 12,
-      marginRight: 8,
+      paddingHorizontal: 6,
+      paddingVertical: 1,
+      borderRadius: 8,
+      marginRight: 6,
     },
     priorityText: {
       color: 'white',
-      fontSize: 12,
+      fontSize: 10,
       fontWeight: 'bold',
     },
     categoryTag: {
-      fontSize: 12,
+      fontSize: 10,
       fontWeight: '600',
     },
     deleteButton: {
-      padding: 8,
+      padding: 6,
     },
     deleteButtonText: {
-      fontSize: 24,
+      fontSize: 20,
       color: '#ff4757',
     },
     emptyState: {
@@ -503,17 +499,23 @@ export default function TasksScreen() {
     pickerContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
+      justifyContent: 'center',
       gap: 8,
+      marginHorizontal: -4,
     },
     pickerOption: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: 16,
+      justifyContent: 'center',
+      paddingHorizontal: 12,
       paddingVertical: 10,
       borderRadius: 20,
       borderWidth: 2,
       backgroundColor: colors.cardBackground,
-      minWidth: 100,
+      width: 140,
+      height: 44,
+      marginHorizontal: 4,
+      marginVertical: 4,
     },
     selectedPickerOption: {
       backgroundColor: colors.primary,
@@ -523,8 +525,10 @@ export default function TasksScreen() {
       marginRight: 6,
     },
     pickerLabel: {
-      fontSize: 14,
+      fontSize: 13,
       fontWeight: '600',
+      textAlign: 'center',
+      flex: 1,
     },
     priorityContainer: {
       flexDirection: 'row',
@@ -543,24 +547,6 @@ export default function TasksScreen() {
     },
     priorityOptionText: {
       fontSize: 14,
-      fontWeight: '600',
-    },
-    timeContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-    },
-    timeButton: {
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.cardBackground,
-    },
-    timeButtonText: {
-      fontSize: 14,
-      color: colors.text,
       fontWeight: '600',
     },
     modalButtons: {
@@ -626,10 +612,10 @@ export default function TasksScreen() {
       ? tasks.filter(t => !t.completed).length
       : tasks.filter(t => t.category === category && !t.completed).length;
 
-    // CONSISTENT CENTER DETECTION - Same scaling for all categories
+    // EDGE-BASED SCALING - Match the selection logic exactly
     const itemIndex = index !== undefined ? index : 0;
     
-    // FlatList has padding that shifts everything
+    // FlatList has padding that shifts everything  
     const flatListPadding = (SCREEN_WIDTH - CATEGORY_ITEM_WIDTH) / 2;
     
     // Item's position within the FlatList content
@@ -637,32 +623,36 @@ export default function TasksScreen() {
     
     // Item's actual position on screen (accounting for scroll and padding)
     const itemLeftEdgeOnScreen = flatListPadding + itemPositionInContent - scrollX;
-    const itemCenterOnScreen = itemLeftEdgeOnScreen + (CATEGORY_ITEM_WIDTH / 2);
+    const itemRightEdgeOnScreen = itemLeftEdgeOnScreen + CATEGORY_ITEM_WIDTH;
     
-    // True screen center
+    // True screen center (same as the invisible red line)
     const screenCenter = SCREEN_WIDTH / 2;
     
-    // Distance from screen center - round to avoid floating point issues
-    const distanceFromCenter = Math.round(Math.abs(itemCenterOnScreen - screenCenter));
+    // Check if red line touches this item (same logic as selection)
+    const isTouchedByRedLine = itemLeftEdgeOnScreen <= screenCenter && screenCenter <= itemRightEdgeOnScreen;
     
-    // CONSISTENT scaling - same thresholds for all items
+    // Distance-based scaling for items not touched by red line
+    const itemCenterOnScreen = itemLeftEdgeOnScreen + (CATEGORY_ITEM_WIDTH / 2);
+    const distanceFromCenter = Math.abs(itemCenterOnScreen - screenCenter);
+    
     let scale = 1;
     let opacity = 1;
     
-    if (distanceFromCenter <= 10) {
-      scale = 1.5;      // EXACTLY center - same for ALL categories
+    if (isTouchedByRedLine) {
+      // Item is touched by red line - make it bigger
+      scale = 1.2;
       opacity = 1;
-    } else if (distanceFromCenter <= 30) {
-      scale = 1.2;      // Very close to center
-      opacity = 0.95;
     } else if (distanceFromCenter <= 60) {
-      scale = 1.0;      // Near center
+      // Close to center but not touched
+      scale = 1.0;
       opacity = 0.8;
     } else if (distanceFromCenter <= 120) {
-      scale = 0.7;      // Adjacent items
+      // Adjacent items
+      scale = 0.7;
       opacity = 0.6;
     } else {
-      scale = 0.4;      // Distant items
+      // Distant items
+      scale = 0.4;
       opacity = 0.3;
     }
 
@@ -761,7 +751,38 @@ export default function TasksScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Category Carousel */}
+      {/* Tasks Panel */}
+      <View style={styles.tasksPanel}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={openAddModal}
+            >
+              <Text style={styles.addButtonText}>+ Add</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Tasks List */}
+        <FlatList
+          data={displayTasks}
+          keyExtractor={(item) => item.id}
+          renderItem={renderTaskItem}
+          style={styles.tasksContainer}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateEmoji}>✨</Text>
+              <Text style={styles.emptyStateText}>No tasks yet</Text>
+              <Text style={styles.emptyStateSubtext}>Create some tasks to get started!</Text>
+            </View>
+          }
+        />
+      </View>
+
+      {/* Category Carousel - Moved to Bottom */}
       <View style={styles.categoryWheelContainer}>
         <FlatList 
           ref={categoryScrollRef}
@@ -773,7 +794,7 @@ export default function TasksScreen() {
           decelerationRate={0.95} // Much faster deceleration
           onScroll={handleScroll}
           onMomentumScrollEnd={handleMomentumScrollEnd}
-          scrollEventThrottle={8} // Faster updates for smoother visual
+          scrollEventThrottle={1} // Maximum responsiveness for real-time selection
           removeClippedSubviews={false}
           renderItem={({ item, index }) => renderCategoryTab(item, index)}
           keyExtractor={(item, index) => `${item}-${index}`}
@@ -798,7 +819,7 @@ export default function TasksScreen() {
           bottom: 0,
           width: 2,
           backgroundColor: 'red',
-          opacity: 0.8,
+          opacity: 0,
           zIndex: 100,
         }} />
         
@@ -817,45 +838,6 @@ export default function TasksScreen() {
         />
       </View>
 
-      {/* Tasks Panel */}
-      <View style={styles.tasksPanel}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerButtons}>
-            <TouchableOpacity 
-              style={styles.addButton}
-              onPress={openAddModal}
-            >
-              <Text style={styles.addButtonText}>+</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.completedToggle}
-              onPress={() => setShowCompleted(!showCompleted)}
-            >
-              <Text style={[styles.completedToggleText, { color: colors.text }]}>
-                {showCompleted ? 'Hide' : 'Show'} Completed
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Tasks List */}
-        <FlatList
-          data={displayTasks}
-          keyExtractor={(item) => item.id}
-          renderItem={renderTaskItem}
-          style={styles.tasksContainer}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateEmoji}>✨</Text>
-              <Text style={styles.emptyStateText}>No tasks yet</Text>
-              <Text style={styles.emptyStateSubtext}>Create some tasks to get started!</Text>
-            </View>
-          }
-        />
-      </View>
-
       {/* Add Task Modal */}
       <Modal
         visible={modalVisible}
@@ -869,32 +851,6 @@ export default function TasksScreen() {
           </View>
 
           <ScrollView style={styles.modalContent}>
-            {/* Task Title */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Task Title</Text>
-              <TextInput
-                style={styles.textInput}
-                value={newTask.title}
-                onChangeText={(text) => setNewTask(prev => ({ ...prev, title: text }))}
-                placeholder="What needs to be done?"
-                placeholderTextColor={colors.placeholderText}
-                autoFocus
-              />
-            </View>
-
-            {/* Description */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Description (Optional)</Text>
-              <TextInput
-                style={[styles.textInput, styles.textArea]}
-                value={newTask.description}
-                onChangeText={(text) => setNewTask(prev => ({ ...prev, description: text }))}
-                placeholder="Add more details..."
-                placeholderTextColor={colors.placeholderText}
-                multiline
-              />
-            </View>
-
             {/* Category */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Category</Text>
@@ -921,6 +877,32 @@ export default function TasksScreen() {
               </View>
             </View>
 
+            {/* Task Title */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Task Title</Text>
+              <TextInput
+                style={styles.textInput}
+                value={newTask.title}
+                onChangeText={(text) => setNewTask(prev => ({ ...prev, title: text }))}
+                placeholder="What needs to be done?"
+                placeholderTextColor={colors.placeholderText}
+                autoFocus
+              />
+            </View>
+
+            {/* Description */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Description (Optional)</Text>
+              <TextInput
+                style={[styles.textInput, styles.textArea]}
+                value={newTask.description}
+                onChangeText={(text) => setNewTask(prev => ({ ...prev, description: text }))}
+                placeholder="Add more details..."
+                placeholderTextColor={colors.placeholderText}
+                multiline
+              />
+            </View>
+
             {/* Priority */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Priority</Text>
@@ -943,30 +925,6 @@ export default function TasksScreen() {
                       { color: newTask.priority === priority ? colors.buttonText : colors.text }
                     ]}>
                       {priority.charAt(0).toUpperCase() + priority.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* Estimated Time */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Estimated Time (minutes)</Text>
-              <View style={styles.timeContainer}>
-                {[15, 30, 60, 90, 120].map((time) => (
-                  <TouchableOpacity
-                    key={time}
-                    style={[
-                      styles.timeButton,
-                      newTask.estimatedTime === time && { backgroundColor: colors.primary, borderColor: colors.primary }
-                    ]}
-                    onPress={() => setNewTask(prev => ({ ...prev, estimatedTime: time }))}
-                  >
-                    <Text style={[
-                      styles.timeButtonText,
-                      { color: newTask.estimatedTime === time ? colors.buttonText : colors.text }
-                    ]}>
-                      {time}m
                     </Text>
                   </TouchableOpacity>
                 ))}
