@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, ScrollView, Modal, TextInput, Alert, PanResponder, Dimensions, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, StyleSheet, FlatList, ScrollView, Modal, TextInput, Alert, PanResponder, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useApp } from '../context/AppContext';
@@ -310,6 +310,14 @@ export default function TasksScreen() {
       borderColor: colors.border,
       width: 110,
       alignItems: 'center',
+      transform: [{ scale: 1 }],
+      // @ts-ignore - React Native Web specific properties
+      transitionProperty: 'none !important',
+      transitionDuration: '0s !important',
+      WebkitTransform: 'scale(1) !important',
+      WebkitTransition: 'none !important',
+      transition: 'none !important',
+      transformOrigin: 'center center',
     },
     addButtonText: {
       fontSize: 16,
@@ -325,6 +333,14 @@ export default function TasksScreen() {
       borderColor: colors.border,
       width: 110,
       alignItems: 'center',
+      transform: [{ scale: 1 }],
+      // @ts-ignore - React Native Web specific properties
+      transitionProperty: 'none !important',
+      transitionDuration: '0s !important',
+      WebkitTransform: 'scale(1) !important',
+      WebkitTransition: 'none !important',
+      transition: 'none !important',
+      transformOrigin: 'center center',
     },
     viewAllButtonActive: {
       backgroundColor: colors.primary,
@@ -347,6 +363,14 @@ export default function TasksScreen() {
       borderColor: '#ff4757',
       width: 110,
       alignItems: 'center',
+      transform: [{ scale: 1 }],
+      // @ts-ignore - React Native Web specific properties
+      transitionProperty: 'none !important',
+      transitionDuration: '0s !important',
+      WebkitTransform: 'scale(1) !important',
+      WebkitTransition: 'none !important',
+      transition: 'none !important',
+      transformOrigin: 'center center',
     },
     highPriorityButtonActive: {
       backgroundColor: '#ff4757',
@@ -387,8 +411,21 @@ export default function TasksScreen() {
       elevation: 4,
     },
     categoryEmoji: {
-      fontSize: 22,
-      marginBottom: 2,
+      fontSize: 16,
+      textAlign: 'center',
+    },
+    categoryEmojiBox: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 4,
+      paddingHorizontal: 6,
+      paddingVertical: 4,
+      marginLeft: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 28,
+      minHeight: 24,
     },
     categoryLabel: {
       fontSize: 8,
@@ -453,14 +490,13 @@ export default function TasksScreen() {
     taskHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 2,
+      flex: 1,
     },
     taskTitle: {
       fontSize: 14,
       fontWeight: '600',
       color: colors.text,
       marginLeft: 6,
-      flex: 1,
     },
     completedTask: {
       textDecorationLine: 'line-through',
@@ -475,12 +511,13 @@ export default function TasksScreen() {
       paddingHorizontal: 6,
       paddingVertical: 1,
       borderRadius: 8,
-      marginRight: 6,
+      marginLeft: 8,
     },
     priorityText: {
       color: 'white',
-      fontSize: 10,
+      fontSize: 18,
       fontWeight: 'bold',
+      marginRight: 8,
     },
     priorityBadgeHighlighted: {
       borderWidth: 2,
@@ -822,6 +859,30 @@ export default function TasksScreen() {
           </View>
         )}
         <View style={[styles.taskItem, item.completed && styles.completedTaskItem]}>
+          <View style={styles.taskContent}>
+            <View style={styles.taskHeader}>
+              {/* Priority emojis */}
+              {item.priority === 'high' && (
+                <Text style={styles.priorityText}>⚡</Text>
+              )}
+              {item.priority === 'medium' && (
+                <Text style={styles.priorityText}>�</Text>
+              )}
+              {item.priority === 'low' && (
+                <Text style={styles.priorityText}>🌴</Text>
+              )}
+              
+              <Text style={[styles.taskTitle, item.completed && styles.completedTask]}>
+                {item.title}
+              </Text>
+              
+              {/* Work emoji in a small box after title */}
+              <View style={styles.categoryEmojiBox}>
+                <Text style={styles.categoryEmoji}>{categoryData.emoji}</Text>
+              </View>
+            </View>
+          </View>
+          
           <TouchableOpacity 
             style={styles.taskCheckbox}
             onPress={() => toggleTask(item.id)}
@@ -829,49 +890,6 @@ export default function TasksScreen() {
             <Text style={styles.heartIcon}>
               {item.completed ? '❤️' : '🤍'}
             </Text>
-          </TouchableOpacity>
-          
-          <View style={styles.taskContent}>
-            <View style={styles.taskHeader}>
-              <Text style={styles.categoryEmoji}>{categoryData.emoji}</Text>
-              <Text style={[styles.taskTitle, item.completed && styles.completedTask]}>
-                {item.title}
-              </Text>
-            </View>
-            
-            <View style={styles.taskMeta}>
-              <View style={[
-                styles.priorityBadge,
-                viewHighPriority && styles.priorityBadgeHighlighted,
-                { backgroundColor: 
-                  item.priority === 'high' ? '#ff4757' : 
-                  item.priority === 'medium' ? '#ffa502' : '#2ed573'
-                }
-              ]}>
-                <Text style={styles.priorityText}>{item.priority}</Text>
-              </View>
-              <View style={[
-                styles.categoryTagContainer,
-                viewAllTasks && styles.categoryTagContainerAll,
-                { borderColor: categoryData.color }
-              ]}>
-                <Text style={styles.categoryEmoji}>{categoryData.emoji}</Text>
-                <Text style={[
-                  styles.categoryTag, 
-                  { color: categoryData.color },
-                  viewAllTasks && styles.categoryTagAll
-                ]}>
-                  {categoryData.label}
-                </Text>
-              </View>
-            </View>
-          </View>
-          
-          <TouchableOpacity 
-            style={styles.deleteButton}
-            onPress={() => deleteTask(item.id)}
-          >
-            <Text style={styles.deleteButtonText}>×</Text>
           </TouchableOpacity>
         </View>
       </>
@@ -885,10 +903,18 @@ export default function TasksScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerButtons}>
-            <TouchableOpacity 
-              style={[
+            <Pressable 
+              style={({ pressed }) => [
                 styles.viewAllButton,
-                viewAllTasks && styles.viewAllButtonActive
+                viewAllTasks && styles.viewAllButtonActive,
+                { 
+                  transform: [{ scale: 1 }],
+                  // @ts-ignore
+                  transition: 'none !important',
+                  WebkitTransition: 'none !important',
+                  transitionProperty: 'none !important',
+                  transitionDuration: '0s !important'
+                }
               ]}
               onPress={toggleViewAllTasks}
             >
@@ -898,11 +924,19 @@ export default function TasksScreen() {
               ]}>
                 {viewAllTasks ? '📋 All Tasks' : '👁️ View All'}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[
+            </Pressable>
+            <Pressable 
+              style={({ pressed }) => [
                 styles.highPriorityButton,
-                viewHighPriority && styles.highPriorityButtonActive
+                viewHighPriority && styles.highPriorityButtonActive,
+                { 
+                  transform: [{ scale: 1 }],
+                  // @ts-ignore
+                  transition: 'none !important',
+                  WebkitTransition: 'none !important',
+                  transitionProperty: 'none !important',
+                  transitionDuration: '0s !important'
+                }
               ]}
               onPress={toggleViewHighPriority}
             >
@@ -910,15 +944,25 @@ export default function TasksScreen() {
                 styles.highPriorityButtonText,
                 viewHighPriority && styles.highPriorityButtonTextActive
               ]}>
-                {viewHighPriority ? '🔥 High Priority' : '⚡ Urgent'}
+                {viewHighPriority ? '⚡ High Priority' : '⚡ Urgent'}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.addButton}
+            </Pressable>
+            <Pressable 
+              style={({ pressed }) => [
+                styles.addButton,
+                { 
+                  transform: [{ scale: 1 }],
+                  // @ts-ignore
+                  transition: 'none !important',
+                  WebkitTransition: 'none !important',
+                  transitionProperty: 'none !important',
+                  transitionDuration: '0s !important'
+                }
+              ]}
               onPress={openAddModal}
             >
               <Text style={styles.addButtonText}>+ Add</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
 
@@ -939,7 +983,7 @@ export default function TasksScreen() {
           ) : viewHighPriority ? (
             <View style={styles.viewAllHeader}>
               <Text style={[styles.viewAllHeaderText, { color: '#ff4757' }]}>
-                🔥 High Priority Tasks ({displayTasks.length})
+                ⚡ High Priority Tasks ({displayTasks.length})
               </Text>
               <Text style={styles.viewAllHeaderSubtext}>
                 Showing {incompleteTasks.length} urgent tasks that need immediate attention
