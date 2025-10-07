@@ -422,6 +422,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.text,
     marginBottom: 0,
     flex: 1,
+    textAlign: 'center',
   },
   tasksContainer: {
     gap: 12,
@@ -545,6 +546,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.text,
     marginBottom: 0,
     flex: 1,
+    textAlign: 'center',
   },
   appointmentsContainer: {
     gap: 12,
@@ -706,6 +708,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.text,
     marginBottom: 0,
     flex: 1,
+    textAlign: 'center',
   },
   goalsContainer: {
     gap: 12,
@@ -778,7 +781,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   sectionHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
     paddingHorizontal: 20,

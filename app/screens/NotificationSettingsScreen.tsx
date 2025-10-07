@@ -281,6 +281,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 8,
     fontFamily: 'System',
+    textAlign: 'center',
   },
   sectionSubtitle: {
     fontSize: 14,

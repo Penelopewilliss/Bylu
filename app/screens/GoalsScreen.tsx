@@ -647,6 +647,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 4,
+    textAlign: 'center',
   },
   sectionSubtitle: {
     fontSize: 14,

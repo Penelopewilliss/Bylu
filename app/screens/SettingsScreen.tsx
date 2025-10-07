@@ -346,6 +346,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
     marginBottom: 16,
+    textAlign: 'center',
   },
   settingItem: {
     flexDirection: 'row',

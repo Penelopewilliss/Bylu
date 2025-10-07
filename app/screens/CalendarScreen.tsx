@@ -599,6 +599,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
     marginBottom: 15,
+    textAlign: 'center',
   },
   notificationToggle: {
     flexDirection: 'row',
