@@ -204,6 +204,15 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: 20,
     maxHeight: '80%',
   },
+  modalDragHandle: {
+    width: 50,
+    height: 5,
+    backgroundColor: colors.border,
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginTop: 8,
+    marginBottom: 20,
+  },
   dayModalTitle: {
     fontSize: 20,
     fontWeight: '700',
@@ -777,17 +786,17 @@ export default function CalendarScreen() {
   // PanResponder for swipe to close modal (horizontal + vertical down from header area)
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: (evt) => {
-      // Only capture gestures that start in the header area (top 100px) or for horizontal swipes
+      // Capture gestures that start in the top area (top 200px) or for horizontal swipes
       const { locationY } = evt.nativeEvent;
-      return locationY < 100; // Only capture if starting from top area
+      return locationY < 200; // Expanded area for easier swipe-to-close
     },
     onMoveShouldSetPanResponder: (evt, gestureState) => {
       const { dx, dy } = gestureState;
       const { locationY } = evt.nativeEvent;
       
-      // For gestures starting in header area, allow vertical down swipes
-      if (locationY < 100) {
-        return Math.abs(dx) > 20 || (dy > 20 && Math.abs(dy) > Math.abs(dx));
+      // For gestures starting in top area, allow vertical down swipes
+      if (locationY < 200) {
+        return Math.abs(dx) > 15 || (dy > 15 && Math.abs(dy) > Math.abs(dx));
       }
       
       // For other areas, only horizontal swipes
@@ -804,12 +813,12 @@ export default function CalendarScreen() {
       const { locationY } = evt.nativeEvent;
       
       // Close modal for horizontal swipes (any area)
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
         setShowAddModal(false);
         setShowDayModal(false);
       }
-      // Close modal for vertical down swipes from header area
-      else if (locationY < 100 && dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+      // Close modal for vertical down swipes from expanded top area (overlaps content)
+      else if (locationY < 350 && dy > 60 && Math.abs(dy) > Math.abs(dx)) {
         setShowAddModal(false);
         setShowDayModal(false);
       }
@@ -1245,6 +1254,9 @@ export default function CalendarScreen() {
       >
         <View style={styles.modalOverlay} {...panResponder.panHandlers}>
           <View style={styles.dayModalContent}>
+            {/* Drag handle for swipe-to-close indication */}
+            <View style={styles.modalDragHandle} />
+            
             <Text style={styles.dayModalTitle}>
               {selectedDate?.toLocaleDateString('en-US', { 
                 weekday: 'long', 
