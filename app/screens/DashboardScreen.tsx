@@ -96,12 +96,6 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>📅 Today's Appointments</Text>
-          <TouchableOpacity 
-            style={styles.viewAllButton}
-            onPress={() => onNavigate?.('Calendar')}
-          >
-            <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
         </View>
         
         <View style={styles.sectionCard}>
@@ -136,6 +130,14 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
               <Text style={styles.emptySubtitle}>Enjoy your free time! 🌸</Text>
             </View>
           )}
+          
+          {/* Add Button - Bottom Right */}
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => onNavigate?.('Calendar')}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -146,12 +148,6 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>✅ Today's Tasks</Text>
-          <TouchableOpacity 
-            style={styles.viewAllButton}
-            onPress={() => onNavigate?.('Tasks')}
-          >
-            <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
         </View>
         
         <View style={styles.sectionCard}>
@@ -186,6 +182,14 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
               <Text style={styles.emptySubtitle}>Great job staying productive! 🎉</Text>
             </View>
           )}
+          
+          {/* Add Button - Bottom Right */}
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => onNavigate?.('Tasks')}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -196,12 +200,6 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
       <View style={styles.sectionWrapper}>
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>✨ Your Goals</Text>
-          <TouchableOpacity 
-            style={styles.viewAllButton}
-            onPress={() => onNavigate?.('Goals')}
-          >
-            <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
         </View>
         
         <View style={styles.sectionCard}>
@@ -241,6 +239,14 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
               <Text style={styles.emptySubtitle}>Tap to start achieving your dreams! 🎯</Text>
             </View>
           )}
+          
+          {/* Add Button - Bottom Right */}
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => onNavigate?.('Goals')}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -810,6 +816,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 20,
     padding: 20,
+    paddingBottom: 60, // Extra padding for add button
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -817,6 +824,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     elevation: 4,
     borderWidth: 1,
     borderColor: colors.border,
+    position: 'relative',
   },
   contentList: {
     gap: 12,
@@ -936,6 +944,28 @@ const createStyles = (colors: any) => StyleSheet.create({
   quoteAuthor: {
     fontSize: 14,
     color: colors.primary,
+    fontWeight: '600',
+  },
+  // Add Button Styles - Bottom Right Positioned
+  addButton: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#FF69B4',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(247, 209, 218, 0.5)',
+  },
+  addButtonText: {
+    color: colors.buttonText,
+    fontSize: 12,
     fontWeight: '600',
   },
 });
