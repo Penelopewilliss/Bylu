@@ -140,7 +140,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.text,
   },
   todayText: {
-    color: colors.text,
+    color: '#000000',
     fontWeight: '700',
   },
   otherMonthText: {
@@ -171,12 +171,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '500',
   },
   fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 100, // Move higher to avoid calendar overlap
-    width: 48, // Slightly smaller
-    height: 48,
-    borderRadius: 24,
+    alignSelf: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -187,7 +187,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     elevation: 8,
   },
   fabText: {
-    fontSize: 20, // Smaller to match the smaller FAB
+    fontSize: 16,
     color: colors.buttonText,
     fontWeight: '600',
   },
@@ -285,35 +285,37 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   dayModalButtons: {
     flexDirection: 'row',
-    paddingBottom: 20,
+    paddingBottom: 6,
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   addAppointmentButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
+    flex: 1,
+    marginLeft: 6,
   },
   addAppointmentButtonText: {
     color: colors.buttonText,
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 14,
   },
   closeButton: {
-    backgroundColor: colors.border,
-    paddingVertical: 12,
+    backgroundColor: colors.secondary,
+    paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     flex: 1,
-    marginRight: 12,
+    marginRight: 6,
   },
   closeButtonText: {
     color: colors.text,
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 14,
   },
   addModalContent: {
     backgroundColor: colors.cardBackground,
@@ -739,6 +741,39 @@ export default function CalendarScreen() {
     notificationsEnabled: true // Enable notifications by default
   });
 
+  // PanResponder for calendar month navigation (horizontal swipes)
+  const calendarPanResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: (evt, gestureState) => {
+      // Only capture horizontal swipes (more horizontal than vertical movement)
+      return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 10;
+    },
+    onPanResponderGrant: () => {
+      // Gesture started
+    },
+    onPanResponderMove: () => {
+      // Gesture is moving
+    },
+    onPanResponderRelease: (evt, gestureState) => {
+      // Gesture ended - check if it was a significant swipe
+      const { dx } = gestureState;
+      const swipeThreshold = 50; // Minimum distance for a swipe
+      
+      if (Math.abs(dx) > swipeThreshold) {
+        if (dx > 0) {
+          // Swipe right - go to previous month
+          navigateMonth('prev');
+        } else {
+          // Swipe left - go to next month
+          navigateMonth('next');
+        }
+      }
+    },
+    onPanResponderTerminate: () => {
+      // Gesture was terminated
+    },
+  });
+
   // PanResponder for swipe to close modal (horizontal + vertical down from header area)
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: (evt) => {
@@ -1129,6 +1164,7 @@ export default function CalendarScreen() {
         style={styles.calendarContainer} 
         contentContainerStyle={styles.calendarScrollContent}
         showsVerticalScrollIndicator={false}
+        {...calendarPanResponder.panHandlers}
       >
         <View style={styles.calendarContent}>
           {/* Day Headers */}
@@ -1186,19 +1222,19 @@ export default function CalendarScreen() {
             })}
           </View>
         ))}
+        
+        {/* Add Button underneath calendar */}
+        <TouchableOpacity 
+          style={styles.fab} 
+          onPress={() => {
+            setIsCreatingFromSpecificDay(false);
+            handleAddAppointment();
+          }}
+        >
+          <Text style={styles.fabText}>+ Add Appointment</Text>
+        </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Floating Add Button */}
-      <TouchableOpacity 
-        style={styles.fab} 
-        onPress={() => {
-          setIsCreatingFromSpecificDay(false);
-          handleAddAppointment();
-        }}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
 
       {/* Day Modal */}
       <Modal

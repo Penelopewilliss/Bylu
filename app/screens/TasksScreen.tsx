@@ -194,11 +194,11 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
     marginRight: 8,
-    backgroundColor: colors.border,
+    backgroundColor: colors.secondary,
   },
   saveButton: {
     flex: 1,
@@ -209,7 +209,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.primary,
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: colors.text,
   },
@@ -419,15 +419,15 @@ const createStyles = (colors: any) => StyleSheet.create({
   createButton: {
     flex: 1,
     backgroundColor: colors.primary,
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
     alignItems: 'center',
   },
   createButtonDisabled: {
     backgroundColor: colors.border,
   },
   createButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: colors.buttonText,
     fontFamily: Fonts.body?.fontFamily || 'System',

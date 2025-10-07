@@ -924,18 +924,21 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: 16,
   },
   quoteText: {
-    fontSize: 16,
-    fontStyle: 'italic',
+    fontSize: 28,
+    fontFamily: 'GreatVibes_400Regular',
     color: colors.text,
     textAlign: 'center',
     marginBottom: 12,
-    lineHeight: 24,
+    lineHeight: 40,
     paddingHorizontal: 16,
+    letterSpacing: 0.5,
   },
   quoteAuthor: {
-    fontSize: 14,
+    fontSize: 20,
     color: colors.primary,
     fontWeight: '600',
+    fontFamily: 'DancingScript_400Regular',
+    letterSpacing: 0.3,
   },
   // Add Button Styles - Bottom Right Positioned
   addButton: {
