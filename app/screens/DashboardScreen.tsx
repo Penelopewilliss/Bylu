@@ -4,6 +4,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useOffline } from '../context/OfflineContext';
+import { Category } from '../types';
+
+// Category emoji mapping (matching TasksScreen)
+const TASK_CATEGORIES: Record<Category, { emoji: string; label: string; color: string }> = {
+  work: { emoji: '💼', label: 'Work', color: '#B8C5F2' },
+  personal: { emoji: '👤', label: 'Personal', color: '#E8B4F0' },
+  household: { emoji: '🏠', label: 'Household', color: '#FFD19A' },
+  groceries: { emoji: '🛒', label: 'Groceries', color: '#B8E6B8' },
+  calls: { emoji: '📞', label: 'Calls', color: '#A8D4FF' },
+  shopping: { emoji: '🛍️', label: 'Shopping', color: '#FFB3D1' },
+  errands: { emoji: '🚗', label: 'Errands', color: '#E8B4F0' },
+  finances: { emoji: '💰', label: 'Finances', color: '#D4B5A0' },
+  health: { emoji: '🏥', label: 'Health', color: '#FFB3B3' },
+  fitness: { emoji: '💪', label: 'Fitness', color: '#D4E8B8' },
+  learning: { emoji: '📚', label: 'Learning', color: '#C8B4E8' },
+  hobbies: { emoji: '🎨', label: 'Hobbies', color: '#A3D4D0' },
+  other: { emoji: '📝', label: 'Other', color: '#607D8B' },
+};
 
 // Motivational quotes array
 const quotes = [
@@ -204,25 +222,41 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
         <View style={styles.sectionCard}>
           {highPriorityTasks.length > 0 ? (
             <View style={styles.contentList}>
-              {highPriorityTasks.map((task, index) => (
-                <View key={task.id} style={styles.contentItem}>
-                  <View style={styles.itemContent}>
+              {highPriorityTasks.map((task, index) => {
+                const categoryData = TASK_CATEGORIES[task.category] || TASK_CATEGORIES.other;
+                return (
+                  <View key={task.id} style={styles.contentItem}>
+                    <View style={styles.dashboardTaskContent}>
+                      <View style={styles.dashboardTaskHeader}>
+                        {/* Priority emojis */}
+                        {task.priority === 'high' && (
+                          <Text style={styles.dashboardPriorityText}>⚡</Text>
+                        )}
+                        {task.priority === 'medium' && (
+                          <Text style={styles.dashboardPriorityText}>🔶</Text>
+                        )}
+                        {task.priority === 'low' && (
+                          <Text style={styles.dashboardPriorityText}>🌴</Text>
+                        )}
+                        
+                        <Text style={styles.taskTitle}>{task.title}</Text>
+                        
+                        {/* Work emoji in a small box after title */}
+                        <View style={styles.categoryEmojiBox}>
+                          <Text style={styles.categoryEmoji}>{categoryData.emoji}</Text>
+                        </View>
+                      </View>
+                    </View>
+                    
                     <TouchableOpacity 
                       style={styles.taskCheckbox}
                       onPress={() => handleTaskToggle(task.id)}
                     >
                       <Text style={styles.heartIcon}>🤍</Text>
                     </TouchableOpacity>
-                    <View style={styles.itemDetails}>
-                      <Text style={styles.itemTitle}>{task.title}</Text>
-                      <Text style={styles.itemSubtitle}>Priority: {task.priority}</Text>
-                    </View>
-                    {task.priority === 'high' && (
-                      <Text style={styles.electricEmoji}>⚡</Text>
-                    )}
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           ) : (
             <View style={styles.emptyContent}>
@@ -532,9 +566,9 @@ const createStyles = (colors: any) => StyleSheet.create({
   taskTitle: {
     fontSize: 17,
     color: colors.text,
-    flex: 1,
     fontWeight: '600',
-    marginLeft: 12,
+    marginLeft: 8,
+    marginRight: 8,
     letterSpacing: 0.2,
     lineHeight: 24,
   },
@@ -1017,6 +1051,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     padding: 16,
     borderWidth: 0.5,
     borderColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   itemContent: {
     flexDirection: 'row',
@@ -1154,5 +1191,33 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.buttonText,
     fontSize: 12,
     fontWeight: '600',
+  },
+  // Task layout styles (matching TasksScreen)
+  dashboardTaskContent: {
+    flex: 1,
+  },
+  dashboardTaskHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dashboardPriorityText: {
+    fontSize: 24,
+    color: colors.text,
+  },
+  categoryEmojiBox: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    minWidth: 28,
+    minHeight: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  categoryEmoji: {
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
