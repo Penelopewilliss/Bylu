@@ -9,6 +9,16 @@ export interface NotificationSettings {
   vibrationEnabled: boolean;
 }
 
+export interface PriorityReminderSettings {
+  enabled: boolean;
+  morningEnabled: boolean;
+  lunchEnabled: boolean;
+  eveningEnabled: boolean;
+  morningTime: { hour: number; minute: number };
+  lunchTime: { hour: number; minute: number };
+  eveningTime: { hour: number; minute: number };
+}
+
 export interface Appointment {
   id: string;
   title: string;
@@ -23,9 +33,20 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   vibrationEnabled: true,
 };
 
+const DEFAULT_PRIORITY_REMINDER_SETTINGS: PriorityReminderSettings = {
+  enabled: true,
+  morningEnabled: true,
+  lunchEnabled: false,
+  eveningEnabled: false,
+  morningTime: { hour: 9, minute: 0 },
+  lunchTime: { hour: 13, minute: 0 },
+  eveningTime: { hour: 18, minute: 0 },
+};
+
 class NotificationService {
   private static instance: NotificationService;
   private settings: NotificationSettings = DEFAULT_SETTINGS;
+  private priorityReminderSettings: PriorityReminderSettings = DEFAULT_PRIORITY_REMINDER_SETTINGS;
 
   static getInstance(): NotificationService {
     if (!NotificationService.instance) {
@@ -48,6 +69,11 @@ class NotificationService {
 
     // Load settings
     await this.loadSettings();
+    
+    // Initialize priority reminders
+    await this.scheduleDailyPriorityReminders();
+    
+    console.log('🔔 Notification service initialized');
   }
 
   async requestPermissions(): Promise<boolean> {
@@ -83,15 +109,34 @@ class NotificationService {
     await AsyncStorage.setItem('notificationSettings', JSON.stringify(this.settings));
   }
 
+  async updatePriorityReminderSettings(newSettings: Partial<PriorityReminderSettings>): Promise<void> {
+    this.priorityReminderSettings = { ...this.priorityReminderSettings, ...newSettings };
+    await AsyncStorage.setItem('priorityReminderSettings', JSON.stringify(this.priorityReminderSettings));
+    
+    // Reschedule reminders when settings change
+    await this.scheduleDailyPriorityReminders();
+  }
+
+  getPriorityReminderSettings(): PriorityReminderSettings {
+    return { ...this.priorityReminderSettings };
+  }
+
   async loadSettings(): Promise<void> {
     try {
       const stored = await AsyncStorage.getItem('notificationSettings');
       if (stored) {
         this.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
       }
+      
+      // Load priority reminder settings
+      const priorityStored = await AsyncStorage.getItem('priorityReminderSettings');
+      if (priorityStored) {
+        this.priorityReminderSettings = { ...DEFAULT_PRIORITY_REMINDER_SETTINGS, ...JSON.parse(priorityStored) };
+      }
     } catch (error) {
       console.error('Failed to load notification settings:', error);
       this.settings = DEFAULT_SETTINGS;
+      this.priorityReminderSettings = DEFAULT_PRIORITY_REMINDER_SETTINGS;
     }
   }
 
@@ -231,6 +276,114 @@ class NotificationService {
       console.log('✅ Test notification scheduled');
     } catch (error) {
       console.error('Failed to schedule test notification:', error);
+    }
+  }
+
+  async testPriorityReminder(): Promise<void> {
+    if (!this.settings.enabled) {
+      console.log('❌ Notifications are disabled');
+      return;
+    }
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '⚡ Priority Task Reminder',
+          body: 'Time to focus on your high priority tasks! ⚡',
+          data: { 
+            type: 'priority-reminder-test',
+            timeSlot: 'test'
+          },
+          sound: this.settings.soundEnabled ? 'default' : false,
+          ...(Platform.OS === 'android' && {
+            channelId: 'priority-reminders',
+          }),
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: 2,
+        },
+      });
+      console.log('✅ Test priority reminder scheduled');
+    } catch (error) {
+      console.error('Failed to schedule test priority reminder:', error);
+    }
+  }
+
+  async scheduleDailyPriorityReminders(): Promise<void> {
+    if (!this.priorityReminderSettings.enabled) {
+      await this.cancelAllPriorityReminders();
+      return;
+    }
+
+    // Cancel existing priority reminders
+    await this.cancelAllPriorityReminders();
+
+    const reminderTimes = [];
+    
+    if (this.priorityReminderSettings.morningEnabled) {
+      reminderTimes.push({
+        ...this.priorityReminderSettings.morningTime,
+        id: 'priority-morning',
+        label: 'Morning'
+      });
+    }
+    
+    if (this.priorityReminderSettings.lunchEnabled) {
+      reminderTimes.push({
+        ...this.priorityReminderSettings.lunchTime,
+        id: 'priority-lunch',
+        label: 'Lunch'
+      });
+    }
+    
+    if (this.priorityReminderSettings.eveningEnabled) {
+      reminderTimes.push({
+        ...this.priorityReminderSettings.eveningTime,
+        id: 'priority-evening',
+        label: 'Evening'
+      });
+    }
+
+    // Schedule reminders for each enabled time
+    for (const time of reminderTimes) {
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `⚡ ${time.label} Priority Check`,
+            body: 'Time to review your priority tasks! ⚡',
+            data: { 
+              type: 'priority-reminder',
+              timeSlot: time.id
+            },
+            sound: this.settings.soundEnabled ? 'default' : false,
+            ...(Platform.OS === 'android' && {
+              channelId: 'priority-reminders',
+            }),
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DAILY,
+            hour: time.hour,
+            minute: time.minute,
+          },
+          identifier: time.id,
+        });
+        
+        console.log(`✅ Scheduled ${time.label.toLowerCase()} priority reminder for ${time.hour}:${time.minute.toString().padStart(2, '0')}`);
+      } catch (error) {
+        console.error(`Failed to schedule ${time.label.toLowerCase()} priority reminder:`, error);
+      }
+    }
+  }
+
+  async cancelAllPriorityReminders(): Promise<void> {
+    try {
+      await Notifications.cancelScheduledNotificationAsync('priority-morning');
+      await Notifications.cancelScheduledNotificationAsync('priority-lunch');
+      await Notifications.cancelScheduledNotificationAsync('priority-evening');
+      console.log('✅ Cancelled all priority reminders');
+    } catch (error) {
+      console.error('Failed to cancel priority reminders:', error);
     }
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -15,7 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useCalendarSync } from '../context/CalendarSyncContext';
 import OfflineIndicator from '../components/OfflineIndicator';
 import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
-import NotificationService from '../services/NotificationService';
+import NotificationService, { PriorityReminderSettings } from '../services/NotificationService';
 
 export default function SettingsScreen() {
   const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime } = useTheme();
@@ -31,7 +31,49 @@ export default function SettingsScreen() {
     enableSync 
   } = useCalendarSync();
 
+  const [priorityReminderSettings, setPriorityReminderSettings] = useState<PriorityReminderSettings>({
+    enabled: true,
+    morningEnabled: true,
+    lunchEnabled: false,
+    eveningEnabled: false,
+    morningTime: { hour: 9, minute: 0 },
+    lunchTime: { hour: 13, minute: 0 },
+    eveningTime: { hour: 18, minute: 0 },
+  });
+
   const styles = createStyles(colors);
+
+  // Load priority reminder settings on component mount
+  useEffect(() => {
+    const loadPrioritySettings = async () => {
+      try {
+        const notificationService = NotificationService.getInstance();
+        const settings = notificationService.getPriorityReminderSettings();
+        setPriorityReminderSettings(settings);
+        console.log(`⚙️ SettingsScreen: Loaded priority reminder settings, enabled = ${settings.enabled}`);
+      } catch (error) {
+        console.error('Failed to load priority reminder settings:', error);
+      }
+    };
+    
+    loadPrioritySettings();
+  }, []);
+
+  const updatePriorityReminderSetting = async (key: keyof PriorityReminderSettings, value: any) => {
+    try {
+      console.log(`⚙️ SettingsScreen: Updating ${key} to ${value}`);
+      const newSettings = { ...priorityReminderSettings, [key]: value };
+      setPriorityReminderSettings(newSettings);
+      
+      const notificationService = NotificationService.getInstance();
+      await notificationService.updatePriorityReminderSettings(newSettings);
+      
+      console.log(`✅ SettingsScreen: Updated priority reminder setting: ${key} = ${value}`);
+    } catch (error) {
+      console.error('Failed to update priority reminder settings:', error);
+      Alert.alert('Error', 'Failed to update reminder settings');
+    }
+  };
 
   const resetOnboarding = async () => {
     try {
@@ -78,6 +120,40 @@ export default function SettingsScreen() {
       Alert.alert(
         '❌ Error',
         'Failed to send test notification. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  const testPriorityReminder = async () => {
+    try {
+      console.log('⚡ Testing priority reminder...');
+      const notificationService = NotificationService.getInstance();
+      
+      // Request permissions first
+      const hasPermission = await notificationService.requestPermissions();
+      if (!hasPermission) {
+        Alert.alert(
+          '❌ Permission Required',
+          'Please allow notifications to test priority reminders!',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      // Send test priority reminder
+      await notificationService.testPriorityReminder();
+      
+      Alert.alert(
+        '⚡ Priority Reminder Sent!',
+        'Check your notification bar for your priority task reminder!',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error testing priority reminder:', error);
+      Alert.alert(
+        '❌ Error',
+        'Failed to send test priority reminder. Please try again.',
         [{ text: 'OK' }]
       );
     }
@@ -283,6 +359,75 @@ export default function SettingsScreen() {
             </View>
             <Text style={styles.chevron}>🔔</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingItem} onPress={testPriorityReminder}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>⚡ Test Priority Reminder</Text>
+              <Text style={styles.settingDescription}>Test your priority task reminder notification</Text>
+            </View>
+            <Text style={styles.chevron}>⚡</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Priority Reminders Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>⚡ Priority Reminders</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Enable Reminders</Text>
+              <Text style={styles.settingDescription}>Daily reminders for your priority tasks</Text>
+            </View>
+            <Switch
+              value={priorityReminderSettings.enabled}
+              onValueChange={(value) => updatePriorityReminderSetting('enabled', value)}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor={priorityReminderSettings.enabled ? colors.background : colors.textLight}
+            />
+          </View>
+
+          {priorityReminderSettings.enabled && (
+            <>
+              <View style={styles.settingItem}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>🌅 Morning (9:00 AM)</Text>
+                  <Text style={styles.settingDescription}>Start your day with priority focus</Text>
+                </View>
+                <Switch
+                  value={priorityReminderSettings.morningEnabled}
+                  onValueChange={(value) => updatePriorityReminderSetting('morningEnabled', value)}
+                  trackColor={{ false: colors.border, true: colors.primary }}
+                  thumbColor={priorityReminderSettings.morningEnabled ? colors.background : colors.textLight}
+                />
+              </View>
+
+              <View style={styles.settingItem}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>🍽️ Lunch (1:00 PM)</Text>
+                  <Text style={styles.settingDescription}>Midday priority check-in</Text>
+                </View>
+                <Switch
+                  value={priorityReminderSettings.lunchEnabled}
+                  onValueChange={(value) => updatePriorityReminderSetting('lunchEnabled', value)}
+                  trackColor={{ false: colors.border, true: colors.primary }}
+                  thumbColor={priorityReminderSettings.lunchEnabled ? colors.background : colors.textLight}
+                />
+              </View>
+
+              <View style={styles.settingItem}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>🌆 Evening (6:00 PM)</Text>
+                  <Text style={styles.settingDescription}>End-of-day priority review</Text>
+                </View>
+                <Switch
+                  value={priorityReminderSettings.eveningEnabled}
+                  onValueChange={(value) => updatePriorityReminderSetting('eveningEnabled', value)}
+                  trackColor={{ false: colors.border, true: colors.primary }}
+                  thumbColor={priorityReminderSettings.eveningEnabled ? colors.background : colors.textLight}
+                />
+              </View>
+            </>
+          )}
         </View>
 
         {/* Developer Section */}

@@ -1,10 +1,12 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, Pressable, StyleSheet, FlatList, ScrollView, Modal, TextInput, Alert, PanResponder, Dimensions, Animated } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Pressable, StyleSheet, FlatList, ScrollView, Modal, TextInput, Alert, PanResponder, Dimensions, Animated, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Category, Priority } from '../types';
+import NotificationService from '../services/NotificationService';
+import { useFocusEffect } from '@react-navigation/native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CATEGORY_ITEM_WIDTH = 100;
@@ -35,6 +37,7 @@ export default function TasksScreen() {
   const [viewAllTasks, setViewAllTasks] = useState(false);
   const [viewHighPriority, setViewHighPriority] = useState(false);
   const [scrollX, setScrollX] = useState(0);
+  const [priorityNotificationsEnabled, setPriorityNotificationsEnabled] = useState(true);
   const categoryScrollRef = useRef<FlatList>(null);
   const modalScrollRef = useRef<ScrollView>(null);
   const [newTask, setNewTask] = useState({
@@ -43,6 +46,38 @@ export default function TasksScreen() {
     category: 'personal' as Category,
     priority: 'medium' as Priority,
   });
+
+  // Load priority notification settings when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadNotificationSettings = async () => {
+        try {
+          const notificationService = NotificationService.getInstance();
+          const settings = notificationService.getPriorityReminderSettings();
+          setPriorityNotificationsEnabled(settings.enabled);
+          console.log(`📱 TasksScreen: Loaded priority notifications enabled = ${settings.enabled}`);
+        } catch (error) {
+          console.error('Failed to load priority notification settings:', error);
+        }
+      };
+      
+      loadNotificationSettings();
+    }, [])
+  );
+
+  const togglePriorityNotifications = async (enabled: boolean) => {
+    try {
+      console.log(`📱 TasksScreen: Toggling priority notifications to ${enabled}`);
+      setPriorityNotificationsEnabled(enabled);
+      const notificationService = NotificationService.getInstance();
+      await notificationService.updatePriorityReminderSettings({ enabled });
+      console.log(`✅ TasksScreen: Priority notifications ${enabled ? 'enabled' : 'disabled'} and saved`);
+    } catch (error) {
+      console.error('Failed to update priority notification settings:', error);
+      setPriorityNotificationsEnabled(!enabled); // Revert on error
+      Alert.alert('Error', 'Failed to update notification settings');
+    }
+  };
 
   // PanResponder for swipe to close modal
   const panResponder = PanResponder.create({
@@ -732,6 +767,36 @@ export default function TasksScreen() {
     createButtonText: {
       color: colors.buttonText,
     },
+    priorityNotificationToggle: {
+      margin: 20,
+      marginTop: 16,
+      backgroundColor: colors.cardBackground,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: 'hidden',
+    },
+    priorityToggleContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+    },
+    priorityToggleInfo: {
+      flex: 1,
+      marginRight: 16,
+    },
+    priorityToggleTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+      marginBottom: 4,
+    },
+    priorityToggleDescription: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      lineHeight: 20,
+    },
   });
 
   // Filter tasks by category and priority
@@ -1002,6 +1067,24 @@ export default function TasksScreen() {
               <Text style={styles.emptyStateSubtext}>Declutter your life!</Text>
             </View>
           }
+          ListFooterComponent={viewHighPriority ? (
+            <View style={styles.priorityNotificationToggle}>
+              <View style={styles.priorityToggleContent}>
+                <View style={styles.priorityToggleInfo}>
+                  <Text style={styles.priorityToggleTitle}>🔔 Priority Notifications</Text>
+                  <Text style={styles.priorityToggleDescription}>
+                    Get daily reminders for your high priority tasks
+                  </Text>
+                </View>
+                <Switch
+                  value={priorityNotificationsEnabled}
+                  onValueChange={togglePriorityNotifications}
+                  trackColor={{ false: colors.border, true: colors.accent }}
+                  thumbColor={priorityNotificationsEnabled ? colors.background : colors.textLight}
+                />
+              </View>
+            </View>
+          ) : null}
         />
       </View>
 
