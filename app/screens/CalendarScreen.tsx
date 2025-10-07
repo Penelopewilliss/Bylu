@@ -313,7 +313,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginRight: 6,
   },
   closeButtonText: {
-    color: colors.text,
+    color: colors.buttonText,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -396,7 +396,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: colors.text,
+    color: colors.buttonText,
     fontWeight: '600',
     fontSize: 16,
   },

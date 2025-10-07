@@ -211,7 +211,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   cancelButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.buttonText,
   },
   saveButtonText: {
     fontSize: 16,

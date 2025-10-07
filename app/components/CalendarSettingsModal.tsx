@@ -341,7 +341,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 18,
-    color: colors.text,
+    color: colors.buttonText,
     fontWeight: 'bold',
   },
   content: {
