@@ -3,7 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Simple network detection without external dependencies
 class NetworkService {
   private isOnline: boolean = true;
-  private checkInterval: NodeJS.Timeout | null = null;
+  // In React Native / browser environments setInterval returns a numeric id
+  private checkInterval: number | null = null;
   private listeners: Array<(isOnline: boolean) => void> = [];
 
   constructor() {
@@ -16,9 +17,9 @@ class NetworkService {
       this.isOnline = true;
       
       // Check network periodically (simple approach)
-      this.checkInterval = setInterval(() => {
+      this.checkInterval = Number(setInterval(() => {
         this.checkConnectivity();
-      }, 10000); // Check every 10 seconds
+      }, 10000)); // Check every 10 seconds
       
       console.log('🌐 Network service initialized');
     } catch (error) {
@@ -108,7 +109,7 @@ class NetworkService {
 
   public cleanup() {
     if (this.checkInterval) {
-      clearInterval(this.checkInterval);
+        clearInterval(this.checkInterval as number);
       this.checkInterval = null;
     }
     this.listeners = [];

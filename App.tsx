@@ -223,12 +223,12 @@ function TopBar({
   );
 }
 
-function Screen({ activeTab, onNavigate }: { activeTab: TabName; onNavigate: (tab: string) => void }) {
+function Screen({ activeTab, onNavigate, deepLink, onClearDeepLink }: { activeTab: TabName; onNavigate: (tab: string) => void; deepLink?: any; onClearDeepLink?: () => void }) {
   switch (activeTab) {
     case 'Dashboard':
       return <DashboardScreen onNavigate={onNavigate} />;
     case 'Tasks':
-      return <TasksScreen />;
+      return <TasksScreen deepLink={deepLink} onDeepLinkHandled={onClearDeepLink} />;
     case 'Calendar':
       return <CalendarScreen />;
     case 'Goals':
@@ -244,6 +244,7 @@ function Screen({ activeTab, onNavigate }: { activeTab: TabName; onNavigate: (ta
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState<TabName>('Dashboard');
+  const [deepLink, setDeepLink] = useState<any>(null);
   const [isSplashFinished, setIsSplashFinished] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -338,6 +339,29 @@ function MainApp() {
     };
     
     initializeNotifications();
+    
+    // Listen for notification responses (user taps)
+    const subscription = require('expo-notifications').addNotificationResponseReceivedListener((response: any) => {
+      try {
+        const data = response?.notification?.request?.content?.data;
+        console.log('📲 Notification response received', data);
+        if (data?.type === 'priority-reminder' || data?.type === 'priority-reminder-test') {
+          // Navigate to Tasks tab and set deep link payload so TasksScreen can open high-priority view
+          setActiveTab('Tasks');
+          setDeepLink({ type: data.type, timeSlot: data?.timeSlot });
+        }
+      } catch (err) {
+        console.error('Failed handling notification response', err);
+      }
+    });
+
+    return () => {
+      try {
+        subscription.remove();
+      } catch (e) {
+        // ignore
+      }
+    };
   }, []);
 
   const completeOnboarding = async () => {
@@ -380,7 +404,7 @@ function MainApp() {
         onHomePress={() => setActiveTab('Dashboard')} 
       />
       <View style={styles.content}>
-        <Screen activeTab={activeTab} onNavigate={handleNavigate} />
+        <Screen activeTab={activeTab} onNavigate={handleNavigate} deepLink={deepLink} onClearDeepLink={() => setDeepLink(null)} />
       </View>
       
       {/* Floating Home Button - Bottom Right */}

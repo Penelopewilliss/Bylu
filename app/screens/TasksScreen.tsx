@@ -27,7 +27,7 @@ const TASK_CATEGORIES: Record<Category, { emoji: string; label: string; color: s
   other: { emoji: '📝', label: 'Other', color: '#607D8B' },
 };
 
-export default function TasksScreen() {
+export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?: any; onDeepLinkHandled?: () => void }) {
   const { tasks, toggleTask, deleteTask, addTask } = useApp();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -67,6 +67,23 @@ export default function TasksScreen() {
     
     return () => clearInterval(syncInterval);
   }, []);
+
+  // Handle deep links from notifications to open high-priority view
+  useEffect(() => {
+    if (deepLink && (deepLink.type === 'priority-reminder' || deepLink.type === 'priority-reminder-test')) {
+      console.log('TasksScreen received deepLink, opening high priority view', deepLink);
+      setViewHighPriority(true);
+      // Ensure other views are disabled
+      setViewAllTasks(false);
+      setShowCompleted(false);
+
+      // Clear deep link after handling so it doesn't re-trigger
+      if (typeof onDeepLinkHandled === 'function') {
+        // Delay slightly to allow navigation/animation
+        setTimeout(() => onDeepLinkHandled(), 300);
+      }
+    }
+  }, [deepLink]);
 
   const togglePriorityNotifications = async (enabled: boolean) => {
     try {
