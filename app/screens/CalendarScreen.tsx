@@ -10,7 +10,7 @@ import {
   Alert,
   PanResponder 
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import type { CalendarEvent } from '../types';
@@ -398,7 +398,6 @@ const createStyles = (colors: any) => StyleSheet.create({
   addModalButtons: {
     flexDirection: 'row',
     gap: 12,
-    paddingBottom: 32, // Extra padding for Android navigation bar
   },
   cancelButton: {
     flex: 1,
@@ -694,6 +693,7 @@ const MONTHS = [
 export default function CalendarScreen() {
   const { events, addEvent, deleteEvent } = useApp();
   const { colors, formatTime, isMilitaryTime } = useTheme();
+  const insets = useSafeAreaInsets();
   
   const styles = createStyles(colors);
   
@@ -1821,7 +1821,7 @@ export default function CalendarScreen() {
             </ScrollView>
             
             {/* Button area outside ScrollView */}
-            <View style={styles.addModalButtons}>
+            <View style={[styles.addModalButtons, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
               <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={() => setShowAddModal(false)}

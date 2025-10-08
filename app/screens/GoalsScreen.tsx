@@ -12,7 +12,7 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Fonts from '../constants/fonts';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -23,6 +23,7 @@ const { width } = Dimensions.get('window');
 export default function GoalsScreen() {
   const { colors } = useTheme();
   const { goals, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask } = useApp();
+  const insets = useSafeAreaInsets();
   const styles = createStyles(colors);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -368,7 +369,7 @@ export default function GoalsScreen() {
           </ScrollView>
           
           {/* Bottom Button Container */}
-          <View style={styles.modalButtonContainer}>
+          <View style={[styles.modalButtonContainer, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setModalVisible(false)}
@@ -632,7 +633,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    paddingBottom: 32, // Extra padding for Android navigation bar
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.background,

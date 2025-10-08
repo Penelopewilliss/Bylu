@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Pressable, StyleSheet, FlatList, ScrollView, Modal, TextInput, Alert, PanResponder, Dimensions, Animated, Switch } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -30,6 +30,7 @@ const TASK_CATEGORIES: Record<Category, { emoji: string; label: string; color: s
 export default function TasksScreen() {
   const { tasks, toggleTask, deleteTask, addTask } = useApp();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
   const [modalVisible, setModalVisible] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
@@ -1249,7 +1250,7 @@ export default function TasksScreen() {
           </ScrollView>
 
           {/* Modal Buttons */}
-          <View style={styles.modalButtons}>
+          <View style={[styles.modalButtons, { paddingBottom: Math.max(20, insets.bottom + 16) }]}>
             <TouchableOpacity 
               style={[styles.modalButton, styles.cancelButton]}
               onPress={() => setModalVisible(false)}
