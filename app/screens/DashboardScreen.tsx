@@ -1096,7 +1096,8 @@ const createStyles = (colors: any) => StyleSheet.create({
   itemContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    flex: 1,
   },
   itemDetails: {
     flex: 1,
@@ -1187,7 +1188,8 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   deleteButton: {
     padding: 6,
-    marginLeft: 8,
+    marginLeft: 12,
+    alignSelf: 'center',
   },
   deleteButtonText: {
     fontSize: 20,
