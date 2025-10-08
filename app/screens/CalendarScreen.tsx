@@ -1306,7 +1306,7 @@ export default function CalendarScreen() {
               )}
             </ScrollView>
             
-            <View style={styles.dayModalButtons}>
+            <View style={[styles.dayModalButtons, { paddingBottom: Math.max(16, insets.bottom + 12) }]}>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setShowDayModal(false)}
