@@ -44,7 +44,7 @@ const quotes = [
 
 export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { colors } = useTheme();
-  const { tasks, events, goals, toggleTask } = useApp();
+  const { tasks, events, goals, toggleTask, deleteEvent } = useApp();
   const { isOnline, addToSyncQueue } = useOffline();
   const [showCloudTutorial, setShowCloudTutorial] = useState(false); // Will be loaded from storage
   const [showDailyInspiration, setShowDailyInspiration] = useState(false); // Hide daily inspiration initially
@@ -373,6 +373,24 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
                       <Text style={styles.itemSubtitle}>{formatTimeFromISO(event.startDate)}{event.endDate ? ` - ${formatTimeFromISO(event.endDate)}` : ''}</Text>
                     </View>
                   </View>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={async () => {
+                      try {
+                        await deleteEvent(event.id);
+                        // Queue delete for sync when offline
+                        try {
+                          await addToSyncQueue('DELETE', 'event', { id: event.id, deletedAt: new Date().toISOString() });
+                        } catch (syncErr) {
+                          console.log('Failed to queue event delete for sync', syncErr);
+                        }
+                      } catch (err) {
+                        console.error('Failed to delete event', err);
+                      }
+                    }}
+                  >
+                    <Text style={styles.deleteButtonText}>🗑️</Text>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
@@ -1166,6 +1184,14 @@ const createStyles = (colors: any) => StyleSheet.create({
   previewEmoji: {
     fontSize: 24,
     marginRight: 16,
+  },
+  deleteButton: {
+    padding: 6,
+    marginLeft: 8,
+  },
+  deleteButtonText: {
+    fontSize: 20,
+    color: '#ff4757',
   },
   quoteContent: {
     alignItems: 'center',
