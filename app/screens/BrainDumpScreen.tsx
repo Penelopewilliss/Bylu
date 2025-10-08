@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { BrainDumpEntry } from '../types';
@@ -17,6 +17,7 @@ import fonts from '../constants/fonts';
 export default function BrainDumpScreen() {
   const { colors } = useTheme();
   const { brainDump, addBrainDumpEntry, deleteBrainDumpEntry } = useApp();
+  const insets = useSafeAreaInsets();
   const [currentThought, setCurrentThought] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -69,14 +70,12 @@ export default function BrainDumpScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.subtitle}>
-          <Text style={styles.cloudEmoji}>💭</Text>
-          <Text style={styles.subtitleText}> Capture your racing thoughts</Text>
-        </Text>
-      </View>
+    <View style={styles.container}>
+      {/* Header with full height background */}
+      <Text style={styles.headerText}>
+        <Text style={styles.cloudEmoji}>💭</Text>
+        <Text style={styles.subtitleText}> Capture your racing thoughts</Text>
+      </Text>
 
       {/* Quick Capture */}
       <View style={styles.captureSection}>
@@ -134,7 +133,7 @@ export default function BrainDumpScreen() {
         {/* Bottom spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -143,8 +142,22 @@ const createStyles = (colors: any) => StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    padding: 20,
+  headerText: {
+    backgroundColor: colors.background,
+    paddingTop: 45,
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    textAlign: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    zIndex: 10,
+    position: 'relative',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  headerContent: {
+    paddingHorizontal: 20,
+    paddingTop: 45,
     paddingBottom: 30,
   },
   title: {
@@ -158,6 +171,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     textAlign: 'center',
     alignItems: 'center',
     marginBottom: 20,
+    zIndex: 10,
+    position: 'relative',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   cloudEmoji: {
     fontSize: 42,
