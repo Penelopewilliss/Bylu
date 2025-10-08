@@ -105,6 +105,26 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
     return eventDate === todayString;
   }).slice(0, 3);
 
+  // Get tomorrow's appointments
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowString = tomorrow.toISOString().split('T')[0];
+  const tomorrowAppointments = events.filter(event => {
+    const eventDate = new Date(event.startDate).toISOString().split('T')[0];
+    return eventDate === tomorrowString;
+  }).slice(0, 3);
+
+  // Simple time formatter for dashboard (falls back to locale time)
+  const formatTimeFromISO = (iso?: string) => {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    } catch (e) {
+      return '';
+    }
+  };
+
   // Get daily quote (stable for the day)
   const dailyQuoteIndex = Math.floor((today.getTime() / (1000 * 60 * 60 * 24)) % quotes.length);
   const dailyQuote = quotes[dailyQuoteIndex];
@@ -342,26 +362,26 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
         </View>
         
         <View style={styles.sectionCard}>
-          <View style={styles.contentList}>
-            <View style={styles.contentItem}>
-              <View style={styles.itemContent}>
-                <Text style={styles.previewEmoji}>📅</Text>
-                <View style={styles.itemDetails}>
-                  <Text style={styles.itemTitle}>Morning Yoga Session</Text>
-                  <Text style={styles.itemSubtitle}>8:00 AM - 9:00 AM</Text>
+          {tomorrowAppointments.length > 0 ? (
+            <View style={styles.contentList}>
+              {tomorrowAppointments.map((event) => (
+                <View key={event.id} style={styles.contentItem}>
+                  <View style={styles.itemContent}>
+                    <Text style={styles.previewEmoji}>📅</Text>
+                    <View style={styles.itemDetails}>
+                      <Text style={styles.itemTitle}>{event.title}</Text>
+                      <Text style={styles.itemSubtitle}>{formatTimeFromISO(event.startDate)}{event.endDate ? ` - ${formatTimeFromISO(event.endDate)}` : ''}</Text>
+                    </View>
+                  </View>
                 </View>
-              </View>
+              ))}
             </View>
-            <View style={styles.contentItem}>
-              <View style={styles.itemContent}>
-                <Text style={styles.previewEmoji}>☕</Text>
-                <View style={styles.itemDetails}>
-                  <Text style={styles.itemTitle}>Coffee with Sarah</Text>
-                  <Text style={styles.itemSubtitle}>10:30 AM - 11:30 AM</Text>
-                </View>
-              </View>
+          ) : (
+            <View style={styles.emptyContent}>
+              <Text style={styles.emptyTitle}>No appointments for tomorrow</Text>
+              <Text style={styles.emptySubtitle}>Tap a day in the calendar to add one</Text>
             </View>
-          </View>
+          )}
         </View>
       </View>
 
