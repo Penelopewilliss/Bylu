@@ -16,11 +16,12 @@ import CalendarScreen from './app/screens/CalendarScreen';
 import GoalsScreen from './app/screens/GoalsScreen';
 import BrainDumpScreen from './app/screens/BrainDumpScreen';
 import SettingsScreen from './app/screens/SettingsScreen';
+import AlarmClockScreen from './app/screens/AlarmClockScreen';
 import OnboardingScreen from './app/screens/OnboardingScreen';
 
 const { width, height } = Dimensions.get('window');
 
-type TabName = 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'BrainDump' | 'Settings';
+type TabName = 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'BrainDump' | 'AlarmClock' | 'Settings';
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -88,7 +89,7 @@ function HamburgerMenu({
   isVisible: boolean;
   onClose: () => void;
 }) {
-  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'Settings'];
+  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
 
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
@@ -102,6 +103,8 @@ function HamburgerMenu({
         return '✨';
       case 'BrainDump':
         return '💭';
+      case 'AlarmClock':
+        return '⏰';
       case 'Settings':
         return '🌸';
       default:
@@ -187,6 +190,8 @@ function TopBar({
         return '✨';
       case 'BrainDump':
         return '💭';
+      case 'AlarmClock':
+        return '⏰';
       case 'Settings':
         return '🌸';
       default:
@@ -235,6 +240,8 @@ function Screen({ activeTab, onNavigate, deepLink, onClearDeepLink }: { activeTa
       return <GoalsScreen />;
     case 'BrainDump':
       return <BrainDumpScreen />;
+    case 'AlarmClock':
+      return <AlarmClockScreen onNavigate={onNavigate} />;
     case 'Settings':
       return <SettingsScreen />;
     default:
@@ -250,7 +257,7 @@ function MainApp() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean | null>(null);
   
-  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'Settings'];
+  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
 
   const navigateToTab = (direction: 'next' | 'prev') => {
     const currentIndex = tabs.indexOf(activeTab);
@@ -389,7 +396,7 @@ function MainApp() {
   console.log('📱 Showing main app');
 
   const handleNavigate = (tab: string) => {
-    const validTabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'Settings'];
+    const validTabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
     if (validTabs.includes(tab as TabName)) {
       setActiveTab(tab as TabName);
     }
