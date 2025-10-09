@@ -8,7 +8,9 @@ import {
   TextInput, 
   ScrollView,
   Alert,
-  PanResponder 
+  PanResponder,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -1351,6 +1353,11 @@ export default function CalendarScreen() {
         transparent={true}
         onRequestClose={() => setShowAddModal(false)}
       >
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
         <View style={styles.modalOverlay}>
           {/* Header area with PanResponder for swipe-to-close */}
           <View style={styles.modalHeader} {...panResponder.panHandlers}>
@@ -1840,6 +1847,7 @@ export default function CalendarScreen() {
             </View>
           </View>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

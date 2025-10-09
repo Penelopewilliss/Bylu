@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
@@ -70,12 +72,16 @@ export default function BrainDumpScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header with full height background */}
-      <Text style={styles.headerText}>
-        <Text style={styles.cloudEmoji}>💭</Text>
-        <Text style={styles.subtitleText}> Capture your racing thoughts</Text>
-      </Text>
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View style={styles.container}>
+        {/* Header with full height background */}
+        <Text style={styles.headerText}>
+          <Text style={styles.cloudEmoji}>💭</Text>
+          <Text style={styles.subtitleText}> Capture your racing thoughts</Text>
+        </Text>
 
       {/* Quick Capture */}
       <View style={styles.captureSection}>
@@ -134,6 +140,7 @@ export default function BrainDumpScreen() {
         <View style={styles.bottomSpacing} />
       </ScrollView>
     </View>
+    </KeyboardAvoidingView>
   );
 }
 

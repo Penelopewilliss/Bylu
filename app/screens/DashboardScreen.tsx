@@ -259,13 +259,19 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
                           <Text style={styles.dashboardPriorityText}>🌴</Text>
                         )}
                         
-                        <Text style={styles.taskTitle}>{task.title}</Text>
-                        
-                        {/* Work emoji in a small box after title */}
-                        <View style={styles.categoryEmojiBox}>
-                          <Text style={styles.categoryEmoji}>{categoryData.emoji}</Text>
-                        </View>
+                        <Text 
+                          style={styles.taskTitle}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {task.title}
+                        </Text>
                       </View>
+                    </View>
+                    
+                    {/* Category emoji fixed on the right side */}
+                    <View style={styles.categoryEmojiBox}>
+                      <Text style={styles.categoryEmoji}>{categoryData.emoji}</Text>
                     </View>
                     
                     <TouchableOpacity 
@@ -606,9 +612,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.text,
     fontWeight: '600',
     marginLeft: 8,
-    marginRight: 8,
+    marginRight: 16,
     letterSpacing: 0.2,
     lineHeight: 24,
+    flex: 1,
+    flexShrink: 1,
   },
   taskTitleCompleted: {
     textDecorationLine: 'line-through',
@@ -1136,8 +1144,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     textAlign: 'center',
   },
   taskCheckbox: {
-    marginRight: 12,
+    marginRight: 8,
+    marginLeft: 8,
     paddingHorizontal: 4,
+    flexShrink: 0,
   },
   // Additional styles for the new clean design
   goalContent: {
@@ -1248,6 +1258,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flex: 1,
+    flexWrap: 'nowrap',
   },
   dashboardPriorityText: {
     fontSize: 24,
@@ -1263,6 +1275,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     minHeight: 24,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
+    marginLeft: 8,
+    marginRight: 8,
   },
   categoryEmoji: {
     fontSize: 16,

@@ -8,6 +8,8 @@ import {
   TextInput,
   Modal,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
   PanResponder,
   Alert,
   Dimensions,
@@ -280,14 +282,22 @@ export default function GoalsScreen() {
         presentationStyle="fullScreen"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader} {...panResponder.panHandlers}>
-            <Text style={styles.modalTitle}>
-              {editingGoal ? 'Edit Goal' : 'Add Goal'}
-            </Text>
-          </View>
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader} {...panResponder.panHandlers}>
+              <Text style={styles.modalTitle}>
+                {editingGoal ? 'Edit Goal' : 'Add Goal'}
+              </Text>
+            </View>
 
-          <ScrollView style={styles.modalContent}>
+            <ScrollView 
+              style={styles.modalContent}
+              keyboardShouldPersistTaps="handled"
+            >
             {/* Goal Title */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Goal Title</Text>
@@ -384,6 +394,7 @@ export default function GoalsScreen() {
             </TouchableOpacity>
           </View>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

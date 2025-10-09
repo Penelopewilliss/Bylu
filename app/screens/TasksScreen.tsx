@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Pressable, StyleSheet, FlatList, ScrollView, Modal, TextInput, Alert, PanResponder, Dimensions, Animated, Switch } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, StyleSheet, FlatList, ScrollView, Modal, TextInput, Alert, PanResponder, Dimensions, Animated, Switch, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useApp } from '../context/AppContext';
@@ -1173,18 +1173,24 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
         presentationStyle="fullScreen"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader} {...panResponder.panHandlers}>
-            <Text style={styles.modalTitle}>Add Task</Text>
-          </View>
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader} {...panResponder.panHandlers}>
+              <Text style={styles.modalTitle}>Add Task</Text>
+            </View>
 
-          <ScrollView 
-            ref={modalScrollRef}
-            style={styles.modalContent}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-            contentContainerStyle={{ flexGrow: 1 }}
-          >
+            <ScrollView 
+              ref={modalScrollRef}
+              style={styles.modalContent}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+              contentContainerStyle={{ flexGrow: 1 }}
+              keyboardShouldPersistTaps="handled"
+            >
             {/* Category */}
             <View style={[styles.section, { marginTop: 30 }]}>
               <Text style={styles.sectionTitle}>Category</Text>
@@ -1283,6 +1289,7 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
             </TouchableOpacity>
           </View>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
