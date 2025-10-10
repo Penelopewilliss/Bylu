@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Modal, Dimensions, PanResponder, Animated, Image, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Font from 'expo-font';
+import * as Notifications from 'expo-notifications';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProvider } from './app/context/AppContext';
 import { ThemeProvider } from './app/context/ThemeContext';
@@ -17,6 +18,7 @@ import GoalsScreen from './app/screens/GoalsScreen';
 import BrainDumpScreen from './app/screens/BrainDumpScreen';
 import SettingsScreen from './app/screens/SettingsScreen';
 import AlarmClockScreen from './app/screens/AlarmClockScreen';
+import AlarmActiveScreen from './app/screens/AlarmActiveScreen';
 import OnboardingScreen from './app/screens/OnboardingScreen';
 
 const { width, height } = Dimensions.get('window');
@@ -257,6 +259,10 @@ function MainApp() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean | null>(null);
   
+  // Alarm state
+  const [showAlarmScreen, setShowAlarmScreen] = useState(false);
+  const [activeAlarm, setActiveAlarm] = useState<any>(null);
+  
   const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
 
   const navigateToTab = (direction: 'next' | 'prev') => {
@@ -351,8 +357,23 @@ function MainApp() {
     const subscription = require('expo-notifications').addNotificationResponseReceivedListener((response: any) => {
       try {
         const data = response?.notification?.request?.content?.data;
-        console.log('📲 Notification response received', data);
-        if (data?.type === 'priority-reminder' || data?.type === 'priority-reminder-test') {
+        const identifier = response?.notification?.request?.identifier;
+        console.log('📲 Notification response received', data, identifier);
+        
+        // Check if this is an alarm notification
+        if (identifier && identifier.startsWith('alarm-')) {
+          // Extract alarm information from the notification
+          const alarmData = {
+            id: identifier,
+            title: response?.notification?.request?.content?.title || 'Alarm',
+            body: response?.notification?.request?.content?.body || 'Time to wake up!',
+            sound: response?.notification?.request?.content?.sound,
+          };
+          
+          console.log('⏰ Alarm notification triggered:', alarmData);
+          setActiveAlarm(alarmData);
+          setShowAlarmScreen(true);
+        } else if (data?.type === 'priority-reminder' || data?.type === 'priority-reminder-test') {
           // Navigate to Tasks tab and set deep link payload so TasksScreen can open high-priority view
           setActiveTab('Tasks');
           setDeepLink({ type: data.type, timeSlot: data?.timeSlot });
@@ -434,6 +455,23 @@ function MainApp() {
         isVisible={menuVisible}
         onClose={() => setMenuVisible(false)}
       />
+      
+      {/* Alarm Active Screen - Full Screen Overlay */}
+      {showAlarmScreen && activeAlarm && (
+        <AlarmActiveScreen
+          alarm={activeAlarm}
+          onDismiss={() => {
+            setShowAlarmScreen(false);
+            setActiveAlarm(null);
+          }}
+          onSnooze={(minutes) => {
+            console.log(`⏰ Alarm snoozed for ${minutes} minutes`);
+            setShowAlarmScreen(false);
+            setActiveAlarm(null);
+            // TODO: Schedule snooze notification
+          }}
+        />
+      )}
     </View>
   );
 }

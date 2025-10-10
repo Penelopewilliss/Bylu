@@ -89,6 +89,13 @@ export class AlarmNotificationService {
           vibrate: alarm.vibrate ? [0, 250, 250, 250] : undefined,
           priority: Notifications.AndroidNotificationPriority.HIGH,
           categoryIdentifier: 'alarm',
+          data: {
+            type: 'alarm',
+            alarmId: alarm.id,
+            alarmLabel: alarm.label,
+            soundName: alarm.soundName,
+            time: alarm.time,
+          },
         },
         trigger: {
           type: 'date',
@@ -114,6 +121,13 @@ export class AlarmNotificationService {
           vibrate: alarm.vibrate ? [0, 250, 250, 250] : undefined,
           priority: Notifications.AndroidNotificationPriority.HIGH,
           categoryIdentifier: 'alarm',
+          data: {
+            type: 'alarm',
+            alarmId: alarm.id,
+            alarmLabel: alarm.label,
+            soundName: alarm.soundName,
+            time: alarm.time,
+          },
         },
         trigger: {
           type: 'calendar',

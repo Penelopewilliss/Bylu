@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput, PanResponder, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
@@ -13,6 +13,7 @@ interface AlarmClockScreenProps {
 export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) {
   const { colors } = useTheme();
   const { alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm } = useApp();
+  const insets = useSafeAreaInsets();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAlarm, setEditingAlarm] = useState<Alarm | null>(null);
   const [newAlarmHour, setNewAlarmHour] = useState(7);
@@ -581,7 +582,7 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
               </View>
 
               {/* Modal Buttons */}
-              <View style={styles.modalButtons}>
+              <View style={[styles.modalButtons, { paddingBottom: Math.max(20, insets.bottom + 16) }]}>
                 <TouchableOpacity style={styles.cancelButton} onPress={handleCancelModal}>
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
@@ -1056,6 +1057,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 15,
+    marginTop: 20,
+    paddingHorizontal: 20,
   },
   cancelButton: {
     flex: 1,
