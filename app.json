@@ -20,7 +20,9 @@
       "bundleIdentifier": "com.penelope11.glowgetterapp",
       "buildNumber": "1.0.0",
       "infoPlist": {
-        "UIBackgroundModes": ["background-fetch"]
+        "UIBackgroundModes": [
+          "background-fetch"
+        ]
       }
     },
     "android": {
@@ -48,7 +50,8 @@
           "color": "#ffffff",
           "defaultChannel": "default"
         }
-      ]
+      ],
+      "expo-router"
     ],
     "extra": {
       "eas": {

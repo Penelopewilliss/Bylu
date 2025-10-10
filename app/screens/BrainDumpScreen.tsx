@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { BrainDumpEntry } from '../types';
@@ -43,6 +44,11 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
       onDeepLinkHandled?.();
     }
   }, [deepLink]);
+
+  // Clean up broken voice memos on component mount
+  useEffect(() => {
+    cleanupBrokenVoiceMemos();
+  }, []);
 
   const handleQuickCapture = () => {
     if (currentThought.trim()) {
@@ -92,21 +98,45 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
     console.log('🎤 Recording stopped and stored at', uri);
     
     if (uri) {
-      // Get recording duration
-      const { sound } = await Audio.Sound.createAsync({ uri });
-      const status = await sound.getStatusAsync();
-      const duration = status.isLoaded ? status.durationMillis || 0 : 0;
-      await sound.unloadAsync();
+      try {
+        // Create permanent storage directory for audio files
+        const audioDir = `${FileSystem.documentDirectory}audio/`;
+        const dirInfo = await FileSystem.getInfoAsync(audioDir);
+        if (!dirInfo.exists) {
+          await FileSystem.makeDirectoryAsync(audioDir, { intermediates: true });
+        }
+        
+        // Generate unique filename
+        const filename = `voice_memo_${Date.now()}.m4a`;
+        const permanentUri = `${audioDir}${filename}`;
+        
+        // Copy from temporary location to permanent storage
+        await FileSystem.copyAsync({
+          from: uri,
+          to: permanentUri,
+        });
+        
+        console.log('🎤 Audio file saved permanently at:', permanentUri);
+        
+        // Get recording duration
+        const { sound } = await Audio.Sound.createAsync({ uri: permanentUri });
+        const status = await sound.getStatusAsync();
+        const duration = status.isLoaded ? status.durationMillis || 0 : 0;
+        await sound.unloadAsync();
 
-      // Add voice memo to brain dump
-      const voiceMemo = {
-        type: 'voice' as const,
-        audioUri: uri,
-        duration: Math.round(duration / 1000), // Convert to seconds
-      };
-      
-      addBrainDumpEntry('🎤 Voice memo', voiceMemo);
-      Alert.alert('🎤', 'Voice memo captured!', [{ text: 'Continue', style: 'default' }]);
+        // Add voice memo to brain dump with permanent URI
+        const voiceMemo = {
+          type: 'voice' as const,
+          audioUri: permanentUri,
+          duration: Math.round(duration / 1000), // Convert to seconds
+        };
+        
+        addBrainDumpEntry('🎤 Voice memo', voiceMemo);
+        Alert.alert('🎤', 'Voice memo captured!', [{ text: 'Continue', style: 'default' }]);
+      } catch (error) {
+        console.error('Failed to save audio file permanently:', error);
+        Alert.alert('🎤 Storage Error', 'Could not save voice memo permanently.');
+      }
     }
   };
 
@@ -120,6 +150,15 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
 
       if (entry.audioUri) {
         console.log('🔊 Playing voice memo:', entry.audioUri);
+        
+        // Check if file exists before trying to play
+        const fileInfo = await FileSystem.getInfoAsync(entry.audioUri);
+        if (!fileInfo.exists) {
+          console.error('🔊 Voice memo file not found:', entry.audioUri);
+          Alert.alert('🔊 Playback Error', 'Voice memo file not found. This may be an old recording that was cleared from cache.');
+          return;
+        }
+        
         const { sound } = await Audio.Sound.createAsync({ uri: entry.audioUri });
         setPlayingSound(sound);
         setPlayingId(entry.id);
@@ -137,6 +176,33 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
     } catch (error) {
       console.error('Error playing voice memo:', error);
       Alert.alert('🔊 Playback Error', 'Could not play voice memo.');
+    }
+  };
+
+  // Clean up broken voice memo entries on component mount
+  const cleanupBrokenVoiceMemos = async () => {
+    try {
+      const brokenEntries = [];
+      for (const entry of brainDump) {
+        if (entry.type === 'voice' && entry.audioUri) {
+          const fileInfo = await FileSystem.getInfoAsync(entry.audioUri);
+          if (!fileInfo.exists) {
+            console.log('🗑️ Found broken voice memo entry:', entry.id);
+            brokenEntries.push(entry.id);
+          }
+        }
+      }
+      
+      // Remove broken entries
+      for (const entryId of brokenEntries) {
+        deleteBrainDumpEntry(entryId);
+      }
+      
+      if (brokenEntries.length > 0) {
+        console.log(`🗑️ Cleaned up ${brokenEntries.length} broken voice memo entries`);
+      }
+    } catch (error) {
+      console.error('Error cleaning up voice memos:', error);
     }
   };
 
