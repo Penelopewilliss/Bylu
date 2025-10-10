@@ -82,6 +82,14 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
         // Delay slightly to allow navigation/animation
         setTimeout(() => onDeepLinkHandled(), 300);
       }
+    } else if (deepLink && deepLink.type === 'add-task') {
+      console.log('TasksScreen received add-task deepLink, opening add modal');
+      openAddModal();
+      
+      // Clear deep link after handling
+      if (typeof onDeepLinkHandled === 'function') {
+        setTimeout(() => onDeepLinkHandled(), 300);
+      }
     }
   }, [deepLink]);
 
@@ -365,9 +373,9 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 16,
-      backgroundColor: 'transparent',
+      backgroundColor: colors.primary,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.primary,
       width: 110,
       alignItems: 'center',
       transform: [{ scale: 1 }],
@@ -382,7 +390,7 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
     addButtonText: {
       fontSize: 16,
       fontWeight: '500',
-      color: colors.text,
+      color: colors.buttonText,
     },
     viewAllButton: {
       paddingHorizontal: 12,
@@ -1204,7 +1212,7 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
                 styles.viewAllButtonText,
                 showCompleted && styles.viewAllButtonTextActive
               ]}>
-                {showCompleted ? '✅ Hide Done' : '👁️ Show Done'}
+                {showCompleted ? '✅ Hide Done' : 'Show Done'}
               </Text>
             </Pressable>
             

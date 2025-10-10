@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { useApp } from '../context/AppContext';
 import { BrainDumpEntry } from '../types';
 import fonts from '../constants/fonts';
 
-export default function BrainDumpScreen() {
+export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepLink?: any; onDeepLinkHandled?: () => void }) {
   const { colors } = useTheme();
   const { brainDump, addBrainDumpEntry, deleteBrainDumpEntry } = useApp();
   const insets = useSafeAreaInsets();
@@ -31,6 +31,18 @@ export default function BrainDumpScreen() {
   const [playingSound, setPlayingSound] = useState<Audio.Sound | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const styles = createStyles(colors);
+  const textInputRef = useRef<TextInput>(null);
+
+  // Handle deep link to open add modals
+  useEffect(() => {
+    if (deepLink?.type === 'add-thought') {
+      textInputRef.current?.focus();
+      onDeepLinkHandled?.();
+    } else if (deepLink?.type === 'add-voice-memo') {
+      startRecording();
+      onDeepLinkHandled?.();
+    }
+  }, [deepLink]);
 
   const handleQuickCapture = () => {
     if (currentThought.trim()) {
@@ -190,6 +202,7 @@ export default function BrainDumpScreen() {
           {/* Quick Capture */}
           <View style={styles.captureSection}>
             <TextInput
+              ref={textInputRef}
               style={styles.thoughtInput}
               value={currentThought}
               onChangeText={setCurrentThought}

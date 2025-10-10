@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput, PanResponder, Platform } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
@@ -9,9 +9,11 @@ import type { Alarm } from '../types';
 
 interface AlarmClockScreenProps {
   onNavigate?: (screen: string) => void;
+  deepLink?: any;
+  onDeepLinkHandled?: () => void;
 }
 
-export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) {
+export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandled }: AlarmClockScreenProps) {
   const { colors } = useTheme();
   const { alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm } = useApp();
   const insets = useSafeAreaInsets();
@@ -28,6 +30,14 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
   const [showSoundSelector, setShowSoundSelector] = useState(false);
   const [currentPlayingSound, setCurrentPlayingSound] = useState<Audio.Sound | null>(null);
   const [playingSound, setPlayingSound] = useState<string | null>(null);
+  
+  // Handle deep link to open add modal
+  useEffect(() => {
+    if (deepLink?.type === 'add-alarm') {
+      setShowAddModal(true);
+      onDeepLinkHandled?.();
+    }
+  }, [deepLink]);
   
   // PanResponder for swipe to close modal (down swipe only, in header area)
   const panResponder = PanResponder.create({

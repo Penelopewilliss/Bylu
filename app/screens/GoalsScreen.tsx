@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ import type { Goal, MicroTask } from '../types';
 
 const { width } = Dimensions.get('window');
 
-export default function GoalsScreen() {
+export default function GoalsScreen({ deepLink, onDeepLinkHandled }: { deepLink?: any; onDeepLinkHandled?: () => void }) {
   const { colors } = useTheme();
   const { goals, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask } = useApp();
   const insets = useSafeAreaInsets();
@@ -37,6 +37,14 @@ export default function GoalsScreen() {
   });
   const [newTaskText, setNewTaskText] = useState('');
   const [tempMicroTasks, setTempMicroTasks] = useState<MicroTask[]>([]);
+
+  // Handle deep link to open add modal
+  useEffect(() => {
+    if (deepLink?.type === 'add-goal') {
+      openAddModal();
+      onDeepLinkHandled?.();
+    }
+  }, [deepLink]);
 
   // PanResponder for swipe to close modal (down swipe only, not in input fields)
   const panResponder = PanResponder.create({

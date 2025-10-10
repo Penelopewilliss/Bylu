@@ -1,37 +1,99 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 
 interface HomeScreenProps {
   onNavigate?: (screen: string) => void;
+  onSetDeepLink?: (deepLink: any) => void;
 }
 
-export default function HomeScreen({ onNavigate }: HomeScreenProps) {
+export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
+
+  const navigateWithModal = (screen: string, modalType: string) => {
+    if (onSetDeepLink) {
+      onSetDeepLink({ type: modalType });
+    }
+    onNavigate?.(screen);
+  };
+
+  const quickActions = [
+    {
+      title: 'Go to Dashboard',
+      emoji: '🦋',
+      description: 'View your overview',
+      action: () => onNavigate?.('Dashboard'),
+      color: '#8B5CF6'
+    },
+    {
+      title: 'Add Appointment',
+      emoji: '📅',
+      description: 'Create calendar event',
+      action: () => navigateWithModal('Calendar', 'add-appointment'),
+      color: '#4ECDC4'
+    },
+    {
+      title: 'Add Task',
+      emoji: '🌺',
+      description: 'Create a new task',
+      action: () => navigateWithModal('Tasks', 'add-task'),
+      color: '#DDA0DD'
+    },
+    {
+      title: 'Add Goal',
+      emoji: '✨',
+      description: 'Set a new goal',
+      action: () => navigateWithModal('Goals', 'add-goal'),
+      color: '#FFEAA7'
+    },
+    {
+      title: 'Add Thought',
+      emoji: '💭',
+      description: 'Capture an idea',
+      action: () => navigateWithModal('BrainDump', 'add-thought'),
+      color: '#45B7D1'
+    },
+    {
+      title: 'Add Voice Memo',
+      emoji: '🎤',
+      description: 'Record audio note',
+      action: () => navigateWithModal('BrainDump', 'add-voice-memo'),
+      color: '#96CEB4'
+    },
+    {
+      title: 'Set Alarm',
+      emoji: '⏰',
+      description: 'Schedule a new alarm',
+      action: () => navigateWithModal('AlarmClock', 'add-alarm'),
+      color: '#FF6B6B'
+    },
+    {
+      title: 'Go to Settings',
+      emoji: '🌸',
+      description: 'Manage your preferences',
+      action: () => onNavigate?.('Settings'),
+      color: '#F8BBD9'
+    }
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>🏠 Home</Text>
-          <Text style={styles.subtitle}>Welcome to your personal space</Text>
-        </View>
-
-        <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeText}>✨ Ready to make today amazing?</Text>
-          <Text style={styles.welcomeSubtext}>
-            This is your new home page - tell me what you'd like to see here!
-          </Text>
-        </View>
-
-        {/* Placeholder content - you can customize this later */}
-        <View style={styles.placeholderSection}>
-          <Text style={styles.placeholderTitle}>🎯 Coming Soon</Text>
-          <Text style={styles.placeholderText}>
-            This space is ready for your ideas! Let me know what features you'd like to add to your home page.
-          </Text>
+        {/* Quick Actions Grid */}
+        <View style={styles.actionsGrid}>
+          {quickActions.map((action, index) => (
+            <TouchableOpacity 
+              key={index}
+              style={styles.actionCard}
+              onPress={action.action}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.actionEmoji}>{action.emoji}</Text>
+              <Text style={styles.actionTitle}>{action.title}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -45,7 +107,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: 12,
   },
   header: {
     marginBottom: 30,
@@ -65,6 +127,48 @@ const createStyles = (colors: any) => StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Montserrat-Regular',
   },
+  actionsGrid: {
+    marginBottom: 30,
+    marginTop: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  actionCard: {
+    backgroundColor: colors.cardBackground,
+    width: '40%',
+    aspectRatio: 1,
+    borderRadius: 100,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionHeader: {
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  actionEmoji: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  actionTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.text,
+    fontFamily: 'Montserrat-SemiBold',
+    textAlign: 'center',
+    paddingHorizontal: 4,
+  },
   welcomeSection: {
     backgroundColor: colors.cardBackground,
     padding: 20,
@@ -82,28 +186,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontFamily: 'Montserrat-SemiBold',
   },
   welcomeSubtext: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-    fontFamily: 'Montserrat-Regular',
-  },
-  placeholderSection: {
-    backgroundColor: colors.cardBackground,
-    padding: 20,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-  placeholderTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 10,
-    fontFamily: 'Montserrat-SemiBold',
-  },
-  placeholderText: {
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',

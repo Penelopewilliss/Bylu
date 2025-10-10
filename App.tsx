@@ -239,22 +239,22 @@ function TopBar({
   );
 }
 
-function Screen({ activeTab, onNavigate, deepLink, onClearDeepLink }: { activeTab: TabName; onNavigate: (tab: string) => void; deepLink?: any; onClearDeepLink?: () => void }) {
+function Screen({ activeTab, onNavigate, deepLink, onClearDeepLink, onSetDeepLink }: { activeTab: TabName; onNavigate: (tab: string) => void; deepLink?: any; onClearDeepLink?: () => void; onSetDeepLink?: (deepLink: any) => void }) {
   switch (activeTab) {
     case 'Home':
-      return <HomeScreen onNavigate={onNavigate} />;
+      return <HomeScreen onNavigate={onNavigate} onSetDeepLink={onSetDeepLink} />;
     case 'Dashboard':
       return <DashboardScreen onNavigate={onNavigate} />;
     case 'Tasks':
       return <TasksScreen deepLink={deepLink} onDeepLinkHandled={onClearDeepLink} />;
     case 'Calendar':
-      return <CalendarScreen />;
+      return <CalendarScreen deepLink={deepLink} onDeepLinkHandled={onClearDeepLink} />;
     case 'Goals':
-      return <GoalsScreen />;
+      return <GoalsScreen deepLink={deepLink} onDeepLinkHandled={onClearDeepLink} />;
     case 'BrainDump':
-      return <BrainDumpScreen />;
+      return <BrainDumpScreen deepLink={deepLink} onDeepLinkHandled={onClearDeepLink} />;
     case 'AlarmClock':
-      return <AlarmClockScreen onNavigate={onNavigate} />;
+      return <AlarmClockScreen onNavigate={onNavigate} deepLink={deepLink} onDeepLinkHandled={onClearDeepLink} />;
     case 'Settings':
       return <SettingsScreen />;
     default:
@@ -471,7 +471,13 @@ function MainApp() {
         onHomePress={() => setActiveTab('Home')} 
       />
       <View style={styles.content}>
-        <Screen activeTab={activeTab} onNavigate={handleNavigate} deepLink={deepLink} onClearDeepLink={() => setDeepLink(null)} />
+        <Screen 
+          activeTab={activeTab} 
+          onNavigate={handleNavigate} 
+          deepLink={deepLink} 
+          onClearDeepLink={() => setDeepLink(null)}
+          onSetDeepLink={setDeepLink}
+        />
       </View>
       
       {/* Floating Home Button - Bottom Right */}

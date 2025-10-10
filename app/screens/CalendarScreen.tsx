@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -692,7 +692,7 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-export default function CalendarScreen() {
+export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLink?: any; onDeepLinkHandled?: () => void }) {
   const { events, addEvent, deleteEvent } = useApp();
   const { colors, formatTime, isMilitaryTime } = useTheme();
   const insets = useSafeAreaInsets();
@@ -715,6 +715,14 @@ export default function CalendarScreen() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  // Handle deep link to open add modal
+  useEffect(() => {
+    if (deepLink?.type === 'add-appointment') {
+      setShowAddModal(true);
+      onDeepLinkHandled?.();
+    }
+  }, [deepLink]);
 
   // Update form date when dropdowns change
   const updateFormDate = (month: number, day: number, year: number) => {
