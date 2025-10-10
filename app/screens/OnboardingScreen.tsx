@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useCalendarSync } from '../context/CalendarSyncContext';
+import { useTheme } from '../context/ThemeContext';
 import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
 
 const { width } = Dimensions.get('window');
@@ -27,18 +28,28 @@ const pages: OnboardingPage[] = [
   },
   {
     emoji: "🌸",
-    title: "Manage Your Tasks",
-    subtitle: "Stay organized with cute and efficient task management"
+    title: "Circular Home Navigation",
+    subtitle: "Tap circular cards on your home screen to quickly access tasks, goals, and features"
+  },
+  {
+    emoji: "📝",
+    title: "Smart Task Management",
+    subtitle: "Organize tasks by category with priority levels and instant completion tracking"
+  },
+  {
+    emoji: "🎤",
+    title: "Voice Memos & Brain Dump",
+    subtitle: "Capture thoughts instantly with voice recordings and text notes that save automatically"
+  },
+  {
+    emoji: "🔔",
+    title: "Smart Notifications",
+    subtitle: "Set custom daily appointment reminders with your preferred times using scrollable pickers"
   },
   {
     emoji: "🌟",
-    title: "Track Your Goals",
-    subtitle: "Achieve your dreams with our goal tracking system"
-  },
-  {
-    emoji: "✨",
-    title: "Schedule Appointments",
-    subtitle: "Never miss important moments with our calendar"
+    title: "Goals & Calendar Sync",
+    subtitle: "Track your dreams and sync with Google Calendar for seamless planning"
   }
 ];
 
@@ -50,6 +61,152 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [currentPage, setCurrentPage] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const { authenticateGoogle, isAuthenticating } = useCalendarSync();
+  const { colors } = useTheme();
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    page: {
+      width,
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 40,
+    },
+    content: {
+      alignItems: 'center',
+      maxWidth: 280,
+    },
+    emoji: {
+      fontSize: 80,
+      marginBottom: 30,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.primary,
+      textAlign: 'center',
+      marginBottom: 16,
+      fontFamily: 'System',
+    },
+    subtitle: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 24,
+      fontFamily: 'System',
+    },
+    footer: {
+      paddingHorizontal: 20,
+      paddingBottom: 50,
+      paddingTop: 20,
+    },
+    pagination: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginBottom: 30,
+    },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      marginHorizontal: 4,
+    },
+    activeDot: {
+      backgroundColor: colors.primary,
+    },
+    inactiveDot: {
+      backgroundColor: colors.border,
+    },
+    buttons: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    spacer: {
+      flex: 1,
+    },
+    backButton: {
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+    },
+    backButtonText: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      fontFamily: 'System',
+    },
+    nextButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: 16,
+      paddingHorizontal: 32,
+      borderRadius: 25,
+      shadowColor: colors.primary,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    nextButtonText: {
+      color: colors.buttonText,
+      fontSize: 16,
+      fontWeight: 'bold',
+      fontFamily: 'System',
+    },
+    googleButtons: {
+      flex: 1,
+      flexDirection: 'column',
+      gap: 12,
+      marginLeft: 12,
+    },
+    skipButton: {
+      backgroundColor: colors.cardBackground,
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      borderRadius: 20,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    skipButtonText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      fontWeight: '500',
+      fontFamily: 'System',
+    },
+    connectButton: {
+      backgroundColor: '#4285F4',
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      borderRadius: 25,
+      alignItems: 'center',
+      shadowColor: '#4285F4',
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    connectButtonDisabled: {
+      backgroundColor: colors.border,
+      shadowOpacity: 0,
+    },
+    connectButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: 'bold',
+      fontFamily: 'System',
+    },
+  });
 
   const goToNext = () => {
     if (currentPage < pages.length - 1) {
@@ -175,146 +332,3 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  page: {
-    width,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  content: {
-    alignItems: 'center',
-    maxWidth: 280,
-  },
-  emoji: {
-    fontSize: 80,
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FF69B4',
-    textAlign: 'center',
-    marginBottom: 16,
-    fontFamily: 'System',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 24,
-    fontFamily: 'System',
-  },
-  footer: {
-    paddingHorizontal: 20,
-    paddingBottom: 50,
-    paddingTop: 20,
-  },
-  pagination: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 30,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-  activeDot: {
-    backgroundColor: '#FF69B4',
-  },
-  inactiveDot: {
-    backgroundColor: '#E0E0E0',
-  },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  spacer: {
-    flex: 1, // Takes up space on the left when there's no back button
-  },
-  backButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#999',
-    fontFamily: 'System',
-  },
-  nextButton: {
-    backgroundColor: '#FF69B4',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 25,
-    shadowColor: '#FF69B4',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  nextButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'System',
-  },
-  googleButtons: {
-    flex: 1,
-    flexDirection: 'column',
-    gap: 12,
-    marginLeft: 12,
-  },
-  skipButton: {
-    backgroundColor: '#F0F0F0',
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  skipButtonText: {
-    color: '#666',
-    fontSize: 14,
-    fontWeight: '500',
-    fontFamily: 'System',
-  },
-  connectButton: {
-    backgroundColor: '#4285F4', // Google blue
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 25,
-    alignItems: 'center',
-    shadowColor: '#4285F4',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  connectButtonDisabled: {
-    backgroundColor: '#CCCCCC',
-    shadowOpacity: 0,
-  },
-  connectButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'System',
-  },
-});

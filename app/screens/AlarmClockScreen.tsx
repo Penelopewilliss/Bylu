@@ -675,26 +675,37 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
                   { key: 'guitar', name: '🎸 Guitar Strum', description: 'Acoustic guitar' },
                   { key: 'horn', name: '📯 Horn Sound', description: 'Clear horn sound' },
                 ].map((sound) => (
-                  <TouchableOpacity
-                    key={sound.key}
-                    style={[styles.soundOption, quickAlarmSound === sound.key && styles.selectedSoundOption]}
-                    onPress={() => {
-                      setQuickAlarmSound(sound.key);
-                      setShowSoundSelector(false);
-                    }}
-                  >
-                    <View style={styles.soundInfo}>
-                      <Text style={[styles.soundName, quickAlarmSound === sound.key && styles.selectedSoundName]}>
-                        {sound.name}
-                      </Text>
-                      <Text style={[styles.soundDescription, quickAlarmSound === sound.key && styles.selectedSoundDescription]}>
-                        {sound.description}
-                      </Text>
-                    </View>
-                    {quickAlarmSound === sound.key && (
-                      <Text style={styles.soundCheckmark}>✓</Text>
-                    )}
-                  </TouchableOpacity>
+                  <View key={sound.key} style={styles.soundOptionContainer}>
+                    <TouchableOpacity
+                      style={[styles.soundOption, quickAlarmSound === sound.key && styles.selectedSoundOption]}
+                      onPress={() => {
+                        setQuickAlarmSound(sound.key);
+                        setShowSoundSelector(false);
+                      }}
+                    >
+                      <View style={styles.soundInfo}>
+                        <Text style={[styles.soundName, quickAlarmSound === sound.key && styles.selectedSoundName]}>
+                          {sound.name}
+                        </Text>
+                        <Text style={[styles.soundDescription, quickAlarmSound === sound.key && styles.selectedSoundDescription]}>
+                          {sound.description}
+                        </Text>
+                      </View>
+                      <View style={styles.soundActions}>
+                        <TouchableOpacity
+                          style={[styles.previewButton, playingSound === sound.key && styles.previewButtonPlaying]}
+                          onPress={() => playPreviewSound(sound.key)}
+                        >
+                          <Text style={[styles.previewButtonText, playingSound === sound.key && styles.previewButtonTextPlaying]}>
+                            {playingSound === sound.key ? '⏹️' : '▶️'}
+                          </Text>
+                        </TouchableOpacity>
+                        {quickAlarmSound === sound.key && (
+                          <Text style={styles.soundCheckmark}>✓</Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                 ))}
               </ScrollView>
             </View>
