@@ -4,6 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Audio } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
+import { AlarmNotificationService } from '../services/AlarmNotificationService';
 import type { Alarm } from '../types';
 
 interface AlarmClockScreenProps {
@@ -23,6 +24,8 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
   const [snoozeEnabled, setSnoozeEnabled] = useState(true);
   const [snoozeInterval, setSnoozeInterval] = useState(5);
   const [selectedSound, setSelectedSound] = useState('gentle_chimes');
+  const [quickAlarmSound, setQuickAlarmSound] = useState('bell');
+  const [showSoundSelector, setShowSoundSelector] = useState(false);
   const [currentPlayingSound, setCurrentPlayingSound] = useState<Audio.Sound | null>(null);
   const [playingSound, setPlayingSound] = useState<string | null>(null);
   
@@ -184,18 +187,41 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
     setShowAddModal(true);
   };
 
-  const createQuickAlarm = (time: string, label: string) => {
+    const createQuickAlarm = async (time: string, title: string) => {
     const newAlarm = {
+      id: Date.now().toString(),
       time,
-      label,
+      label: title,
       isEnabled: true,
       repeatDays: [], // One-time alarm
-      soundName: 'gentle_chimes',
+      soundName: quickAlarmSound,
       vibrate: true,
       snoozeEnabled: true,
       snoozeInterval: 5,
+      createdAt: new Date().toISOString()
     };
-    addAlarm(newAlarm);
+    
+    const success = await AlarmNotificationService.scheduleAlarm(newAlarm);
+    
+    if (success && success.length > 0) {
+      addAlarm(newAlarm);
+    }
+  };
+
+  const getSoundDisplayName = (soundKey: string) => {
+    const soundMap: { [key: string]: string } = {
+      'bell': '🔔 Classic Bell',
+      'chime': '🎵 Gentle Chime',
+      'nature_sounds': '🌿 Nature Sounds',
+      'digital': '📱 Digital Beep',
+      'melody': '🎶 Melody',
+      'urgent': '🚨 Urgent Alert',
+      'calm': '🧘 Calm Tone',
+      'piano': '🎹 Piano Notes',
+      'guitar': '🎸 Guitar Strum',
+      'horn': '📯 Horn Sound'
+    };
+    return soundMap[soundKey] || '🔔 Classic Bell';
   };
 
   const playPreviewSound = async (soundKey: string) => {
@@ -338,6 +364,19 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
             >
               <Text style={styles.quickAlarmTime}>10:00 PM</Text>
               <Text style={styles.quickAlarmLabel}>Sleep</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Sound Selector */}
+          <View style={styles.soundSelectorContainer}>
+            <Text style={styles.soundSelectorLabel}>Quick Alarm Sound:</Text>
+            <TouchableOpacity 
+              style={styles.soundSelectorButton}
+              onPress={() => setShowSoundSelector(true)}
+            >
+              <Text style={styles.soundSelectorText}>
+                {getSoundDisplayName(quickAlarmSound)}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -594,6 +633,61 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
                 </TouchableOpacity>
               </View>
             </ScrollView>
+          </View>
+        </Modal>
+
+        {/* Sound Selector Modal */}
+        <Modal
+          visible={showSoundSelector}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowSoundSelector(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { height: '50%' }]}>
+              {/* Modal Header */}
+              <View style={styles.modalHeader} {...panResponder.panHandlers}>
+                <View style={styles.modalHandle} />
+                <Text style={styles.modalTitle}>Choose Quick Alarm Sound</Text>
+              </View>
+
+              {/* Sound Options */}
+              <ScrollView style={styles.soundsList}>
+                {[
+                  { key: 'bell', name: '🔔 Classic Bell', description: 'Traditional alarm sound' },
+                  { key: 'chime', name: '🎵 Gentle Chime', description: 'Soft and pleasant' },
+                  { key: 'nature_sounds', name: '🌿 Nature Sounds', description: 'Birds and forest' },
+                  { key: 'digital', name: '📱 Digital Beep', description: 'Modern electronic sound' },
+                  { key: 'melody', name: '🎶 Melody', description: 'Peaceful tune' },
+                  { key: 'urgent', name: '🚨 Urgent Alert', description: 'Strong wake-up call' },
+                  { key: 'calm', name: '🧘 Calm Tone', description: 'Gentle awakening' },
+                  { key: 'piano', name: '🎹 Piano Notes', description: 'Soft piano melody' },
+                  { key: 'guitar', name: '🎸 Guitar Strum', description: 'Acoustic guitar' },
+                  { key: 'horn', name: '📯 Horn Sound', description: 'Clear horn sound' },
+                ].map((sound) => (
+                  <TouchableOpacity
+                    key={sound.key}
+                    style={[styles.soundOption, quickAlarmSound === sound.key && styles.selectedSoundOption]}
+                    onPress={() => {
+                      setQuickAlarmSound(sound.key);
+                      setShowSoundSelector(false);
+                    }}
+                  >
+                    <View style={styles.soundInfo}>
+                      <Text style={[styles.soundName, quickAlarmSound === sound.key && styles.selectedSoundName]}>
+                        {sound.name}
+                      </Text>
+                      <Text style={[styles.soundDescription, quickAlarmSound === sound.key && styles.selectedSoundDescription]}>
+                        {sound.description}
+                      </Text>
+                    </View>
+                    {quickAlarmSound === sound.key && (
+                      <Text style={styles.soundCheckmark}>✓</Text>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           </View>
         </Modal>
     </SafeAreaView>
@@ -1085,5 +1179,43 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: colors.buttonText,
+  },
+  soundSelectorContainer: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: colors.cardBackground,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  soundSelectorLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 10,
+  },
+  soundSelectorButton: {
+    backgroundColor: colors.background,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+  },
+  soundSelectorText: {
+    fontSize: 14,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  soundsList: {
+    flex: 1,
+    paddingHorizontal: 20,
   },
 });

@@ -353,8 +353,35 @@ function MainApp() {
     
     initializeNotifications();
     
+    // Listen for notifications when they arrive (automatic trigger)
+    const notificationSubscription = Notifications.addNotificationReceivedListener((notification: any) => {
+      try {
+        const data = notification?.request?.content?.data;
+        const identifier = notification?.request?.identifier;
+        console.log('🔔 Notification received automatically', data, identifier);
+        
+        // Check if this is an alarm notification
+        if (identifier && identifier.startsWith('alarm-')) {
+          // Extract alarm information from the notification
+          const alarmData = {
+            id: identifier,
+            title: notification?.request?.content?.title || 'Alarm',
+            body: notification?.request?.content?.body || 'Time to wake up!',
+            sound: notification?.request?.content?.sound,
+            ...data, // Include any additional alarm data
+          };
+          
+          console.log('⏰ Alarm notification auto-triggered:', alarmData);
+          setActiveAlarm(alarmData);
+          setShowAlarmScreen(true);
+        }
+      } catch (err) {
+        console.error('Failed handling automatic notification', err);
+      }
+    });
+    
     // Listen for notification responses (user taps)
-    const subscription = require('expo-notifications').addNotificationResponseReceivedListener((response: any) => {
+    const responseSubscription = Notifications.addNotificationResponseReceivedListener((response: any) => {
       try {
         const data = response?.notification?.request?.content?.data;
         const identifier = response?.notification?.request?.identifier;
@@ -385,7 +412,8 @@ function MainApp() {
 
     return () => {
       try {
-        subscription.remove();
+        notificationSubscription.remove();
+        responseSubscription.remove();
       } catch (e) {
         // ignore
       }
@@ -460,6 +488,7 @@ function MainApp() {
       {showAlarmScreen && activeAlarm && (
         <AlarmActiveScreen
           alarm={activeAlarm}
+          visible={showAlarmScreen}
           onDismiss={() => {
             setShowAlarmScreen(false);
             setActiveAlarm(null);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, PanResponder, Animated, Vibration, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, PanResponder, Animated, Vibration, Platform, Modal } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
@@ -12,7 +12,7 @@ interface AlarmActiveScreenProps {
   visible?: boolean;
 }
 
-export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible }: AlarmActiveScreenProps) {
+export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible = true }: AlarmActiveScreenProps) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -76,8 +76,18 @@ export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible 
         await sound.unloadAsync();
       }
 
+      // Set audio mode for alarm priority
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true, // IMPORTANT: Play even in silent mode
+        shouldDuckAndroid: false,
+        staysActiveInBackground: false,
+      });
+
       // Get the appropriate sound URL based on alarm sound type
-      const soundUrl = getAlarmSoundUrl(alarm.soundName || 'gentle_chimes');
+      const soundUrl = getAlarmSoundUrl(alarm.soundName || 'classic_bell');
+      
+      console.log('🔊 Playing alarm sound:', soundUrl);
       
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: soundUrl },
@@ -90,6 +100,7 @@ export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible 
       
       setSound(newSound);
       setIsPlaying(true);
+      console.log('🔊 Alarm sound started successfully');
     } catch (error) {
       console.error('Error playing alarm sound:', error);
       // Fallback to system sound if custom sound fails
@@ -111,21 +122,21 @@ export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible 
   };
 
   const getAlarmSoundUrl = (soundName: string): string => {
-    // These would be actual sound file URLs or local assets
+    // For better Expo Go compatibility, use more reliable sound URLs
     const soundUrls: { [key: string]: string } = {
-      gentle_chimes: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-      soft_piano: 'https://www.soundjay.com/misc/sounds/bell-ringing-04.wav',
-      nature_sounds: 'https://www.soundjay.com/nature/sounds/forest-1.wav',
-      classic_bell: 'https://www.soundjay.com/misc/sounds/bell-ringing-01.wav',
-      peaceful_melody: 'https://www.soundjay.com/misc/sounds/bell-ringing-02.wav',
-      morning_breeze: 'https://www.soundjay.com/nature/sounds/wind-1.wav',
-      ocean_waves: 'https://www.soundjay.com/nature/sounds/ocean-1.wav',
-      forest_birds: 'https://www.soundjay.com/nature/sounds/birds-1.wav',
-      wind_chimes: 'https://www.soundjay.com/misc/sounds/bell-ringing-03.wav',
-      rainfall: 'https://www.soundjay.com/nature/sounds/rain-1.wav',
+      gentle_chimes: 'https://www2.cs.uic.edu/~i101/SoundFiles/Taunt.wav',
+      soft_piano: 'https://www2.cs.uic.edu/~i101/SoundFiles/StarWars3.wav',
+      nature_sounds: 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav',
+      classic_bell: 'https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav',
+      peaceful_melody: 'https://www2.cs.uic.edu/~i101/SoundFiles/ImperialMarch60.wav',
+      morning_breeze: 'https://www2.cs.uic.edu/~i101/SoundFiles/gettysburg10.wav',
+      ocean_waves: 'https://www2.cs.uic.edu/~i101/SoundFiles/preamble10.wav',
+      forest_birds: 'https://www2.cs.uic.edu/~i101/SoundFiles/gettysburg.wav',
+      wind_chimes: 'https://www2.cs.uic.edu/~i101/SoundFiles/tada.wav',
+      rainfall: 'https://www2.cs.uic.edu/~i101/SoundFiles/preamble.wav',
     };
     
-    return soundUrls[soundName] || soundUrls.gentle_chimes;
+    return soundUrls[soundName] || soundUrls.classic_bell;
   };
 
   const startAnimations = () => {
@@ -271,10 +282,18 @@ export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible 
 
   if (!visible) return null;
 
+  console.log('🚨 AlarmActiveScreen rendering with alarm:', alarm);
+
   const styles = createStyles(colors);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Modal
+      visible={visible}
+      animationType="fade"
+      presentationStyle="fullScreen"
+      onRequestClose={handleDismiss}
+    >
+      <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Current Time Display */}
         <View style={styles.timeContainer}>
@@ -341,6 +360,7 @@ export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible 
         </Animated.View>
       </View>
     </SafeAreaView>
+    </Modal>
   );
 }
 
