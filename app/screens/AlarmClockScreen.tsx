@@ -14,13 +14,14 @@ interface AlarmClockScreenProps {
 }
 
 export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandled }: AlarmClockScreenProps) {
-  const { colors } = useTheme();
+  const { colors, isMilitaryTime } = useTheme();
   const { alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm } = useApp();
   const insets = useSafeAreaInsets();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAlarm, setEditingAlarm] = useState<Alarm | null>(null);
   const [newAlarmHour, setNewAlarmHour] = useState(7);
   const [newAlarmMinute, setNewAlarmMinute] = useState(0);
+  const [newAlarmAmPm, setNewAlarmAmPm] = useState<'AM' | 'PM'>('AM');
   const [newAlarmLabel, setNewAlarmLabel] = useState('');
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [snoozeEnabled, setSnoozeEnabled] = useState(true);
@@ -72,16 +73,47 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
   const styles = createStyles(colors);
 
   const alarmSounds = [
-    { key: 'gentle_chimes', name: '🎐 Gentle Chimes', description: 'Soft and peaceful', duration: 3000 },
-    { key: 'soft_piano', name: '🎹 Soft Piano', description: 'Melodic and calming', duration: 3000 },
-    { key: 'nature_sounds', name: '🌿 Nature Sounds', description: 'Birds and water', duration: 3000 },
-    { key: 'classic_bell', name: '🔔 Classic Bell', description: 'Traditional alarm', duration: 2000 },
-    { key: 'peaceful_melody', name: '🎵 Peaceful Melody', description: 'Soothing tune', duration: 4000 },
-    { key: 'morning_breeze', name: '🍃 Morning Breeze', description: 'Light and airy', duration: 3000 },
-    { key: 'ocean_waves', name: '🌊 Ocean Waves', description: 'Rhythmic and calm', duration: 3000 },
-    { key: 'forest_birds', name: '🐦 Forest Birds', description: 'Natural wake-up call', duration: 3000 },
-    { key: 'wind_chimes', name: '💨 Wind Chimes', description: 'Ethereal and light', duration: 2500 },
-    { key: 'rainfall', name: '🌧️ Gentle Rain', description: 'Soft and steady', duration: 3000 },
+    // Epic & Motivational 🌟
+    { key: 'cosmic_awakening', name: '🌌 Cosmic Awakening', description: 'Ethereal space sounds building to inspiration', duration: 4000 },
+    { key: 'champion_rise', name: '🏆 Champion Rise', description: 'Heroic orchestral theme for ambitious mornings', duration: 3500 },
+    { key: 'power_surge', name: '⚡ Power Surge', description: 'Energizing electronic beats with uplifting melody', duration: 3000 },
+    
+    // Musical & Melodic 🎵
+    { key: 'crystal_harmony', name: '💎 Crystal Harmony', description: 'Beautiful crystal bowl harmonics', duration: 4000 },
+    { key: 'royal_fanfare', name: '👑 Royal Fanfare', description: 'Majestic brass fanfare fit for royalty', duration: 3000 },
+    { key: 'zen_bells', name: '🧘 Zen Bells', description: 'Peaceful temple bells with reverb', duration: 3500 },
+    
+    // Nature & Ambient 🌊  
+    { key: 'mystic_forest', name: '🧚 Mystic Forest', description: 'Enchanted forest with magical undertones', duration: 4000 },
+    { key: 'ocean_sunrise', name: '🌅 Ocean Sunrise', description: 'Gentle waves with morning birds', duration: 3500 },
+    { key: 'mountain_breeze', name: '��️ Mountain Breeze', description: 'Wind through trees with distant chimes', duration: 3000 },
+    
+    // Modern & Tech ⚡
+    { key: 'future_pulse', name: '🚀 Future Pulse', description: 'Futuristic sci-fi awakening sequence', duration: 3000 },
+    { key: 'digital_dawn', name: '🌐 Digital Dawn', description: 'Clean modern tones with building energy', duration: 3500 },
+    { key: 'quantum_chime', name: '⚛️ Quantum Chime', description: 'Crystalline digital harmonics', duration: 2500 },
+    
+    // Classic Options 🔔
+    { key: 'gentle_chimes', name: '🎐 Gentle Chimes', description: 'Soft and peaceful traditional', duration: 3000 },
+    { key: 'soft_piano', name: '🎹 Soft Piano', description: 'Melodic and calming piano', duration: 3000 },
+    { key: 'classic_bell', name: '🔔 Classic Bell', description: 'Traditional alarm bell', duration: 2000 },
+    
+    // Funny & Hilarious 😂
+    { key: 'rooster_opera', name: '🐓 Rooster Opera', description: 'Dramatic rooster performing opera - absolutely hilarious!', duration: 4000 },
+    { key: 'alien_invasion', name: '👽 Alien Invasion', description: 'Funny alien sounds: "WAKE UP HUMAN!"', duration: 3500 },
+    { key: 'grandmother_yelling', name: '👵 Grandma Yelling', description: 'Sweet grandma shouting "GET UP HONEY!"', duration: 3000 },
+    { key: 'cat_piano', name: '🐱 Cat Piano', description: 'Cats meowing a silly tune on piano keys', duration: 3500 },
+    { key: 'rubber_duck', name: '🦆 Rubber Duck', description: 'Squeaky rubber duck having a meltdown', duration: 2500 },
+    { key: 'pirate_wake_up', name: '🏴‍☠️ Pirate Wake Up', description: 'Gruff pirate: "AHOY! TIME TO WAKE UP MATEY!"', duration: 3000 },
+    { key: 'baby_elephant', name: '🐘 Baby Elephant', description: 'Adorable baby elephant trumpeting loudly', duration: 3000 },
+    { key: 'disco_chicken', name: '🐔 Disco Chicken', description: 'Funky disco chicken dance party', duration: 4000 },
+    { key: 'robot_malfunction', name: '🤖 Robot Malfunction', description: 'Robot glitching out: "ERROR! HUMAN MUST WAKE!"', duration: 3000 },
+    { key: 'snoring_bear', name: '🐻 Snoring Bear', description: 'Bear snoring so loud it wakes itself up', duration: 3500 },
+    { key: 'chipmunk_chaos', name: '🐿️ Chipmunk Chaos', description: 'Hyperactive chipmunks chattering at high speed', duration: 3000 },
+    { key: 'mom_voice', name: '👩 Mom Voice', description: 'Classic mom: "GET UP RIGHT NOW OR NO BREAKFAST!"', duration: 3500 },
+    { key: 'screaming_goat', name: '🐐 Screaming Goat', description: 'Hilarious goat screaming like a human', duration: 2500 },
+    { key: 'dramatic_llama', name: '🦙 Dramatic Llama', description: 'Overly dramatic llama making funny sounds', duration: 3000 },
+    { key: 'singing_frog', name: '🐸 Singing Frog', description: 'Frog attempting to sing opera (badly)', duration: 3500 },
   ];
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -97,7 +129,17 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
       return;
     }
 
-    const timeString = `${newAlarmHour.toString().padStart(2, '0')}:${newAlarmMinute.toString().padStart(2, '0')}`;
+    // Convert to 24-hour format for storage
+    let hour24 = newAlarmHour;
+    if (!isMilitaryTime) {
+      if (newAlarmAmPm === 'PM' && newAlarmHour !== 12) {
+        hour24 = newAlarmHour + 12;
+      } else if (newAlarmAmPm === 'AM' && newAlarmHour === 12) {
+        hour24 = 0;
+      }
+    }
+
+    const timeString = `${hour24.toString().padStart(2, '0')}:${newAlarmMinute.toString().padStart(2, '0')}`;
     
     const alarmData = {
       time: timeString,
@@ -124,8 +166,9 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
   };
 
   const resetModalState = () => {
-    setNewAlarmHour(7);
+    setNewAlarmHour(isMilitaryTime ? 7 : 7);
     setNewAlarmMinute(0);
+    setNewAlarmAmPm('AM');
     setNewAlarmLabel('');
     setSelectedDays([]);
     setSnoozeEnabled(true);
@@ -149,9 +192,18 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
   const formatTime = (time: string) => {
     const [hour, minute] = time.split(':');
     const hourNum = parseInt(hour);
-    const period = hourNum >= 12 ? 'PM' : 'AM';
-    const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
-    return `${displayHour}:${minute} ${period}`;
+    
+    if (isMilitaryTime) {
+      return `${hourNum.toString().padStart(2, '0')}:${minute}`;
+    } else {
+      const period = hourNum >= 12 ? 'PM' : 'AM';
+      const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+      return `${displayHour}:${minute} ${period}`;
+    }
+  };
+
+  const getQuickAlarmDisplayTime = (time24: string) => {
+    return formatTime(time24);
   };
 
   const formatRepeatDays = (repeatDays: number[]) => {
@@ -180,11 +232,30 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
   const handleEditAlarm = (alarm: Alarm) => {
     // Parse the time string (e.g., "07:30" -> hour: 7, minute: 30)
     const [hourStr, minuteStr] = alarm.time.split(':');
-    const hour = parseInt(hourStr, 10);
+    const hour24 = parseInt(hourStr, 10);
     const minute = parseInt(minuteStr, 10);
     
+    if (isMilitaryTime) {
+      setNewAlarmHour(hour24);
+      setNewAlarmAmPm('AM'); // Not used in military time
+    } else {
+      // Convert 24-hour to 12-hour format
+      if (hour24 === 0) {
+        setNewAlarmHour(12);
+        setNewAlarmAmPm('AM');
+      } else if (hour24 <= 11) {
+        setNewAlarmHour(hour24);
+        setNewAlarmAmPm('AM');
+      } else if (hour24 === 12) {
+        setNewAlarmHour(12);
+        setNewAlarmAmPm('PM');
+      } else {
+        setNewAlarmHour(hour24 - 12);
+        setNewAlarmAmPm('PM');
+      }
+    }
+    
     // Set the form state with the alarm's current values
-    setNewAlarmHour(hour);
     setNewAlarmMinute(minute);
     setNewAlarmLabel(alarm.label || '');
     setSelectedDays(alarm.repeatDays || []);
@@ -220,16 +291,42 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
 
   const getSoundDisplayName = (soundKey: string) => {
     const soundMap: { [key: string]: string } = {
+      // Epic & Motivational
+      'cosmic_awakening': '🌌 Cosmic Awakening',
+      'champion_rise': '🏆 Champion Rise',
+      'power_surge': '⚡ Power Surge',
+      
+      // Musical & Melodic
+      'crystal_harmony': '💎 Crystal Harmony',
+      'royal_fanfare': '👑 Royal Fanfare',
+      'zen_bells': '🧘 Zen Bells',
+      
+      // Nature & Ambient
+      'mystic_forest': '🧚 Mystic Forest',
+      'ocean_sunrise': '🌅 Ocean Sunrise',
+      'mountain_breeze': '🏔️ Mountain Breeze',
+      
+      // Modern & Tech
+      'future_pulse': '🚀 Future Pulse',
+      'digital_dawn': '🌐 Digital Dawn',
+      'quantum_chime': '⚛️ Quantum Chime',
+      
+      // Classic Options
+      'gentle_chimes': '🎐 Gentle Chimes',
+      'soft_piano': '🎹 Soft Piano',
+      'classic_bell': '🔔 Classic Bell',
+      
+      // Legacy compatibility
       'bell': '🔔 Classic Bell',
-      'chime': '🎵 Gentle Chime',
-      'nature_sounds': '🌿 Nature Sounds',
-      'digital': '📱 Digital Beep',
-      'melody': '🎶 Melody',
-      'urgent': '🚨 Urgent Alert',
-      'calm': '🧘 Calm Tone',
-      'piano': '🎹 Piano Notes',
-      'guitar': '🎸 Guitar Strum',
-      'horn': '📯 Horn Sound'
+      'chime': '🎐 Gentle Chimes',
+      'nature_sounds': '🧚 Mystic Forest',
+      'digital': '🌐 Digital Dawn',
+      'melody': '�� Soft Piano',
+      'urgent': '⚡ Power Surge',
+      'calm': '🧘 Zen Bells',
+      'piano': '🎹 Soft Piano',
+      'guitar': '💎 Crystal Harmony',
+      'horn': '👑 Royal Fanfare'
     };
     return soundMap[soundKey] || '🔔 Classic Bell';
   };
@@ -256,18 +353,49 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
         staysActiveInBackground: false,
       });
 
-      // Different sound URLs for each alarm type - using more reliable sources
+      // Local asset sounds with online fallbacks for preview
       const soundUrls: { [key: string]: string } = {
-        'gentle_chimes': 'https://www2.cs.uic.edu/~i101/SoundFiles/Taunt.wav',
+        // Epic & Motivational
+        'cosmic_awakening': 'https://www.soundjay.com/misc/sounds/magic-chime-02.wav',
+        'champion_rise': 'https://www.soundjay.com/misc/sounds/fanfare-1.wav', 
+        'power_surge': 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
+        
+        // Musical & Melodic
+        'crystal_harmony': 'https://www.soundjay.com/misc/sounds/crystal-chimes-02.wav',
+        'royal_fanfare': 'https://www.soundjay.com/misc/sounds/trumpet-fanfare-01.wav',
+        'zen_bells': 'https://www.soundjay.com/misc/sounds/tibetan-bells-01.wav',
+        
+        // Nature & Ambient
+        'mystic_forest': 'https://www.soundjay.com/nature/sounds/forest-with-creek.wav',
+        'ocean_sunrise': 'https://www.soundjay.com/nature/sounds/ocean-waves-02.wav',
+        'mountain_breeze': 'https://www.soundjay.com/nature/sounds/wind-chimes-01.wav',
+        
+        // Modern & Tech
+        'future_pulse': 'https://www.soundjay.com/misc/sounds/futuristic-chime.wav',
+        'digital_dawn': 'https://www.soundjay.com/misc/sounds/digital-beep-01.wav',
+        'quantum_chime': 'https://www.soundjay.com/misc/sounds/crystal-chime-clean.wav',
+        
+        // Funny & Hilarious
+        'rooster_opera': 'https://www.soundjay.com/animals/sounds/rooster-crow-01.wav',
+        'alien_invasion': 'https://www.soundjay.com/misc/sounds/sci-fi-beep-01.wav',
+        'grandmother_yelling': 'https://www.soundjay.com/human/sounds/woman-laughing-01.wav',
+        'cat_piano': 'https://www.soundjay.com/animals/sounds/cat-meow-01.wav',
+        'rubber_duck': 'https://www.soundjay.com/misc/sounds/rubber-duck-squeak.wav',
+        'pirate_wake_up': 'https://www.soundjay.com/human/sounds/man-yelling-01.wav',
+        'baby_elephant': 'https://www.soundjay.com/animals/sounds/elephant-trumpet-01.wav',
+        'disco_chicken': 'https://www.soundjay.com/animals/sounds/chicken-cluck-01.wav',
+        'robot_malfunction': 'https://www.soundjay.com/misc/sounds/robot-beep-01.wav',
+        'snoring_bear': 'https://www.soundjay.com/animals/sounds/bear-growl-01.wav',
+        'chipmunk_chaos': 'https://www.soundjay.com/animals/sounds/squirrel-chatter-01.wav',
+        'mom_voice': 'https://www.soundjay.com/human/sounds/woman-yelling-01.wav',
+        'screaming_goat': 'https://www.soundjay.com/animals/sounds/goat-bleat-01.wav',
+        'dramatic_llama': 'https://www.soundjay.com/animals/sounds/llama-sound-01.wav',
+        'singing_frog': 'https://www.soundjay.com/animals/sounds/frog-croak-01.wav',
+        
+        // Classic fallbacks
+        'gentle_chimes': 'https://www2.cs.uic.edu/~i101/SoundFiles/tada.wav',
         'soft_piano': 'https://www2.cs.uic.edu/~i101/SoundFiles/StarWars3.wav',
-        'nature_sounds': 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav',
         'classic_bell': 'https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav',
-        'peaceful_melody': 'https://www2.cs.uic.edu/~i101/SoundFiles/ImperialMarch60.wav',
-        'morning_breeze': 'https://www2.cs.uic.edu/~i101/SoundFiles/gettysburg10.wav',
-        'ocean_waves': 'https://www2.cs.uic.edu/~i101/SoundFiles/preamble10.wav',
-        'forest_birds': 'https://www2.cs.uic.edu/~i101/SoundFiles/gettysburg.wav',
-        'wind_chimes': 'https://www2.cs.uic.edu/~i101/SoundFiles/tada.wav',
-        'rainfall': 'https://www2.cs.uic.edu/~i101/SoundFiles/preamble.wav',
       };
 
       const soundUrl = soundUrls[soundKey] || soundUrls['gentle_chimes'];
@@ -348,7 +476,7 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
               style={styles.quickAlarmButton}
               onPress={() => createQuickAlarm('07:00', '🌅 Morning Routine')}
             >
-              <Text style={styles.quickAlarmTime}>7:00 AM</Text>
+              <Text style={styles.quickAlarmTime}>{getQuickAlarmDisplayTime('07:00')}</Text>
               <Text style={styles.quickAlarmLabel}>Morning</Text>
             </TouchableOpacity>
             
@@ -356,7 +484,7 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
               style={styles.quickAlarmButton}
               onPress={() => createQuickAlarm('08:00', '💼 Work Time')}
             >
-              <Text style={styles.quickAlarmTime}>8:00 AM</Text>
+              <Text style={styles.quickAlarmTime}>{getQuickAlarmDisplayTime('08:00')}</Text>
               <Text style={styles.quickAlarmLabel}>Work</Text>
             </TouchableOpacity>
             
@@ -364,7 +492,7 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
               style={styles.quickAlarmButton}
               onPress={() => createQuickAlarm('12:00', '🍽️ Lunch Break')}
             >
-              <Text style={styles.quickAlarmTime}>12:00 PM</Text>
+              <Text style={styles.quickAlarmTime}>{getQuickAlarmDisplayTime('12:00')}</Text>
               <Text style={styles.quickAlarmLabel}>Lunch</Text>
             </TouchableOpacity>
             
@@ -372,7 +500,7 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
               style={styles.quickAlarmButton}
               onPress={() => createQuickAlarm('22:00', '🌙 Bedtime')}
             >
-              <Text style={styles.quickAlarmTime}>10:00 PM</Text>
+              <Text style={styles.quickAlarmTime}>{getQuickAlarmDisplayTime('22:00')}</Text>
               <Text style={styles.quickAlarmLabel}>Sleep</Text>
             </TouchableOpacity>
           </View>
@@ -480,14 +608,17 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
                       nestedScrollEnabled={true}
                       keyboardShouldPersistTaps="handled"
                     >
-                      {Array.from({ length: 24 }, (_, i) => (
+                      {(isMilitaryTime 
+                        ? Array.from({ length: 24 }, (_, i) => i)
+                        : Array.from({ length: 12 }, (_, i) => i + 1)
+                      ).map((hour) => (
                         <TouchableOpacity
-                          key={i}
-                          style={[styles.timeOption, newAlarmHour === i && styles.selectedTimeOption]}
-                          onPress={() => setNewAlarmHour(i)}
+                          key={hour}
+                          style={[styles.timeOption, newAlarmHour === hour && styles.selectedTimeOption]}
+                          onPress={() => setNewAlarmHour(hour)}
                         >
-                          <Text style={[styles.timeOptionText, newAlarmHour === i && styles.selectedTimeOptionText]}>
-                            {i.toString().padStart(2, '0')}
+                          <Text style={[styles.timeOptionText, newAlarmHour === hour && styles.selectedTimeOptionText]}>
+                            {isMilitaryTime ? hour.toString().padStart(2, '0') : hour}
                           </Text>
                         </TouchableOpacity>
                       ))}
@@ -517,6 +648,33 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
                       ))}
                     </ScrollView>
                   </View>
+                  
+                  {!isMilitaryTime && (
+                    <>
+                      <Text style={styles.timeColon}>:</Text>
+                      <View style={styles.timePickerColumn}>
+                        <Text style={styles.timePickerLabel}>AM/PM</Text>
+                        <ScrollView 
+                          style={styles.timeScrollView} 
+                          showsVerticalScrollIndicator={false}
+                          nestedScrollEnabled={true}
+                          keyboardShouldPersistTaps="handled"
+                        >
+                          {['AM', 'PM'].map(period => (
+                            <TouchableOpacity
+                              key={period}
+                              style={[styles.timeOption, newAlarmAmPm === period && styles.selectedTimeOption]}
+                              onPress={() => setNewAlarmAmPm(period as 'AM' | 'PM')}
+                            >
+                              <Text style={[styles.timeOptionText, newAlarmAmPm === period && styles.selectedTimeOptionText]}>
+                                {period}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      </View>
+                    </>
+                  )}
                 </View>
               </View>
 
@@ -664,16 +822,44 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
               {/* Sound Options */}
               <ScrollView style={styles.soundsList}>
                 {[
-                  { key: 'bell', name: '🔔 Classic Bell', description: 'Traditional alarm sound' },
-                  { key: 'chime', name: '🎵 Gentle Chime', description: 'Soft and pleasant' },
-                  { key: 'nature_sounds', name: '🌿 Nature Sounds', description: 'Birds and forest' },
-                  { key: 'digital', name: '📱 Digital Beep', description: 'Modern electronic sound' },
-                  { key: 'melody', name: '🎶 Melody', description: 'Peaceful tune' },
-                  { key: 'urgent', name: '🚨 Urgent Alert', description: 'Strong wake-up call' },
-                  { key: 'calm', name: '🧘 Calm Tone', description: 'Gentle awakening' },
-                  { key: 'piano', name: '🎹 Piano Notes', description: 'Soft piano melody' },
-                  { key: 'guitar', name: '🎸 Guitar Strum', description: 'Acoustic guitar' },
-                  { key: 'horn', name: '📯 Horn Sound', description: 'Clear horn sound' },
+                  // Epic & Motivational
+                  { key: 'cosmic_awakening', name: '🌌 Cosmic Awakening', description: 'Ethereal space sounds building to inspiration' },
+                  { key: 'champion_rise', name: '🏆 Champion Rise', description: 'Heroic orchestral theme for ambitious mornings' },
+                  { key: 'power_surge', name: '⚡ Power Surge', description: 'Energizing electronic beats with uplifting melody' },
+                  
+                  // Musical & Melodic
+                  { key: 'crystal_harmony', name: '💎 Crystal Harmony', description: 'Beautiful crystal bowl harmonics' },
+                  { key: 'royal_fanfare', name: '👑 Royal Fanfare', description: 'Majestic brass fanfare fit for royalty' },
+                  { key: 'zen_bells', name: '🧘 Zen Bells', description: 'Peaceful temple bells with reverb' },
+                  
+                  // Nature & Ambient
+                  { key: 'mystic_forest', name: '🧚 Mystic Forest', description: 'Enchanted forest with magical undertones' },
+                  { key: 'ocean_sunrise', name: '🌅 Ocean Sunrise', description: 'Gentle waves with morning birds' },
+                  
+                  // Modern & Tech
+                  { key: 'future_pulse', name: '🚀 Future Pulse', description: 'Futuristic sci-fi awakening sequence' },
+                  { key: 'digital_dawn', name: '💻 Digital Dawn', description: 'Clean modern tones with building energy' },
+                  
+                  // Classic favorites
+                  { key: 'gentle_chimes', name: '🎐 Gentle Chimes', description: 'Soft and peaceful traditional' },
+                  { key: 'classic_bell', name: '🔔 Classic Bell', description: 'Traditional alarm bell' },
+                  
+                  // Funny & Hilarious
+                  { key: 'rooster_opera', name: '🐓 Rooster Opera', description: 'Dramatic rooster awakening performance' },
+                  { key: 'alien_invasion', name: '👽 Alien Invasion', description: 'Sci-fi wake up call from space' },
+                  { key: 'grandmother_yelling', name: '👵 Grandmother Yelling', description: 'Classic wake up technique' },
+                  { key: 'cat_piano', name: '🐱 Cat Piano', description: 'Musical feline surprise' },
+                  { key: 'rubber_duck', name: '🦆 Rubber Duck', description: 'Squeaky morning greeting' },
+                  { key: 'pirate_wake_up', name: '🏴‍☠️ Pirate Wake Up', description: 'Arrr, time to rise matey!' },
+                  { key: 'baby_elephant', name: '🐘 Baby Elephant', description: 'Adorable trumpet call' },
+                  { key: 'disco_chicken', name: '🐔 Disco Chicken', description: 'Funky clucking beats' },
+                  { key: 'robot_malfunction', name: '🤖 Robot Malfunction', description: 'Glitchy morning beeps' },
+                  { key: 'snoring_bear', name: '🐻 Snoring Bear', description: 'From sleep to growl' },
+                  { key: 'chipmunk_chaos', name: '🐿️ Chipmunk Chaos', description: 'Hyperactive chatter' },
+                  { key: 'mom_voice', name: '👩 Mom Voice', description: 'The ultimate wake up call' },
+                  { key: 'screaming_goat', name: '🐐 Screaming Goat', description: 'Internet famous wake up' },
+                  { key: 'dramatic_llama', name: '🦙 Dramatic Llama', description: 'Theatrical morning call' },
+                  { key: 'singing_frog', name: '🐸 Singing Frog', description: 'Croaky morning serenade' },
                 ].map((sound) => (
                   <View key={sound.key} style={styles.soundOptionContainer}>
                     <TouchableOpacity

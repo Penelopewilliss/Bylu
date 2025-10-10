@@ -110,7 +110,7 @@ class NotificationService {
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#FF69B4',
-        sound: 'default', // We can customize this later
+        sound: 'default', // Custom: 'bylu_notification.wav' when using development build
       });
     }
 

@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NotificationService, { NotificationSettings, DailyAppointmentSettings } from '../services/NotificationService';
 import HomeButton from '../components/HomeButton';
+import { useTheme } from '../context/ThemeContext';
 
 const TIMING_OPTIONS = [
   { value: 5, label: '5 minutes' },
@@ -23,6 +24,17 @@ const TIMING_OPTIONS = [
 ];
 
 export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?: (screen: string) => void }) {
+  const { colors, isMilitaryTime } = useTheme();
+  
+  const formatTime = (hour: number, minute: number) => {
+    if (isMilitaryTime) {
+      return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    } else {
+      const period = hour >= 12 ? 'PM' : 'AM';
+      const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+    }
+  };
   const [settings, setSettings] = useState<NotificationSettings>({
     enabled: true,
     timings: [15, 60],
@@ -326,8 +338,7 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
                     >
                       <Text style={styles.timePickerLabel}>Morning Time:</Text>
                       <Text style={styles.timePickerValue}>
-                        {dailySettings.morningTime.hour.toString().padStart(2, '0')}:
-                        {dailySettings.morningTime.minute.toString().padStart(2, '0')}
+                        {formatTime(dailySettings.morningTime.hour, dailySettings.morningTime.minute)}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -354,8 +365,7 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
                     >
                       <Text style={styles.timePickerLabel}>Evening Time:</Text>
                       <Text style={styles.timePickerValue}>
-                        {dailySettings.eveningTime.hour.toString().padStart(2, '0')}:
-                        {dailySettings.eveningTime.minute.toString().padStart(2, '0')}
+                        {formatTime(dailySettings.eveningTime.hour, dailySettings.eveningTime.minute)}
                       </Text>
                     </TouchableOpacity>
                   )}

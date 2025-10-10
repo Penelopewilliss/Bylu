@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 
@@ -11,6 +11,32 @@ interface HomeScreenProps {
 export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
+
+  // Floating particles animation
+  const screenWidth = Dimensions.get('window').width;
+  const particles = Array.from({ length: 6 }, (_, i) => ({
+    id: i,
+    animatedValue: useRef(new Animated.Value(0)).current,
+    xPosition: Math.random() * screenWidth,
+    delay: i * 800,
+  }));
+
+  useEffect(() => {
+    particles.forEach((particle) => {
+      const animate = () => {
+        particle.animatedValue.setValue(0);
+        Animated.timing(particle.animatedValue, {
+          toValue: 1,
+          duration: 4000 + Math.random() * 2000, // Random duration between 4-6 seconds
+          useNativeDriver: true,
+        }).start(() => {
+          setTimeout(animate, Math.random() * 3000); // Random delay before next animation
+        });
+      };
+
+      setTimeout(animate, particle.delay);
+    });
+  }, []);
 
   const navigateWithModal = (screen: string, modalType: string) => {
     if (onSetDeepLink) {
@@ -93,6 +119,39 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
               <Text style={styles.actionEmoji}>{action.emoji}</Text>
               <Text style={styles.actionTitle}>{action.title}</Text>
             </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Floating Particles Animation */}
+        <View style={styles.particlesContainer}>
+          {particles.map((particle) => (
+            <Animated.View
+              key={particle.id}
+              style={[
+                styles.particle,
+                {
+                  left: particle.xPosition,
+                  opacity: particle.animatedValue.interpolate({
+                    inputRange: [0, 0.1, 0.9, 1],
+                    outputRange: [0, 0.8, 0.8, 0],
+                  }),
+                  transform: [
+                    {
+                      translateY: particle.animatedValue.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [100, -100],
+                      }),
+                    },
+                    {
+                      scale: particle.animatedValue.interpolate({
+                        inputRange: [0, 0.5, 1],
+                        outputRange: [0.3, 1, 0.3],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
           ))}
         </View>
       </ScrollView>
@@ -191,5 +250,21 @@ const createStyles = (colors: any) => StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     fontFamily: 'Montserrat-Regular',
+  },
+  particlesContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    pointerEvents: 'none', // Allow touch events to pass through
+  },
+  particle: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.primary || '#8B5CF6',
+    opacity: 0.6,
   },
 });

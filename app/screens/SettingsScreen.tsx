@@ -20,7 +20,7 @@ import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
 import NotificationService, { PriorityReminderSettings, DailyAppointmentSettings } from '../services/NotificationService';
 
 export default function SettingsScreen() {
-  const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime } = useTheme();
+  const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime, formatTime } = useTheme();
   const { 
     isConnected, 
     isAuthenticating, 
@@ -454,7 +454,7 @@ export default function SettingsScreen() {
             <>
               <View style={styles.settingItem}>
                 <View style={styles.settingInfo}>
-                  <Text style={styles.settingLabel}>🌅 Morning (9:00 AM)</Text>
+                  <Text style={styles.settingLabel}>🌅 Morning ({formatTime(priorityReminderSettings.morningTime.hour, priorityReminderSettings.morningTime.minute)})</Text>
                   <Text style={styles.settingDescription}>Start your day with priority focus</Text>
                 </View>
                 <Switch
@@ -467,7 +467,7 @@ export default function SettingsScreen() {
 
               <View style={styles.settingItem}>
                 <View style={styles.settingInfo}>
-                  <Text style={styles.settingLabel}>🍽️ Lunch (1:00 PM)</Text>
+                  <Text style={styles.settingLabel}>🍽️ Lunch ({formatTime(priorityReminderSettings.lunchTime.hour, priorityReminderSettings.lunchTime.minute)})</Text>
                   <Text style={styles.settingDescription}>Midday priority check-in</Text>
                 </View>
                 <Switch
@@ -480,7 +480,7 @@ export default function SettingsScreen() {
 
               <View style={styles.settingItem}>
                 <View style={styles.settingInfo}>
-                  <Text style={styles.settingLabel}>🌆 Evening (6:00 PM)</Text>
+                  <Text style={styles.settingLabel}>🌆 Evening ({formatTime(priorityReminderSettings.eveningTime.hour, priorityReminderSettings.eveningTime.minute)})</Text>
                   <Text style={styles.settingDescription}>End-of-day priority review</Text>
                 </View>
                 <Switch
@@ -533,8 +533,7 @@ export default function SettingsScreen() {
                 >
                   <Text style={styles.timePickerLabel}>Morning Time:</Text>
                   <Text style={styles.timePickerValue}>
-                    {dailyAppointmentSettings.morningTime.hour.toString().padStart(2, '0')}:
-                    {dailyAppointmentSettings.morningTime.minute.toString().padStart(2, '0')}
+                    {formatTime(dailyAppointmentSettings.morningTime.hour, dailyAppointmentSettings.morningTime.minute)}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -559,8 +558,7 @@ export default function SettingsScreen() {
                 >
                   <Text style={styles.timePickerLabel}>Evening Time:</Text>
                   <Text style={styles.timePickerValue}>
-                    {dailyAppointmentSettings.eveningTime.hour.toString().padStart(2, '0')}:
-                    {dailyAppointmentSettings.eveningTime.minute.toString().padStart(2, '0')}
+                    {formatTime(dailyAppointmentSettings.eveningTime.hour, dailyAppointmentSettings.eveningTime.minute)}
                   </Text>
                 </TouchableOpacity>
               )}

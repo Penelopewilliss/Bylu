@@ -13,7 +13,7 @@ interface AlarmActiveScreenProps {
 }
 
 export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible = true }: AlarmActiveScreenProps) {
-  const { colors } = useTheme();
+  const { colors, isMilitaryTime } = useTheme();
   const insets = useSafeAreaInsets();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -268,7 +268,7 @@ export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible 
     return date.toLocaleTimeString([], { 
       hour: '2-digit', 
       minute: '2-digit',
-      hour12: true 
+      hour12: !isMilitaryTime 
     });
   };
 
