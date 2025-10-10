@@ -19,6 +19,14 @@ export interface PriorityReminderSettings {
   eveningTime: { hour: number; minute: number };
 }
 
+export interface DailyAppointmentSettings {
+  enabled: boolean;
+  morningEnabled: boolean;
+  eveningEnabled: boolean;
+  morningTime: { hour: number; minute: number }; // For today's appointments
+  eveningTime: { hour: number; minute: number }; // For tomorrow's appointments
+}
+
 export interface Appointment {
   id: string;
   title: string;
@@ -43,10 +51,19 @@ const DEFAULT_PRIORITY_REMINDER_SETTINGS: PriorityReminderSettings = {
   eveningTime: { hour: 18, minute: 0 },
 };
 
+const DEFAULT_DAILY_APPOINTMENT_SETTINGS: DailyAppointmentSettings = {
+  enabled: true,
+  morningEnabled: true,
+  eveningEnabled: true,
+  morningTime: { hour: 8, minute: 0 }, // 8:00 AM for today's appointments
+  eveningTime: { hour: 20, minute: 0 }, // 8:00 PM for tomorrow's appointments
+};
+
 class NotificationService {
   private static instance: NotificationService;
   private settings: NotificationSettings = DEFAULT_SETTINGS;
   private priorityReminderSettings: PriorityReminderSettings = DEFAULT_PRIORITY_REMINDER_SETTINGS;
+  private dailyAppointmentSettings: DailyAppointmentSettings = DEFAULT_DAILY_APPOINTMENT_SETTINGS;
 
   static getInstance(): NotificationService {
     if (!NotificationService.instance) {
@@ -121,6 +138,23 @@ class NotificationService {
     return { ...this.priorityReminderSettings };
   }
 
+  getDailyAppointmentSettings(): DailyAppointmentSettings {
+    return { ...this.dailyAppointmentSettings };
+  }
+
+  async setDailyAppointmentSettings(settings: DailyAppointmentSettings): Promise<void> {
+    try {
+      this.dailyAppointmentSettings = settings;
+      await AsyncStorage.setItem('dailyAppointmentSettings', JSON.stringify(settings));
+      
+      // Reschedule daily notifications with new settings
+      await this.scheduleDailyAppointmentNotifications();
+    } catch (error) {
+      console.error('Failed to save daily appointment settings:', error);
+      throw error;
+    }
+  }
+
   async loadSettings(): Promise<void> {
     try {
       const stored = await AsyncStorage.getItem('notificationSettings');
@@ -133,10 +167,17 @@ class NotificationService {
       if (priorityStored) {
         this.priorityReminderSettings = { ...DEFAULT_PRIORITY_REMINDER_SETTINGS, ...JSON.parse(priorityStored) };
       }
+
+      // Load daily appointment settings
+      const dailyStored = await AsyncStorage.getItem('dailyAppointmentSettings');
+      if (dailyStored) {
+        this.dailyAppointmentSettings = { ...DEFAULT_DAILY_APPOINTMENT_SETTINGS, ...JSON.parse(dailyStored) };
+      }
     } catch (error) {
       console.error('Failed to load notification settings:', error);
       this.settings = DEFAULT_SETTINGS;
       this.priorityReminderSettings = DEFAULT_PRIORITY_REMINDER_SETTINGS;
+      this.dailyAppointmentSettings = DEFAULT_DAILY_APPOINTMENT_SETTINGS;
     }
   }
 
@@ -384,6 +425,147 @@ class NotificationService {
       console.log('✅ Cancelled all priority reminders');
     } catch (error) {
       console.error('Failed to cancel priority reminders:', error);
+    }
+  }
+
+  async scheduleDailyAppointmentNotifications(appointments?: any[]): Promise<void> {
+    if (!this.dailyAppointmentSettings.enabled) {
+      await this.cancelAllDailyAppointmentNotifications();
+      return;
+    }
+
+    // Cancel existing daily appointment notifications
+    await this.cancelAllDailyAppointmentNotifications();
+
+    // Schedule morning notification for today's appointments
+    if (this.dailyAppointmentSettings.morningEnabled) {
+      await this.scheduleDailyNotification(
+        'daily-appointments-morning',
+        'Today\'s Appointments',
+        'morning',
+        this.dailyAppointmentSettings.morningTime,
+        appointments
+      );
+    }
+
+    // Schedule evening notification for tomorrow's appointments
+    if (this.dailyAppointmentSettings.eveningEnabled) {
+      await this.scheduleDailyNotification(
+        'daily-appointments-evening',
+        'Tomorrow\'s Appointments',
+        'evening',
+        this.dailyAppointmentSettings.eveningTime,
+        appointments
+      );
+    }
+  }
+
+  private async scheduleDailyNotification(
+    identifier: string,
+    title: string,
+    type: 'morning' | 'evening',
+    time: { hour: number; minute: number },
+    appointments?: any[]
+  ): Promise<void> {
+    try {
+      const now = new Date();
+      const scheduleTime = new Date();
+      scheduleTime.setHours(time.hour, time.minute, 0, 0);
+
+      // If the time has passed today, schedule for tomorrow
+      if (scheduleTime <= now) {
+        scheduleTime.setDate(scheduleTime.getDate() + 1);
+      }
+
+      // Get notification body based on appointments
+      const body = this.getNotificationBody(type, appointments);
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `📅 ${title}`,
+          body,
+          data: { 
+            type: 'daily-appointments',
+            timeSlot: type
+          },
+          sound: this.settings.soundEnabled ? 'default' : false,
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          hour: time.hour,
+          minute: time.minute,
+          repeats: true,
+        },
+        identifier,
+      });
+
+      console.log(`✅ Scheduled daily ${type} appointment notification for ${time.hour}:${time.minute.toString().padStart(2, '0')}`);
+    } catch (error) {
+      console.error(`Failed to schedule daily ${type} appointment notification:`, error);
+    }
+  }
+
+  private getNotificationBody(type: 'morning' | 'evening', appointments?: any[]): string {
+    if (!appointments || appointments.length === 0) {
+      return type === 'morning' 
+        ? 'You have no appointments scheduled for today' 
+        : 'You have no appointments scheduled for tomorrow';
+    }
+
+    // Filter appointments for the relevant day
+    const relevantAppointments = this.filterAppointmentsByDate(type, appointments);
+    
+    if (relevantAppointments.length === 0) {
+      return type === 'morning' 
+        ? 'You have no appointments scheduled for today' 
+        : 'You have no appointments scheduled for tomorrow';
+    }
+
+    if (relevantAppointments.length === 1) {
+      const appointment = relevantAppointments[0];
+      const time = this.formatAppointmentTime(appointment.startDate);
+      return `${time}: ${appointment.title}`;
+    }
+
+    // Multiple appointments
+    const dayText = type === 'morning' ? 'today' : 'tomorrow';
+    return `You have ${relevantAppointments.length} appointments ${dayText}. Tap to see details.`;
+  }
+
+  private filterAppointmentsByDate(type: 'morning' | 'evening', appointments: any[]): any[] {
+    const targetDate = new Date();
+    if (type === 'evening') {
+      targetDate.setDate(targetDate.getDate() + 1); // Tomorrow
+    }
+    
+    const targetDateStr = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+    return appointments.filter(appointment => {
+      const appointmentDate = new Date(appointment.startDate).toISOString().split('T')[0];
+      return appointmentDate === targetDateStr;
+    });
+  }
+
+  private formatAppointmentTime(dateString: string): string {
+    const date = new Date(dateString);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    
+    // Format as 12-hour time
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, '0');
+    
+    return `${displayHours}:${displayMinutes} ${ampm}`;
+  }
+
+  async cancelAllDailyAppointmentNotifications(): Promise<void> {
+    try {
+      await Notifications.cancelScheduledNotificationAsync('daily-appointments-morning');
+      await Notifications.cancelScheduledNotificationAsync('daily-appointments-evening');
+      console.log('✅ Cancelled all daily appointment reminders');
+    } catch (error) {
+      console.error('Failed to cancel daily appointment reminders:', error);
     }
   }
 }

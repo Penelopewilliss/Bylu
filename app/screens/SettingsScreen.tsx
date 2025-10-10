@@ -7,7 +7,9 @@ import {
   ScrollView,
   Switch,
   Alert,
-  Modal
+  Modal,
+  Platform,
+  TextInput
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,7 +17,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useCalendarSync } from '../context/CalendarSyncContext';
 import OfflineIndicator from '../components/OfflineIndicator';
 import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
-import NotificationService, { PriorityReminderSettings } from '../services/NotificationService';
+import NotificationService, { PriorityReminderSettings, DailyAppointmentSettings } from '../services/NotificationService';
 
 export default function SettingsScreen() {
   const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime } = useTheme();
@@ -41,22 +43,37 @@ export default function SettingsScreen() {
     eveningTime: { hour: 18, minute: 0 },
   });
 
+  const [dailyAppointmentSettings, setDailyAppointmentSettings] = useState<DailyAppointmentSettings>({
+    enabled: true,
+    morningEnabled: true,
+    eveningEnabled: true,
+    morningTime: { hour: 8, minute: 0 },
+    eveningTime: { hour: 20, minute: 0 },
+  });
+
+  // Time picker modal state
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [currentTimeType, setCurrentTimeType] = useState<'morning' | 'evening'>('morning');
+  const [tempTime, setTempTime] = useState(new Date());
+
   const styles = createStyles(colors);
 
   // Load priority reminder settings on component mount
   useEffect(() => {
-    const loadPrioritySettings = async () => {
+    const loadSettings = async () => {
       try {
         const notificationService = NotificationService.getInstance();
-        const settings = notificationService.getPriorityReminderSettings();
-        setPriorityReminderSettings(settings);
-        console.log(`⚙️ SettingsScreen: Loaded priority reminder settings, enabled = ${settings.enabled}`);
+        const prioritySettings = notificationService.getPriorityReminderSettings();
+        const dailySettings = notificationService.getDailyAppointmentSettings();
+        setPriorityReminderSettings(prioritySettings);
+        setDailyAppointmentSettings(dailySettings);
+        console.log(`⚙️ SettingsScreen: Loaded notification settings`);
       } catch (error) {
-        console.error('Failed to load priority reminder settings:', error);
+        console.error('Failed to load notification settings:', error);
       }
     };
     
-    loadPrioritySettings();
+    loadSettings();
   }, []);
 
   const updatePriorityReminderSetting = async (key: keyof PriorityReminderSettings, value: any) => {
@@ -73,6 +90,53 @@ export default function SettingsScreen() {
       console.error('Failed to update priority reminder settings:', error);
       Alert.alert('Error', 'Failed to update reminder settings');
     }
+  };
+
+  const updateDailyAppointmentSetting = async (key: keyof DailyAppointmentSettings, value: any) => {
+    try {
+      console.log(`⚙️ SettingsScreen: Updating daily appointment ${key} to ${value}`);
+      const newSettings = { ...dailyAppointmentSettings, [key]: value };
+      setDailyAppointmentSettings(newSettings);
+      
+      const notificationService = NotificationService.getInstance();
+      await notificationService.setDailyAppointmentSettings(newSettings);
+      
+      console.log(`✅ SettingsScreen: Updated daily appointment setting: ${key} = ${value}`);
+    } catch (error) {
+      console.error('Failed to update daily appointment settings:', error);
+      Alert.alert('Error', 'Failed to update daily appointment settings');
+    }
+  };
+
+  const showTimePickerModal = (
+    type: 'morning' | 'evening',
+    currentTime: { hour: number; minute: number }
+  ) => {
+    const date = new Date();
+    date.setHours(currentTime.hour);
+    date.setMinutes(currentTime.minute);
+    setTempTime(date);
+    setCurrentTimeType(type);
+    setShowTimePicker(true);
+  };
+
+  const handleTimeChange = (event: any, selectedTime?: Date) => {
+    if (selectedTime) {
+      setTempTime(selectedTime);
+    }
+  };
+
+  const confirmTimeSelection = () => {
+    const newTime = {
+      hour: tempTime.getHours(),
+      minute: tempTime.getMinutes(),
+    };
+    updateDailyAppointmentSetting(`${currentTimeType}Time` as keyof DailyAppointmentSettings, newTime);
+    setShowTimePicker(false);
+  };
+
+  const cancelTimeSelection = () => {
+    setShowTimePicker(false);
   };
 
   const resetOnboarding = async () => {
@@ -430,6 +494,80 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        {/* Daily Appointment Notifications Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📅 Daily Appointment Notifications</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Enable Daily Summaries</Text>
+              <Text style={styles.settingDescription}>Get daily previews of your appointments</Text>
+            </View>
+            <Switch
+              value={dailyAppointmentSettings.enabled}
+              onValueChange={(value) => updateDailyAppointmentSetting('enabled', value)}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor={dailyAppointmentSettings.enabled ? colors.background : colors.textLight}
+            />
+          </View>
+
+          {dailyAppointmentSettings.enabled && (
+            <>
+              <View style={styles.settingItem}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>🌅 Morning Preview</Text>
+                  <Text style={styles.settingDescription}>Today's appointments each morning</Text>
+                </View>
+                <Switch
+                  value={dailyAppointmentSettings.morningEnabled}
+                  onValueChange={(value) => updateDailyAppointmentSetting('morningEnabled', value)}
+                  trackColor={{ false: colors.border, true: colors.primary }}
+                  thumbColor={dailyAppointmentSettings.morningEnabled ? colors.background : colors.textLight}
+                />
+              </View>
+
+              {dailyAppointmentSettings.morningEnabled && (
+                <TouchableOpacity 
+                  style={styles.timePickerItem}
+                  onPress={() => showTimePickerModal('morning', dailyAppointmentSettings.morningTime)}
+                >
+                  <Text style={styles.timePickerLabel}>Morning Time:</Text>
+                  <Text style={styles.timePickerValue}>
+                    {dailyAppointmentSettings.morningTime.hour.toString().padStart(2, '0')}:
+                    {dailyAppointmentSettings.morningTime.minute.toString().padStart(2, '0')}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <View style={styles.settingItem}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingLabel}>🌆 Evening Preview</Text>
+                  <Text style={styles.settingDescription}>Tomorrow's appointments each evening</Text>
+                </View>
+                <Switch
+                  value={dailyAppointmentSettings.eveningEnabled}
+                  onValueChange={(value) => updateDailyAppointmentSetting('eveningEnabled', value)}
+                  trackColor={{ false: colors.border, true: colors.primary }}
+                  thumbColor={dailyAppointmentSettings.eveningEnabled ? colors.background : colors.textLight}
+                />
+              </View>
+
+              {dailyAppointmentSettings.eveningEnabled && (
+                <TouchableOpacity 
+                  style={styles.timePickerItem}
+                  onPress={() => showTimePickerModal('evening', dailyAppointmentSettings.eveningTime)}
+                >
+                  <Text style={styles.timePickerLabel}>Evening Time:</Text>
+                  <Text style={styles.timePickerValue}>
+                    {dailyAppointmentSettings.eveningTime.hour.toString().padStart(2, '0')}:
+                    {dailyAppointmentSettings.eveningTime.minute.toString().padStart(2, '0')}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
+        </View>
+
         {/* Developer Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Developer</Text>
@@ -459,6 +597,114 @@ export default function SettingsScreen() {
         </View>
 
       </ScrollView>
+
+      {/* Time Picker Modal */}
+      <Modal
+        visible={showTimePicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={cancelTimeSelection}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                Set {currentTimeType} notification time
+              </Text>
+            </View>
+            
+            <View style={styles.timePickerContainer}>
+              <View style={styles.customTimePickerContainer}>
+                <View style={styles.customTimePicker}>
+                  <Text style={styles.customTimePickerLabel}>Hour</Text>
+                  <ScrollView 
+                    style={styles.timeScrollView} 
+                    contentContainerStyle={styles.timeScrollContent}
+                    showsVerticalScrollIndicator={false}
+                    nestedScrollEnabled={true}
+                  >
+                    {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                      <TouchableOpacity
+                        key={hour}
+                        style={[
+                          styles.timeOption,
+                          tempTime.getHours() === hour && styles.selectedTimeOption
+                        ]}
+                        onPress={() => {
+                          const newTime = new Date(tempTime);
+                          newTime.setHours(hour);
+                          setTempTime(newTime);
+                        }}
+                      >
+                        <Text style={[
+                          styles.timeOptionText,
+                          tempTime.getHours() === hour && styles.selectedTimeOptionText
+                        ]}>
+                          {hour.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                
+                <View style={styles.customTimePicker}>
+                  <Text style={styles.customTimePickerLabel}>Minutes</Text>
+                  <ScrollView 
+                    style={styles.timeScrollView} 
+                    contentContainerStyle={styles.timeScrollContent}
+                    showsVerticalScrollIndicator={false}
+                    nestedScrollEnabled={true}
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
+                      <TouchableOpacity
+                        key={minute}
+                        style={[
+                          styles.timeOption,
+                          tempTime.getMinutes() === minute && styles.selectedTimeOption
+                        ]}
+                        onPress={() => {
+                          const newTime = new Date(tempTime);
+                          newTime.setMinutes(minute);
+                          setTempTime(newTime);
+                        }}
+                      >
+                        <Text style={[
+                          styles.timeOptionText,
+                          tempTime.getMinutes() === minute && styles.selectedTimeOptionText
+                        ]}>
+                          {minute.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+              
+              {/* Current time display */}
+              <Text style={styles.currentTimeText}>
+                Selected: {tempTime.getHours().toString().padStart(2, '0')}:
+                {tempTime.getMinutes().toString().padStart(2, '0')}
+              </Text>
+            </View>
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={cancelTimeSelection}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={confirmTimeSelection}
+              >
+                <Text style={styles.confirmButtonText}>Set Time</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
     </SafeAreaView>
   );
@@ -555,5 +801,188 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginVertical: 0,
     shadowOpacity: 0.05, // Reduce shadow
     elevation: 1, // Reduce elevation
+  },
+  timePickerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.cardBackground,
+    borderRadius: 8,
+    padding: 12,
+    marginLeft: 16,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  timePickerLabel: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  timePickerValue: {
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: '600',
+    fontFamily: 'monospace',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 20,
+    margin: 20,
+    width: '90%',
+    maxWidth: 400,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+    textAlign: 'center',
+  },
+  timePickerContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 280,
+    backgroundColor: colors.cardBackground,
+    marginHorizontal: 15,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  timePicker: {
+    width: '100%',
+    height: 200,
+    backgroundColor: 'transparent',
+  },
+  currentTimeText: {
+    fontSize: 18,
+    color: colors.primary,
+    fontWeight: '600',
+    marginTop: 15,
+    textAlign: 'center',
+    fontFamily: 'monospace',
+  },
+  // Custom scrollable time picker styles (from CalendarScreen)
+  customTimePickerContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 16,
+    gap: 16,
+  },
+  customTimePicker: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  customTimePickerLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  timeScrollView: {
+    height: 200,
+    width: '100%',
+    paddingVertical: 10,
+  },
+  timeScrollContent: {
+    paddingVertical: 10,
+  },
+  timeOption: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginVertical: 2,
+    alignItems: 'center',
+  },
+  selectedTimeOption: {
+    backgroundColor: colors.primary,
+  },
+  timeOptionText: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  selectedTimeOptionText: {
+    color: colors.buttonText,
+    fontWeight: '600',
+  },
+  webTimeInputContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  webTimeLabel: {
+    fontSize: 16,
+    color: colors.text,
+    marginBottom: 10,
+    fontWeight: '500',
+  },
+  webTimeInput: {
+    width: 120,
+    height: 50,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
+    color: colors.text,
+    backgroundColor: colors.background,
+    fontFamily: 'monospace',
+  },
+  debugText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    borderRightWidth: 1,
+    borderRightColor: colors.border,
+  },
+  confirmButton: {
+    backgroundColor: colors.primary,
+    borderBottomRightRadius: 20,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    color: colors.background,
+    fontWeight: '600',
   },
 });

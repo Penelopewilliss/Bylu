@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import type { Task, CalendarEvent, MoodEntry, FocusSession, Badge, BrainDumpEntry, HyperfocusLog, WeeklyReflection, Goal, MicroTask, Alarm } from '../types';
 import { AlarmNotificationService, setupNotificationCategories } from '../services/AlarmNotificationService';
+import NotificationService from '../services/NotificationService';
 
 const STORAGE_KEYS = {
 	TASKS: '@planner_tasks',
@@ -46,6 +47,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		try {
 			await AlarmNotificationService.requestPermissions();
 			await setupNotificationCategories();
+			
+			// Initialize regular notification service for daily appointments
+			const notificationService = NotificationService.getInstance();
+			await notificationService.loadSettings();
+			await notificationService.scheduleDailyAppointmentNotifications();
 		} catch (error) {
 			console.error('Error initializing notifications:', error);
 		}
@@ -85,6 +91,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
 		if (storedTasks) setTasks(JSON.parse(storedTasks));
 			if (storedEvents) setEvents(JSON.parse(storedEvents));
+			
+			// Schedule daily notifications with loaded events
+			if (storedEvents) {
+				await rescheduleDailyNotifications(JSON.parse(storedEvents));
+			}
 			if (storedGoals) {
 				setGoals(JSON.parse(storedGoals));
 			} else {
@@ -180,6 +191,18 @@ export const [AppProvider, useApp] = createContextHook(() => {
 	const saveEvents = async (newEvents: CalendarEvent[]) => {
 		setEvents(newEvents);
 		await AsyncStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(newEvents));
+		
+		// Reschedule daily appointment notifications with updated events
+		await rescheduleDailyNotifications(newEvents);
+	};
+
+	const rescheduleDailyNotifications = async (appointments: CalendarEvent[]) => {
+		try {
+			const notificationService = NotificationService.getInstance();
+			await notificationService.scheduleDailyAppointmentNotifications(appointments);
+		} catch (error) {
+			console.error('Error rescheduling daily notifications:', error);
+		}
 	};
 
 	const addEvent = useCallback(async (event: Omit<CalendarEvent, 'id'>) => {

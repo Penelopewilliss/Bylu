@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import NotificationService, { NotificationSettings } from '../services/NotificationService';
+import NotificationService, { NotificationSettings, DailyAppointmentSettings } from '../services/NotificationService';
 import HomeButton from '../components/HomeButton';
 
 const TIMING_OPTIONS = [
@@ -29,6 +29,13 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
     soundEnabled: true,
     vibrationEnabled: true,
   });
+  const [dailySettings, setDailySettings] = useState<DailyAppointmentSettings>({
+    enabled: true,
+    morningEnabled: true,
+    eveningEnabled: true,
+    morningTime: { hour: 8, minute: 0 },
+    eveningTime: { hour: 20, minute: 0 },
+  });
   const [loading, setLoading] = useState(true);
 
   const notificationService = NotificationService.getInstance();
@@ -40,7 +47,9 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
   const loadSettings = async () => {
     try {
       const currentSettings = await notificationService.getSettings();
+      const currentDailySettings = await notificationService.getDailyAppointmentSettings();
       setSettings(currentSettings);
+      setDailySettings(currentDailySettings);
     } catch (error) {
       console.error('Failed to load settings:', error);
     } finally {
@@ -96,6 +105,62 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
         [{ text: 'OK', style: 'default' }]
       );
     }
+  };
+
+  const updateDailySettings = async (newSettings: DailyAppointmentSettings) => {
+    try {
+      await notificationService.setDailyAppointmentSettings(newSettings);
+      setDailySettings(newSettings);
+    } catch (error) {
+      console.error('Failed to update daily settings:', error);
+      Alert.alert(
+        'Error',
+        'Failed to update daily appointment settings. Please try again.',
+        [{ text: 'OK', style: 'default' }]
+      );
+    }
+  };
+
+  const showTimePickerModal = (
+    type: 'morning' | 'evening',
+    currentTime: { hour: number; minute: number }
+  ) => {
+    Alert.prompt(
+      `Set ${type} notification time`,
+      `Enter time in HH:MM format (24-hour)`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Set',
+          onPress: (value?: string) => {
+            if (value) {
+              const match = value.match(/^(\d{1,2}):(\d{2})$/);
+              if (match) {
+                const hour = parseInt(match[1]);
+                const minute = parseInt(match[2]);
+                if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                  const newTime = { hour, minute };
+                  const updatedSettings = {
+                    ...dailySettings,
+                    [`${type}Time`]: newTime
+                  };
+                  updateDailySettings(updatedSettings);
+                } else {
+                  Alert.alert('Invalid time', 'Please enter a valid time (00:00 - 23:59)');
+                }
+              } else {
+                Alert.alert('Invalid format', 'Please use HH:MM format (e.g., 08:30)');
+              }
+            }
+          },
+        },
+      ],
+      'plain-text',
+      `${currentTime.hour.toString().padStart(2, '0')}:${currentTime.minute.toString().padStart(2, '0')}`
+    );
   };
 
   const handleHomePress = () => {
@@ -216,6 +281,86 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
                   thumbColor={settings.vibrationEnabled ? '#FFFFFF' : '#FFFFFF'}
                 />
               </View>
+            </View>
+
+            {/* Daily Appointment Notifications */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>📅 Daily Appointment Summary</Text>
+              
+              <View style={styles.settingRow}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingTitle}>Enable Daily Summaries</Text>
+                  <Text style={styles.settingDescription}>
+                    Get daily summaries of your appointments
+                  </Text>
+                </View>
+                <Switch
+                  value={dailySettings.enabled}
+                  onValueChange={(enabled) => updateDailySettings({ ...dailySettings, enabled })}
+                  trackColor={{ false: '#E0E0E0', true: '#FF69B4' }}
+                  thumbColor={dailySettings.enabled ? '#FFFFFF' : '#FFFFFF'}
+                />
+              </View>
+
+              {dailySettings.enabled && (
+                <>
+                  <View style={styles.settingRow}>
+                    <View style={styles.settingInfo}>
+                      <Text style={styles.settingTitle}>Morning Summary</Text>
+                      <Text style={styles.settingDescription}>
+                        Get today's appointments in the morning
+                      </Text>
+                    </View>
+                    <Switch
+                      value={dailySettings.morningEnabled}
+                      onValueChange={(morningEnabled) => updateDailySettings({ ...dailySettings, morningEnabled })}
+                      trackColor={{ false: '#E0E0E0', true: '#FF69B4' }}
+                      thumbColor={dailySettings.morningEnabled ? '#FFFFFF' : '#FFFFFF'}
+                    />
+                  </View>
+
+                  {dailySettings.morningEnabled && (
+                    <TouchableOpacity 
+                      style={styles.timePickerRow}
+                      onPress={() => showTimePickerModal('morning', dailySettings.morningTime)}
+                    >
+                      <Text style={styles.timePickerLabel}>Morning Time:</Text>
+                      <Text style={styles.timePickerValue}>
+                        {dailySettings.morningTime.hour.toString().padStart(2, '0')}:
+                        {dailySettings.morningTime.minute.toString().padStart(2, '0')}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  <View style={styles.settingRow}>
+                    <View style={styles.settingInfo}>
+                      <Text style={styles.settingTitle}>Evening Summary</Text>
+                      <Text style={styles.settingDescription}>
+                        Get tomorrow's appointments in the evening
+                      </Text>
+                    </View>
+                    <Switch
+                      value={dailySettings.eveningEnabled}
+                      onValueChange={(eveningEnabled) => updateDailySettings({ ...dailySettings, eveningEnabled })}
+                      trackColor={{ false: '#E0E0E0', true: '#FF69B4' }}
+                      thumbColor={dailySettings.eveningEnabled ? '#FFFFFF' : '#FFFFFF'}
+                    />
+                  </View>
+
+                  {dailySettings.eveningEnabled && (
+                    <TouchableOpacity 
+                      style={styles.timePickerRow}
+                      onPress={() => showTimePickerModal('evening', dailySettings.eveningTime)}
+                    >
+                      <Text style={styles.timePickerLabel}>Evening Time:</Text>
+                      <Text style={styles.timePickerValue}>
+                        {dailySettings.eveningTime.hour.toString().padStart(2, '0')}:
+                        {dailySettings.eveningTime.minute.toString().padStart(2, '0')}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
             </View>
 
             {/* Test Notification */}
@@ -370,5 +515,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
     fontFamily: 'System',
+  },
+  timePickerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  timePickerLabel: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  timePickerValue: {
+    fontSize: 16,
+    color: '#FF69B4',
+    fontWeight: 'bold',
   },
 });
