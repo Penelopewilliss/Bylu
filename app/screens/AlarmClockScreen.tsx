@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput, PanResponder, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Audio } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import HomeButton from '../components/HomeButton';
@@ -22,19 +23,52 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
   const [snoozeEnabled, setSnoozeEnabled] = useState(true);
   const [snoozeInterval, setSnoozeInterval] = useState(5);
   const [selectedSound, setSelectedSound] = useState('gentle_chimes');
+  const [currentPlayingSound, setCurrentPlayingSound] = useState<Audio.Sound | null>(null);
+  const [playingSound, setPlayingSound] = useState<string | null>(null);
+  
+  // PanResponder for swipe to close modal (down swipe only, in header area)
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: (evt) => {
+      // Only start gesture if it's in the header area (top 80px of modal)
+      const { pageY } = evt.nativeEvent;
+      const modalTop = 100; // Approximate modal top position
+      return pageY < modalTop + 80; // Only allow gestures in header area
+    },
+    onMoveShouldSetPanResponder: (evt, gestureState) => {
+      // Only activate for clear downward swipes
+      const { dx, dy } = gestureState;
+      return dy > 20 && Math.abs(dx) < Math.abs(dy); // Down swipe with minimal horizontal movement
+    },
+    onPanResponderGrant: () => {
+      // Stop any playing sounds when starting swipe
+      stopPreviewSound();
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      // Optional: Add visual feedback during swipe
+    },
+    onPanResponderRelease: (evt, gestureState) => {
+      // Close modal only if swiped down more than 80px
+      const { dy } = gestureState;
+      if (dy > 80) {
+        handleCancelModal();
+      }
+    },
+    onPanResponderTerminationRequest: () => false, // Don't allow termination
+  });
+  
   const styles = createStyles(colors);
 
   const alarmSounds = [
-    { key: 'gentle_chimes', name: '🎐 Gentle Chimes', description: 'Soft and peaceful' },
-    { key: 'soft_piano', name: '🎹 Soft Piano', description: 'Melodic and calming' },
-    { key: 'nature_sounds', name: '🌿 Nature Sounds', description: 'Birds and water' },
-    { key: 'classic_bell', name: '🔔 Classic Bell', description: 'Traditional alarm' },
-    { key: 'peaceful_melody', name: '🎵 Peaceful Melody', description: 'Soothing tune' },
-    { key: 'morning_breeze', name: '🍃 Morning Breeze', description: 'Light and airy' },
-    { key: 'ocean_waves', name: '🌊 Ocean Waves', description: 'Rhythmic and calm' },
-    { key: 'forest_birds', name: '🐦 Forest Birds', description: 'Natural wake-up call' },
-    { key: 'wind_chimes', name: '💨 Wind Chimes', description: 'Ethereal and light' },
-    { key: 'rainfall', name: '🌧️ Gentle Rain', description: 'Soft and steady' },
+    { key: 'gentle_chimes', name: '🎐 Gentle Chimes', description: 'Soft and peaceful', duration: 3000 },
+    { key: 'soft_piano', name: '🎹 Soft Piano', description: 'Melodic and calming', duration: 3000 },
+    { key: 'nature_sounds', name: '🌿 Nature Sounds', description: 'Birds and water', duration: 3000 },
+    { key: 'classic_bell', name: '🔔 Classic Bell', description: 'Traditional alarm', duration: 2000 },
+    { key: 'peaceful_melody', name: '🎵 Peaceful Melody', description: 'Soothing tune', duration: 4000 },
+    { key: 'morning_breeze', name: '🍃 Morning Breeze', description: 'Light and airy', duration: 3000 },
+    { key: 'ocean_waves', name: '🌊 Ocean Waves', description: 'Rhythmic and calm', duration: 3000 },
+    { key: 'forest_birds', name: '🐦 Forest Birds', description: 'Natural wake-up call', duration: 3000 },
+    { key: 'wind_chimes', name: '💨 Wind Chimes', description: 'Ethereal and light', duration: 2500 },
+    { key: 'rainfall', name: '🌧️ Gentle Rain', description: 'Soft and steady', duration: 3000 },
   ];
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -79,6 +113,7 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
     
     setShowAddModal(false);
     resetModalState();
+    stopPreviewSound(); // Stop any playing preview sounds
   };
 
   const resetModalState = () => {
@@ -93,11 +128,10 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
   };
 
   const handleCancelModal = () => {
-    setShowAddModal(false);
     resetModalState();
-  };
-
-  const toggleDay = (dayIndex: number) => {
+    setShowAddModal(false);
+    stopPreviewSound(); // Stop any playing preview sounds
+  };  const toggleDay = (dayIndex: number) => {
     setSelectedDays(prev => 
       prev.includes(dayIndex) 
         ? prev.filter(d => d !== dayIndex)
@@ -168,6 +202,102 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
       snoozeInterval: 5,
     };
     addAlarm(newAlarm);
+  };
+
+  const playPreviewSound = async (soundKey: string) => {
+    try {
+      // Stop any currently playing sound
+      if (currentPlayingSound) {
+        await currentPlayingSound.unloadAsync();
+        setCurrentPlayingSound(null);
+      }
+
+      // If the same sound is already playing, just stop it
+      if (playingSound === soundKey) {
+        setPlayingSound(null);
+        return;
+      }
+
+      // Set audio mode for better mobile compatibility
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: false,
+        staysActiveInBackground: false,
+      });
+
+      // Different sound URLs for each alarm type - using more reliable sources
+      const soundUrls: { [key: string]: string } = {
+        'gentle_chimes': 'https://www2.cs.uic.edu/~i101/SoundFiles/Taunt.wav',
+        'soft_piano': 'https://www2.cs.uic.edu/~i101/SoundFiles/StarWars3.wav',
+        'nature_sounds': 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav',
+        'classic_bell': 'https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav',
+        'peaceful_melody': 'https://www2.cs.uic.edu/~i101/SoundFiles/ImperialMarch60.wav',
+        'morning_breeze': 'https://www2.cs.uic.edu/~i101/SoundFiles/gettysburg10.wav',
+        'ocean_waves': 'https://www2.cs.uic.edu/~i101/SoundFiles/preamble10.wav',
+        'forest_birds': 'https://www2.cs.uic.edu/~i101/SoundFiles/gettysburg.wav',
+        'wind_chimes': 'https://www2.cs.uic.edu/~i101/SoundFiles/tada.wav',
+        'rainfall': 'https://www2.cs.uic.edu/~i101/SoundFiles/preamble.wav',
+      };
+
+      const soundUrl = soundUrls[soundKey] || soundUrls['gentle_chimes'];
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: soundUrl },
+        {
+          shouldPlay: true,
+          volume: 0.4,
+          isLooping: false,
+        }
+      );
+
+      setCurrentPlayingSound(sound);
+      setPlayingSound(soundKey);
+
+      // Auto-stop after preview duration
+      const sound_duration = alarmSounds.find(s => s.key === soundKey)?.duration || 3000;
+      setTimeout(async () => {
+        try {
+          await sound.unloadAsync();
+          setCurrentPlayingSound(null);
+          setPlayingSound(null);
+        } catch (error) {
+          console.log('Error stopping preview:', error);
+        }
+      }, Math.min(sound_duration, 4000)); // Max 4 seconds preview
+
+    } catch (error) {
+      console.log('Error playing preview sound:', error);
+      // Enhanced fallback: show visual feedback with sound description
+      setPlayingSound(soundKey);
+      
+      // Show a brief alert with the sound description as feedback
+      const soundInfo = alarmSounds.find(s => s.key === soundKey);
+      if (soundInfo) {
+        Alert.alert(
+          `🔊 ${soundInfo.name}`,
+          `Preview: ${soundInfo.description}\n\n(Sound preview not available in Expo Go mode)`,
+          [{ text: 'OK' }],
+          { cancelable: true }
+        );
+      }
+      
+      setTimeout(() => {
+        setPlayingSound(null);
+      }, 2000);
+    }
+  };
+
+  const stopPreviewSound = async () => {
+    if (currentPlayingSound) {
+      try {
+        await currentPlayingSound.unloadAsync();
+        setCurrentPlayingSound(null);
+        setPlayingSound(null);
+      } catch (error) {
+        console.log('Error stopping sound:', error);
+      }
+    }
   };
 
   return (
@@ -282,24 +412,35 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
       {/* Custom Alarm Modal */}
       <Modal
         visible={showAddModal}
-        transparent={true}
         animationType="slide"
+        presentationStyle="fullScreen"
         onRequestClose={handleCancelModal}
       >
-        <View style={styles.modalOverlay}>
-          <ScrollView style={styles.modalScrollView} showsVerticalScrollIndicator={false}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>
-                {editingAlarm ? '⏰ Edit Alarm' : '⏰ Add Custom Alarm'}
-              </Text>
-              
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader} {...panResponder.panHandlers}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>
+              {editingAlarm ? '⏰ Edit Alarm' : '⏰ Add Custom Alarm'}
+            </Text>
+          </View>
+
+          <ScrollView 
+            style={styles.modalContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
               {/* Time Picker */}
               <View style={styles.timePickerSection}>
                 <Text style={styles.inputLabel}>Time</Text>
                 <View style={styles.timePicker}>
                   <View style={styles.timePickerColumn}>
                     <Text style={styles.timePickerLabel}>Hour</Text>
-                    <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
+                    <ScrollView 
+                      style={styles.timeScrollView} 
+                      showsVerticalScrollIndicator={false}
+                      nestedScrollEnabled={true}
+                      keyboardShouldPersistTaps="handled"
+                    >
                       {Array.from({ length: 24 }, (_, i) => (
                         <TouchableOpacity
                           key={i}
@@ -318,7 +459,12 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
                   
                   <View style={styles.timePickerColumn}>
                     <Text style={styles.timePickerLabel}>Minute</Text>
-                    <ScrollView style={styles.timeScrollView} showsVerticalScrollIndicator={false}>
+                    <ScrollView 
+                      style={styles.timeScrollView} 
+                      showsVerticalScrollIndicator={false}
+                      nestedScrollEnabled={true}
+                      keyboardShouldPersistTaps="handled"
+                    >
                       {Array.from({ length: 12 }, (_, i) => i * 5).map(minute => (
                         <TouchableOpacity
                           key={minute}
@@ -406,25 +552,41 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
               {/* Alarm Sound Selection */}
               <View style={styles.soundSection}>
                 <Text style={styles.inputLabel}>Alarm Sound</Text>
-                <ScrollView style={styles.soundScrollView} showsVerticalScrollIndicator={false}>
+                <ScrollView 
+                  style={styles.soundScrollView} 
+                  showsVerticalScrollIndicator={false}
+                  nestedScrollEnabled={true}
+                  keyboardShouldPersistTaps="handled"
+                >
                   {alarmSounds.map(sound => (
-                    <TouchableOpacity
-                      key={sound.key}
-                      style={[styles.soundOption, selectedSound === sound.key && styles.selectedSoundOption]}
-                      onPress={() => setSelectedSound(sound.key)}
-                    >
-                      <View style={styles.soundInfo}>
-                        <Text style={[styles.soundName, selectedSound === sound.key && styles.selectedSoundName]}>
-                          {sound.name}
-                        </Text>
-                        <Text style={[styles.soundDescription, selectedSound === sound.key && styles.selectedSoundDescription]}>
-                          {sound.description}
-                        </Text>
-                      </View>
-                      {selectedSound === sound.key && (
-                        <Text style={styles.soundCheckmark}>✓</Text>
-                      )}
-                    </TouchableOpacity>
+                    <View key={sound.key} style={styles.soundOptionContainer}>
+                      <TouchableOpacity
+                        style={[styles.soundOption, selectedSound === sound.key && styles.selectedSoundOption]}
+                        onPress={() => setSelectedSound(sound.key)}
+                      >
+                        <View style={styles.soundInfo}>
+                          <Text style={[styles.soundName, selectedSound === sound.key && styles.selectedSoundName]}>
+                            {sound.name}
+                          </Text>
+                          <Text style={[styles.soundDescription, selectedSound === sound.key && styles.selectedSoundDescription]}>
+                            {sound.description}
+                          </Text>
+                        </View>
+                        <View style={styles.soundActions}>
+                          <TouchableOpacity
+                            style={[styles.previewButton, playingSound === sound.key && styles.previewButtonPlaying]}
+                            onPress={() => playPreviewSound(sound.key)}
+                          >
+                            <Text style={[styles.previewButtonText, playingSound === sound.key && styles.previewButtonTextPlaying]}>
+                              {playingSound === sound.key ? '⏹️' : '▶️'}
+                            </Text>
+                          </TouchableOpacity>
+                          {selectedSound === sound.key && (
+                            <Text style={styles.soundCheckmark}>✓</Text>
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    </View>
                   ))}
                 </ScrollView>
               </View>
@@ -441,7 +603,6 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
                   </Text>
                 </TouchableOpacity>
               </View>
-            </View>
           </ScrollView>
         </View>
       </Modal>
@@ -628,28 +789,31 @@ const createStyles = (colors: any) => StyleSheet.create({
     height: 100,
   },
   // Modal styles
-  modalOverlay: {
+  modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
+    backgroundColor: colors.background,
+  },
+  modalHeader: {
+    backgroundColor: colors.cardBackground,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
     alignItems: 'center',
   },
-  modalScrollView: {
-    flex: 1,
-    width: '100%',
+  modalHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: colors.textSecondary,
+    borderRadius: 2,
+    opacity: 0.5,
+    marginBottom: 15,
   },
   modalContent: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: 20,
-    padding: 30,
-    margin: 20,
-    marginTop: 60,
-    marginBottom: 60,
-    shadowColor: '#FF69B4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    flex: 1,
+    backgroundColor: colors.background,
+    padding: 20,
   },
   modalTitle: {
     fontSize: 24,
@@ -675,6 +839,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   timePickerColumn: {
     alignItems: 'center',
     width: 80,
+    flex: 1,
   },
   timePickerLabel: {
     fontSize: 14,
@@ -685,6 +850,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   timeScrollView: {
     maxHeight: 120,
     width: '100%',
+    flex: 1,
   },
   timeOption: {
     paddingVertical: 8,
@@ -829,6 +995,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.border,
+    flex: 1,
   },
   soundOption: {
     flexDirection: 'row',
@@ -865,6 +1032,36 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 18,
     color: colors.primary,
     fontWeight: 'bold',
+  },
+  // Preview Button Styles
+  soundOptionContainer: {
+    marginBottom: 1,
+  },
+  soundActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  previewButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.primary + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.primary + '40',
+  },
+  previewButtonPlaying: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  previewButtonText: {
+    fontSize: 12,
+    color: colors.primary,
+  },
+  previewButtonTextPlaying: {
+    color: colors.buttonText,
   },
   modalButtons: {
     flexDirection: 'row',
