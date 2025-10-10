@@ -14,6 +14,7 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
   const { colors } = useTheme();
   const { alarms, addAlarm, updateAlarm, deleteAlarm, toggleAlarm } = useApp();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingAlarm, setEditingAlarm] = useState<Alarm | null>(null);
   const [newAlarmHour, setNewAlarmHour] = useState(7);
   const [newAlarmMinute, setNewAlarmMinute] = useState(0);
   const [newAlarmLabel, setNewAlarmLabel] = useState('');
@@ -57,7 +58,7 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
 
     const timeString = `${newAlarmHour.toString().padStart(2, '0')}:${newAlarmMinute.toString().padStart(2, '0')}`;
     
-    const newAlarm = {
+    const alarmData = {
       time: timeString,
       label: newAlarmLabel.trim(),
       isEnabled: true,
@@ -68,7 +69,14 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
       snoozeInterval: snoozeInterval,
     };
     
-    addAlarm(newAlarm);
+    if (editingAlarm) {
+      // Update existing alarm
+      updateAlarm(editingAlarm.id, alarmData);
+    } else {
+      // Add new alarm
+      addAlarm(alarmData);
+    }
+    
     setShowAddModal(false);
     resetModalState();
   };
@@ -81,6 +89,7 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
     setSnoozeEnabled(true);
     setSnoozeInterval(5);
     setSelectedSound('gentle_chimes');
+    setEditingAlarm(null);
   };
 
   const handleCancelModal = () => {
@@ -121,6 +130,26 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
         { text: 'Delete', style: 'destructive', onPress: () => deleteAlarm(alarm.id) }
       ]
     );
+  };
+
+  const handleEditAlarm = (alarm: Alarm) => {
+    // Parse the time string (e.g., "07:30" -> hour: 7, minute: 30)
+    const [hourStr, minuteStr] = alarm.time.split(':');
+    const hour = parseInt(hourStr, 10);
+    const minute = parseInt(minuteStr, 10);
+    
+    // Set the form state with the alarm's current values
+    setNewAlarmHour(hour);
+    setNewAlarmMinute(minute);
+    setNewAlarmLabel(alarm.label || '');
+    setSelectedDays(alarm.repeatDays || []);
+    setSnoozeEnabled(alarm.snoozeEnabled ?? true);
+    setSnoozeInterval(alarm.snoozeInterval || 5);
+    setSelectedSound(alarm.soundName || 'gentle_chimes');
+    
+    // Set editing mode and show modal
+    setEditingAlarm(alarm);
+    setShowAddModal(true);
   };
 
   const createQuickAlarm = (time: string, label: string) => {
@@ -226,7 +255,7 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
                 <View style={styles.alarmActions}>
                   <TouchableOpacity 
                     style={styles.actionButton}
-                    onPress={() => {/* TODO: Open edit modal */}}
+                    onPress={() => handleEditAlarm(alarm)}
                   >
                     <Text style={styles.actionButtonText}>✏️ Edit</Text>
                   </TouchableOpacity>
@@ -256,7 +285,9 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
         <View style={styles.modalOverlay}>
           <ScrollView style={styles.modalScrollView} showsVerticalScrollIndicator={false}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>⏰ Add Custom Alarm</Text>
+              <Text style={styles.modalTitle}>
+                {editingAlarm ? '⏰ Edit Alarm' : '⏰ Add Custom Alarm'}
+              </Text>
               
               {/* Time Picker */}
               <View style={styles.timePickerSection}>
@@ -401,7 +432,9 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
                 </TouchableOpacity>
                 
                 <TouchableOpacity style={styles.saveButton} onPress={handleSaveCustomAlarm}>
-                  <Text style={styles.saveButtonText}>Save Alarm</Text>
+                  <Text style={styles.saveButtonText}>
+                    {editingAlarm ? 'Update Alarm' : 'Save Alarm'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
