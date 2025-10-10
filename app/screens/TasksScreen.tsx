@@ -817,6 +817,88 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
       color: colors.textSecondary,
       lineHeight: 20,
     },
+    // Styles for stacked categories layout
+    stackedCategoriesContainer: {
+      flex: 1,
+      paddingHorizontal: 16,
+    },
+    categorySection: {
+      marginBottom: 24,
+    },
+    categorySectionHeader: {
+      marginBottom: 12,
+    },
+    categorySectionTitleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    categorySectionEmoji: {
+      fontSize: 20,
+      marginRight: 8,
+    },
+    categorySectionTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.text,
+      flex: 1,
+    },
+    categorySectionBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+      minWidth: 24,
+      alignItems: 'center',
+    },
+    categorySectionBadgeText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.background,
+    },
+    categoryTasksList: {
+      gap: 8,
+    },
+    taskTextContainer: {
+      flex: 1,
+    },
+    taskDescription: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginTop: 4,
+      lineHeight: 18,
+    },
+    completedTaskTitle: {
+      textDecorationLine: 'line-through',
+      color: colors.textSecondary,
+    },
+    completedTaskDescription: {
+      textDecorationLine: 'line-through',
+      color: colors.textSecondary,
+    },
+    taskPriorityContainer: {
+      marginTop: 6,
+    },
+    taskPriority: {
+      fontSize: 12,
+      fontWeight: '500',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 8,
+      backgroundColor: colors.border,
+      color: colors.text,
+      alignSelf: 'flex-start',
+    },
+    priorityHigh: {
+      backgroundColor: '#FFE6E6',
+      color: '#D32F2F',
+    },
+    priorityMedium: {
+      backgroundColor: '#FFF3E0',
+      color: '#F57C00',
+    },
+    priorityLow: {
+      backgroundColor: '#E8F5E8',
+      color: '#388E3C',
+    },
   });
 
   // Filter tasks by category and priority
@@ -986,17 +1068,127 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
     );
   };
 
+  // New simplified layout - render all categories stacked vertically
+  const renderAllCategoriesStacked = () => {
+    // Get all categories with tasks, prioritizing them in the order we want
+    const categoryOrder: (Category | 'all')[] = ['all', 'work', 'personal', 'household', 'groceries', 'calls', 'shopping', 'errands', 'finances', 'health', 'fitness', 'learning', 'hobbies', 'other'];
+    
+    return (
+      <ScrollView style={styles.stackedCategoriesContainer} showsVerticalScrollIndicator={false}>
+        {categoryOrder.map((category) => {
+          // Get tasks for this category
+          const categoryTasks = category === 'all' 
+            ? tasks.filter(task => task.priority === 'high') // Show high priority tasks in "Priority" section
+            : tasks.filter(task => task.category === category);
+          
+          // Skip empty categories except for priority
+          if (categoryTasks.length === 0 && category !== 'all') return null;
+          
+          const categoryData = category === 'all' 
+            ? { emoji: '⚡', label: 'Priority', color: colors.primary }
+            : TASK_CATEGORIES[category];
+          
+          const incompleteTasks = categoryTasks.filter(t => !t.completed);
+          const completedTasks = categoryTasks.filter(t => t.completed);
+          const displayTasks = showCompleted 
+            ? [...incompleteTasks, ...completedTasks]
+            : incompleteTasks;
+          
+          // Don't render section if no tasks to display
+          if (displayTasks.length === 0) return null;
+          
+          return (
+            <View key={category} style={styles.categorySection}>
+              {/* Category Header */}
+              <View style={styles.categorySectionHeader}>
+                <View style={styles.categorySectionTitleContainer}>
+                  <Text style={styles.categorySectionEmoji}>{categoryData.emoji}</Text>
+                  <Text style={styles.categorySectionTitle}>{categoryData.label}</Text>
+                  <View style={[styles.categorySectionBadge, { backgroundColor: categoryData.color }]}>
+                    <Text style={styles.categorySectionBadgeText}>{displayTasks.length}</Text>
+                  </View>
+                </View>
+              </View>
+              
+              {/* Tasks in this category */}
+              <View style={styles.categoryTasksList}>
+                {displayTasks.map((task, taskIndex) => {
+                  // Show section header for completed tasks when both sections are visible
+                  const isFirstCompletedTask = showCompleted && 
+                    taskIndex === incompleteTasks.length && 
+                    completedTasks.length > 0;
+                  
+                  return (
+                    <View key={task.id}>
+                      {isFirstCompletedTask && (
+                        <View style={styles.sectionHeader}>
+                          <Text style={styles.sectionHeaderText}>Completed</Text>
+                        </View>
+                      )}
+                      
+                      <View style={[styles.taskItem, task.completed && { opacity: 0.6 }]}>
+                        <View style={styles.taskContent}>
+                          <View style={styles.taskTextContainer}>
+                            <Text style={[
+                              styles.taskTitle,
+                              task.completed && styles.completedTaskTitle
+                            ]} numberOfLines={2}>
+                              {task.title}
+                            </Text>
+                            {task.description && (
+                              <Text style={[
+                                styles.taskDescription,
+                                task.completed && styles.completedTaskDescription
+                              ]} numberOfLines={3}>
+                                {task.description}
+                              </Text>
+                            )}
+                            <View style={styles.taskPriorityContainer}>
+                              <Text style={[
+                                styles.taskPriority,
+                                task.priority === 'high' && styles.priorityHigh,
+                                task.priority === 'medium' && styles.priorityMedium,
+                                task.priority === 'low' && styles.priorityLow
+                              ]}>
+                                {task.priority === 'high' ? '🔥 High' :
+                                 task.priority === 'medium' ? '🔸 Medium' : '🔹 Low'}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                        
+                        <TouchableOpacity 
+                          style={styles.taskCheckbox}
+                          onPress={() => toggleTask(task.id)}
+                        >
+                          <Text style={styles.heartIcon}>
+                            {task.completed ? '❤️' : '🤍'}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })}
+      </ScrollView>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Tasks Panel */}
       <View style={styles.tasksPanel}>
-        {/* Header */}
+        {/* Simplified Header */}
         <View style={styles.header}>
           <View style={styles.headerButtons}>
+            {/* Toggle Completed Tasks */}
             <Pressable 
               style={({ pressed }) => [
                 styles.viewAllButton,
-                viewAllTasks && styles.viewAllButtonActive,
+                showCompleted && styles.viewAllButtonActive,
                 { 
                   transform: [{ scale: 1 }],
                   // @ts-ignore
@@ -1006,37 +1198,17 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
                   transitionDuration: '0s !important'
                 }
               ]}
-              onPress={toggleViewAllTasks}
+              onPress={() => setShowCompleted(!showCompleted)}
             >
               <Text style={[
                 styles.viewAllButtonText,
-                viewAllTasks && styles.viewAllButtonTextActive
+                showCompleted && styles.viewAllButtonTextActive
               ]}>
-                {viewAllTasks ? '📋 All Tasks' : '👁️ View All'}
+                {showCompleted ? '✅ Hide Done' : '👁️ Show Done'}
               </Text>
             </Pressable>
-            <Pressable 
-              style={({ pressed }) => [
-                styles.highPriorityButton,
-                viewHighPriority && styles.highPriorityButtonActive,
-                { 
-                  transform: [{ scale: 1 }],
-                  // @ts-ignore
-                  transition: 'none !important',
-                  WebkitTransition: 'none !important',
-                  transitionProperty: 'none !important',
-                  transitionDuration: '0s !important'
-                }
-              ]}
-              onPress={toggleViewHighPriority}
-            >
-              <Text style={[
-                styles.highPriorityButtonText,
-                viewHighPriority && styles.highPriorityButtonTextActive
-              ]}>
-                {viewHighPriority ? '⚡ High Priority' : '⚡ Urgent'}
-              </Text>
-            </Pressable>
+            
+            {/* Add Task Button */}
             <Pressable 
               style={({ pressed }) => [
                 styles.addButton,
@@ -1056,59 +1228,12 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
           </View>
         </View>
 
-        {/* Tasks List */}
-        <FlatList
-          data={displayTasks}
-          keyExtractor={(item) => item.id}
-          renderItem={renderTaskItem}
-          style={styles.tasksContainer}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={viewAllTasks ? (
-            <View style={styles.viewAllHeader}>
-              <Text style={styles.viewAllHeaderText}>📋 All Tasks ({displayTasks.length})</Text>
-              <Text style={styles.viewAllHeaderSubtext}>
-                Showing {incompleteTasks.length} active, {completedTasks.length} completed
-              </Text>
-            </View>
-          ) : viewHighPriority ? (
-            <View style={styles.viewAllHeader}>
-              <Text style={[styles.viewAllHeaderText, { color: '#ff4757' }]}>
-                ⚡ High Priority Tasks ({displayTasks.length})
-              </Text>
-              <Text style={styles.viewAllHeaderSubtext}>
-                Showing {incompleteTasks.length} urgent tasks that need immediate attention
-              </Text>
-            </View>
-          ) : null}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateEmoji}>🪷</Text>
-              <Text style={styles.emptyStateText}>MAKE IT ZEN!</Text>
-              <Text style={styles.emptyStateSubtext}>Declutter your life!</Text>
-            </View>
-          }
-          ListFooterComponent={viewHighPriority ? (
-            <View style={styles.priorityNotificationToggle}>
-              <View style={styles.priorityToggleContent}>
-                <View style={styles.priorityToggleInfo}>
-                  <Text style={styles.priorityToggleTitle}>🔔 Priority Notifications</Text>
-                  <Text style={styles.priorityToggleDescription}>
-                    Get daily reminders for your high priority tasks
-                  </Text>
-                </View>
-                <Switch
-                  value={priorityNotificationsEnabled}
-                  onValueChange={togglePriorityNotifications}
-                  trackColor={{ false: colors.border, true: colors.accent }}
-                  thumbColor={priorityNotificationsEnabled ? colors.background : colors.textLight}
-                />
-              </View>
-            </View>
-          ) : null}
-        />
+        {/* Tasks List - Now showing all categories stacked */}
+        {renderAllCategoriesStacked()}
       </View>
 
-      {/* Category Carousel - Hidden when viewing all tasks or high priority */}
+      {/* Category Carousel - COMMENTED OUT FOR SIMPLIFIED VIEW (keeping for potential future use) */}
+      {/*
       {!viewAllTasks && !viewHighPriority && (
         <View style={styles.categoryWheelContainer}>
         <FlatList 
@@ -1138,7 +1263,6 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
           updateCellsBatchingPeriod={50}
         />
         
-        {/* DEBUG: Center line to see where middle actually is */}
         <View style={{
           position: 'absolute',
           left: SCREEN_WIDTH / 2 - 1,
@@ -1150,14 +1274,12 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
           zIndex: 100,
         }} />
         
-        {/* Left Gradient Fade */}
         <LinearGradient
           colors={[colors.background, 'transparent']}
           style={styles.leftGradient}
           pointerEvents="none"
         />
         
-        {/* Right Gradient Fade */}
         <LinearGradient
           colors={['transparent', colors.background]}
           style={styles.rightGradient}
@@ -1165,6 +1287,7 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
         />
         </View>
       )}
+      */}
 
       {/* Add Task Modal */}
       <Modal
