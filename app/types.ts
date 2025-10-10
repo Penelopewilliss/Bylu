@@ -84,6 +84,9 @@ export interface BrainDumpEntry {
   id: string;
   content: string;
   createdAt: string;
+  type?: 'text' | 'voice';
+  audioUri?: string;
+  duration?: number;
 }
 
 export interface HyperfocusLog {
@@ -104,3 +107,18 @@ export interface WeeklyReflection {
   distractions: string[];
   nextWeekGoals: string[];
 }
+
+export interface Alarm {
+  id: string;
+  time: string; // Format: "HH:MM" (24-hour)
+  label: string;
+  isEnabled: boolean;
+  repeatDays: number[]; // 0-6 (Sunday-Saturday)
+  soundName: string;
+  vibrate: boolean;
+  snoozeEnabled: boolean;
+  snoozeInterval: number; // minutes
+  createdAt: string;
+}
+
+export type AlarmSoundType = 'gentle_chimes' | 'soft_piano' | 'nature_sounds' | 'classic_bell' | 'peaceful_melody';

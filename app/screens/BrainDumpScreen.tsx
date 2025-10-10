@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Audio } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { BrainDumpEntry } from '../types';
@@ -23,6 +24,12 @@ export default function BrainDumpScreen() {
   const [currentThought, setCurrentThought] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
+  
+  // Voice recording state
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [playingSound, setPlayingSound] = useState<Audio.Sound | null>(null);
+  const [playingId, setPlayingId] = useState<string | null>(null);
   const styles = createStyles(colors);
 
   const handleQuickCapture = () => {
@@ -33,6 +40,98 @@ export default function BrainDumpScreen() {
       // Show a gentle feedback
       Alert.alert('💭', 'Thought captured!', [{ text: 'Continue', style: 'default' }]);
     }
+  };
+
+  // Voice recording functions
+  const startRecording = async () => {
+    try {
+      console.log('🎤 Requesting permissions..');
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      console.log('🎤 Starting recording..');
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(recording);
+      setIsRecording(true);
+      console.log('🎤 Recording started');
+    } catch (err) {
+      console.error('Failed to start recording', err);
+      Alert.alert('🎤 Recording Error', 'Could not start recording. Please check microphone permissions.');
+    }
+  };
+
+  const stopRecording = async () => {
+    console.log('🎤 Stopping recording..');
+    if (!recording) return;
+
+    setIsRecording(false);
+    setRecording(null);
+    await recording.stopAndUnloadAsync();
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+    });
+    
+    const uri = recording.getURI();
+    console.log('🎤 Recording stopped and stored at', uri);
+    
+    if (uri) {
+      // Get recording duration
+      const { sound } = await Audio.Sound.createAsync({ uri });
+      const status = await sound.getStatusAsync();
+      const duration = status.isLoaded ? status.durationMillis || 0 : 0;
+      await sound.unloadAsync();
+
+      // Add voice memo to brain dump
+      const voiceMemo = {
+        type: 'voice' as const,
+        audioUri: uri,
+        duration: Math.round(duration / 1000), // Convert to seconds
+      };
+      
+      addBrainDumpEntry('🎤 Voice memo', voiceMemo);
+      Alert.alert('🎤', 'Voice memo captured!', [{ text: 'Continue', style: 'default' }]);
+    }
+  };
+
+  const playVoiceMemo = async (entry: BrainDumpEntry) => {
+    try {
+      if (playingSound) {
+        await playingSound.unloadAsync();
+        setPlayingSound(null);
+        setPlayingId(null);
+      }
+
+      if (entry.audioUri) {
+        console.log('🔊 Playing voice memo:', entry.audioUri);
+        const { sound } = await Audio.Sound.createAsync({ uri: entry.audioUri });
+        setPlayingSound(sound);
+        setPlayingId(entry.id);
+        
+        await sound.playAsync();
+        
+        // Reset playing state when finished
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setPlayingSound(null);
+            setPlayingId(null);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error playing voice memo:', error);
+      Alert.alert('🔊 Playback Error', 'Could not play voice memo.');
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const filteredThoughts = brainDump.filter(entry =>
@@ -77,50 +176,92 @@ export default function BrainDumpScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.container}>
-        {/* Header with full height background */}
-        <Text style={styles.headerText}>
-          <Text style={styles.cloudEmoji}>💭</Text>
-          <Text style={styles.subtitleText}> Capture your racing thoughts</Text>
-        </Text>
-
-      {/* Quick Capture */}
-      <View style={styles.captureSection}>
-        <TextInput
-          style={styles.thoughtInput}
-          value={currentThought}
-          onChangeText={setCurrentThought}
-          placeholder="What's on your mind? Just dump it here..."
-          placeholderTextColor={colors.placeholderText}
-          multiline
-          maxLength={500}
-          onSubmitEditing={handleQuickCapture}
-          returnKeyType="done"
-        />
-        <TouchableOpacity
-          style={[styles.captureButton, currentThought.trim() ? styles.captureButtonActive : null]}
-          onPress={handleQuickCapture}
-          disabled={!currentThought.trim()}
+        <ScrollView 
+          style={{ flex: 1 }} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={[styles.captureButtonText, currentThought.trim() ? styles.captureButtonTextActive : null]}>✨ Capture</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Header with full height background */}
+          <Text style={styles.headerText}>
+            <Text style={styles.cloudEmoji}>💭</Text>
+            <Text style={styles.subtitleText}> Capture your racing thoughts</Text>
+          </Text>
 
-      {/* Thoughts List */}
-      <ScrollView style={styles.thoughtsList} showsVerticalScrollIndicator={false}>
-        {filteredThoughts.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateEmoji}>🧠</Text>
-            <Text style={styles.emptyStateText}>
-              {searchQuery ? 'No thoughts match your search' : 'Your mind palace awaits...'}
-            </Text>
-            <Text style={styles.emptyStateSubtext}>
-              {searchQuery ? 'Try a different search term' : 'Start dumping those racing thoughts!'}
-            </Text>
+          {/* Quick Capture */}
+          <View style={styles.captureSection}>
+            <TextInput
+              style={styles.thoughtInput}
+              value={currentThought}
+              onChangeText={setCurrentThought}
+              placeholder="What's on your mind? Just dump it here..."
+              placeholderTextColor={colors.placeholderText}
+              multiline
+              maxLength={500}
+              onSubmitEditing={handleQuickCapture}
+              returnKeyType="done"
+            />
+            <TouchableOpacity
+              style={[styles.captureButton, currentThought.trim() ? styles.captureButtonActive : null]}
+              onPress={handleQuickCapture}
+              disabled={!currentThought.trim()}
+            >
+              <Text style={[styles.captureButtonText, currentThought.trim() ? styles.captureButtonTextActive : null]}>✨ Capture</Text>
+            </TouchableOpacity>
+            
+            {/* Voice Recording Controls */}
+            <View style={styles.voiceSection}>
+              <Text style={styles.voiceSectionTitle}>🎤 Voice Memo</Text>
+              <TouchableOpacity
+                style={[styles.voiceButton, isRecording ? styles.voiceButtonRecording : null]}
+                onPress={isRecording ? stopRecording : startRecording}
+              >
+                <Text style={styles.voiceButtonText}>
+                  {isRecording ? '⏹️ Stop Recording' : '🎤 Start Recording'}
+                </Text>
+              </TouchableOpacity>
+              {isRecording && (
+                <Text style={styles.recordingIndicator}>🔴 Recording...</Text>
+              )}
+            </View>
           </View>
-        ) : (
-          filteredThoughts.map((entry) => (
+
+          {/* Thoughts List */}
+          <View style={styles.thoughtsListContainer}>
+            {filteredThoughts.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateEmoji}>🧠</Text>
+                <Text style={styles.emptyStateText}>
+                  {searchQuery ? 'No thoughts match your search' : 'Your mind palace awaits...'}
+                </Text>
+                <Text style={styles.emptyStateSubtext}>
+                  {searchQuery ? 'Try a different search term' : 'Start dumping those racing thoughts!'}
+                </Text>
+              </View>
+            ) : (
+              filteredThoughts.map((entry) => (
             <View key={entry.id} style={styles.thoughtCard}>
-              <Text style={styles.thoughtText}>{entry.content}</Text>
+              {entry.type === 'voice' ? (
+                // Voice memo display
+                <View style={styles.voiceMemoContainer}>
+                  <View style={styles.voiceMemoHeader}>
+                    <Text style={styles.voiceMemoTitle}>🎤 Voice Memo</Text>
+                    {entry.duration && (
+                      <Text style={styles.voiceDuration}>{formatDuration(entry.duration)}</Text>
+                    )}
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.playButton, playingId === entry.id ? styles.playButtonActive : null]}
+                    onPress={() => playVoiceMemo(entry)}
+                  >
+                    <Text style={styles.playButtonText}>
+                      {playingId === entry.id ? '⏸️ Playing...' : '▶️ Play'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                // Regular text thought display
+                <Text style={styles.thoughtText}>{entry.content}</Text>
+              )}
               <View style={styles.thoughtFooter}>
                 <Text style={styles.thoughtDate}>{formatDate(entry.createdAt)}</Text>
                 <TouchableOpacity
@@ -133,13 +274,14 @@ export default function BrainDumpScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-          ))
-        )}
-        
-        {/* Bottom spacing */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-    </View>
+              ))
+            )}
+            
+            {/* Bottom spacing */}
+            <View style={styles.bottomSpacing} />
+          </View>
+        </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -251,9 +393,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  thoughtsList: {
-    flex: 1,
+  thoughtsListContainer: {
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   thoughtCard: {
     backgroundColor: colors.cardBackground,
@@ -317,6 +459,87 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  voiceSection: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: colors.surface,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: colors.primary + '20',
+  },
+  voiceSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  voiceButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  voiceButtonRecording: {
+    backgroundColor: '#FF6B9D',
+    shadowColor: '#FF6B9D',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  voiceButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  recordingIndicator: {
+    fontSize: 14,
+    color: '#FF6B9D',
+    textAlign: 'center',
+    fontWeight: '500',
+    opacity: 0.8,
+  },
+  voiceMemoContainer: {
+    backgroundColor: colors.primary + '10',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  voiceMemoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  voiceMemoTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  voiceDuration: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  playButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  playButtonActive: {
+    backgroundColor: '#FF6B9D',
+  },
+  playButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 14,
   },
   bottomSpacing: {
     height: 100,

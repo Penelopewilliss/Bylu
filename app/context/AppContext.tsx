@@ -2,7 +2,8 @@
 import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import type { Task, CalendarEvent, MoodEntry, FocusSession, Badge, BrainDumpEntry, HyperfocusLog, WeeklyReflection, Goal, MicroTask } from '../types';
+import type { Task, CalendarEvent, MoodEntry, FocusSession, Badge, BrainDumpEntry, HyperfocusLog, WeeklyReflection, Goal, MicroTask, Alarm } from '../types';
+import { AlarmNotificationService, setupNotificationCategories } from '../services/AlarmNotificationService';
 
 const STORAGE_KEYS = {
 	TASKS: '@planner_tasks',
@@ -17,6 +18,7 @@ const STORAGE_KEYS = {
 	FOCUS_STREAK: '@planner_focus_streak',
 	TINY_WINS: '@planner_tiny_wins',
 	ONBOARDING_COMPLETED: '@planner_onboarding_completed',
+	ALARMS: '@planner_alarms',
 };
 
 export const [AppProvider, useApp] = createContextHook(() => {
@@ -29,6 +31,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 	const [brainDump, setBrainDump] = useState<BrainDumpEntry[]>([]);
 	const [hyperfocusLogs, setHyperfocusLogs] = useState<HyperfocusLog[]>([]);
 	const [reflections, setReflections] = useState<WeeklyReflection[]>([]);
+	const [alarms, setAlarms] = useState<Alarm[]>([]);
 	const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>(false);
 	const [focusStreak, setFocusStreak] = useState<number>(0);
 	const [tinyWins, setTinyWins] = useState<string[]>([]);
@@ -36,7 +39,17 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
 	useEffect(() => {
 		loadData();
+		initializeNotifications();
 	}, []);
+
+	const initializeNotifications = async () => {
+		try {
+			await AlarmNotificationService.requestPermissions();
+			await setupNotificationCategories();
+		} catch (error) {
+			console.error('Error initializing notifications:', error);
+		}
+	};
 
 	const loadData = async () => {
 		try {
@@ -50,6 +63,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 			storedBrainDump,
 			storedHyperfocusLogs,
 			storedReflections,
+			storedAlarms,
 			storedFocusStreak,
 			storedTinyWins,
 			storedOnboardingCompleted,
@@ -63,6 +77,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 			AsyncStorage.getItem(STORAGE_KEYS.BRAIN_DUMP),
 			AsyncStorage.getItem(STORAGE_KEYS.HYPERFOCUS_LOGS),
 			AsyncStorage.getItem(STORAGE_KEYS.REFLECTIONS),
+			AsyncStorage.getItem(STORAGE_KEYS.ALARMS),
 			AsyncStorage.getItem(STORAGE_KEYS.FOCUS_STREAK),
 			AsyncStorage.getItem(STORAGE_KEYS.TINY_WINS),
 			AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED),
@@ -112,6 +127,17 @@ export const [AppProvider, useApp] = createContextHook(() => {
 			if (storedBrainDump) setBrainDump(JSON.parse(storedBrainDump));
 			if (storedHyperfocusLogs) setHyperfocusLogs(JSON.parse(storedHyperfocusLogs));
 			if (storedReflections) setReflections(JSON.parse(storedReflections));
+			if (storedAlarms) {
+				const alarms = JSON.parse(storedAlarms);
+				setAlarms(alarms);
+				
+				// Schedule notifications for enabled alarms
+				for (const alarm of alarms) {
+					if (alarm.isEnabled) {
+						await AlarmNotificationService.scheduleAlarm(alarm);
+					}
+				}
+			}
 			if (storedFocusStreak) setFocusStreak(JSON.parse(storedFocusStreak));
 			if (storedTinyWins) setTinyWins(JSON.parse(storedTinyWins));
 		} catch (error) {
@@ -224,11 +250,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
 	}, [goals]);
 
 	// Brain Dump functions
-	const addBrainDumpEntry = useCallback(async (content: string) => {
+	const addBrainDumpEntry = useCallback(async (content: string, additionalData?: Partial<BrainDumpEntry>) => {
 		const newEntry: BrainDumpEntry = {
 			id: Date.now().toString(),
 			content,
 			createdAt: new Date().toISOString(),
+			...additionalData,
 		};
 		const updatedBrainDump = [...brainDump, newEntry];
 		setBrainDump(updatedBrainDump);
@@ -243,6 +270,63 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		setBrainDump(updatedBrainDump);
 		await AsyncStorage.setItem(STORAGE_KEYS.BRAIN_DUMP, JSON.stringify(updatedBrainDump));
 	}, [brainDump]);
+
+	// Alarm functions
+	const addAlarm = useCallback(async (alarmData: Omit<Alarm, 'id' | 'createdAt'>) => {
+		const newAlarm: Alarm = {
+			id: Date.now().toString(),
+			createdAt: new Date().toISOString(),
+			...alarmData,
+		};
+		const updatedAlarms = [...alarms, newAlarm];
+		setAlarms(updatedAlarms);
+		await AsyncStorage.setItem(STORAGE_KEYS.ALARMS, JSON.stringify(updatedAlarms));
+		
+		// Schedule notification if alarm is enabled
+		if (newAlarm.isEnabled) {
+			await AlarmNotificationService.scheduleAlarm(newAlarm);
+		}
+	}, [alarms]);
+
+	const updateAlarm = useCallback(async (alarmId: string, updates: Partial<Alarm>) => {
+		const updatedAlarms = alarms.map(alarm => 
+			alarm.id === alarmId ? { ...alarm, ...updates } : alarm
+		);
+		setAlarms(updatedAlarms);
+		await AsyncStorage.setItem(STORAGE_KEYS.ALARMS, JSON.stringify(updatedAlarms));
+		
+		// Reschedule the alarm with new settings
+		const updatedAlarm = updatedAlarms.find(alarm => alarm.id === alarmId);
+		if (updatedAlarm) {
+			await AlarmNotificationService.rescheduleAlarm(updatedAlarm);
+		}
+	}, [alarms]);
+
+	const deleteAlarm = useCallback(async (alarmId: string) => {
+		const alarmToDelete = alarms.find(alarm => alarm.id === alarmId);
+		const updatedAlarms = alarms.filter(alarm => alarm.id !== alarmId);
+		setAlarms(updatedAlarms);
+		await AsyncStorage.setItem(STORAGE_KEYS.ALARMS, JSON.stringify(updatedAlarms));
+		
+		// Cancel scheduled notifications
+		if (alarmToDelete) {
+			await AlarmNotificationService.cancelAlarm(alarmId, alarmToDelete.repeatDays);
+		}
+	}, [alarms]);
+
+	const toggleAlarm = useCallback(async (alarmId: string) => {
+		const updatedAlarms = alarms.map(alarm => 
+			alarm.id === alarmId ? { ...alarm, isEnabled: !alarm.isEnabled } : alarm
+		);
+		setAlarms(updatedAlarms);
+		await AsyncStorage.setItem(STORAGE_KEYS.ALARMS, JSON.stringify(updatedAlarms));
+		
+		// Reschedule or cancel based on new enabled state
+		const toggledAlarm = updatedAlarms.find(alarm => alarm.id === alarmId);
+		if (toggledAlarm) {
+			await AlarmNotificationService.rescheduleAlarm(toggledAlarm);
+		}
+	}, [alarms]);
 
 	const completeOnboarding = useCallback(async () => {
 		setIsOnboardingCompleted(true);
@@ -259,6 +343,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		brainDump,
 		hyperfocusLogs,
 		reflections,
+		alarms,
 		focusStreak,
 		tinyWins,
 		isLoading,
@@ -276,5 +361,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
 		toggleGoalMicroTask,
 		addBrainDumpEntry,
 		deleteBrainDumpEntry,
-	}), [tasks, events, goals, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, focusStreak, tinyWins, isLoading, isOnboardingCompleted, completeOnboarding, addTask, toggleTask, deleteTask, addEvent, updateEvent, deleteEvent, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask, addBrainDumpEntry, deleteBrainDumpEntry]);
+		addAlarm,
+		updateAlarm,
+		deleteAlarm,
+		toggleAlarm,
+	}), [tasks, events, goals, moods, focusSessions, badges, brainDump, hyperfocusLogs, reflections, alarms, focusStreak, tinyWins, isLoading, isOnboardingCompleted, completeOnboarding, addTask, toggleTask, deleteTask, addEvent, updateEvent, deleteEvent, addGoal, updateGoal, deleteGoal, toggleGoalMicroTask, addBrainDumpEntry, deleteBrainDumpEntry, addAlarm, updateAlarm, deleteAlarm, toggleAlarm]);
 });
