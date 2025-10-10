@@ -127,7 +127,11 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
       `Delete "${alarm.label || formatTime(alarm.time)}"?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteAlarm(alarm.id) }
+        { 
+          text: 'Delete', 
+          style: 'destructive', 
+          onPress: () => deleteAlarm(alarm.id)
+        }
       ]
     );
   };
@@ -599,7 +603,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderTopColor: colors.border,
   },
   actionButton: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.cardBackground,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,

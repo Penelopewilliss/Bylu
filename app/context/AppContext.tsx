@@ -303,14 +303,23 @@ export const [AppProvider, useApp] = createContextHook(() => {
 	}, [alarms]);
 
 	const deleteAlarm = useCallback(async (alarmId: string) => {
-		const alarmToDelete = alarms.find(alarm => alarm.id === alarmId);
-		const updatedAlarms = alarms.filter(alarm => alarm.id !== alarmId);
-		setAlarms(updatedAlarms);
-		await AsyncStorage.setItem(STORAGE_KEYS.ALARMS, JSON.stringify(updatedAlarms));
-		
-		// Cancel scheduled notifications
-		if (alarmToDelete) {
-			await AlarmNotificationService.cancelAlarm(alarmId, alarmToDelete.repeatDays);
+		try {
+			const alarmToDelete = alarms.find(alarm => alarm.id === alarmId);
+			const updatedAlarms = alarms.filter(alarm => alarm.id !== alarmId);
+			setAlarms(updatedAlarms);
+			await AsyncStorage.setItem(STORAGE_KEYS.ALARMS, JSON.stringify(updatedAlarms));
+			
+			// Cancel scheduled notifications
+			if (alarmToDelete) {
+				try {
+					await AlarmNotificationService.cancelAlarm(alarmId, alarmToDelete.repeatDays || []);
+				} catch (notificationError) {
+					console.error('Error cancelling notifications:', notificationError);
+					// Don't let notification errors prevent deletion
+				}
+			}
+		} catch (error) {
+			console.error('Error deleting alarm:', error);
 		}
 	}, [alarms]);
 
