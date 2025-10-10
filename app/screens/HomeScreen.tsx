@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
+import LottieView from 'lottie-react-native';
 
 interface HomeScreenProps {
   onNavigate?: (screen: string) => void;
@@ -122,7 +123,25 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
           ))}
         </View>
 
-        {/* Floating Particles Animation */}
+        {/* 🎨 Lottie Floating Animation */}
+        <LottieView
+          source={require('../../assets/lottie/floating-animation.json')}
+          autoPlay
+          loop
+          speed={0.6}
+          style={{
+            position: 'absolute',
+            bottom: -50,
+            left: 0,
+            right: 0,
+            height: 150,
+            pointerEvents: 'none',
+            opacity: 0.8,
+          }}
+          resizeMode="cover"
+        />
+
+        {/* Original Particles Animation - Commented Out
         <View style={styles.particlesContainer}>
           {particles.map((particle) => (
             <Animated.View
@@ -139,7 +158,7 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
                     {
                       translateY: particle.animatedValue.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [100, -100],
+                        outputRange: [150, -20], // Start from below, float gently upward
                       }),
                     },
                     {
@@ -154,6 +173,7 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
             />
           ))}
         </View>
+        */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -253,10 +273,10 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   particlesContainer: {
     position: 'absolute',
-    top: 0,
+    bottom: -50, // Move even lower, below the visible area
     left: 0,
     right: 0,
-    bottom: 0,
+    height: 150, // Smaller height for more focused bottom animation
     pointerEvents: 'none', // Allow touch events to pass through
   },
   particle: {
