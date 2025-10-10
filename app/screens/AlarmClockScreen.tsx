@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
-import HomeButton from '../components/HomeButton';
 import type { Alarm } from '../types';
 
 interface AlarmClockScreenProps {
@@ -73,12 +72,6 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const snoozeOptions = [5, 10, 15, 20, 30];
-
-  const handleHomePress = () => {
-    if (onNavigate) {
-      onNavigate('Dashboard');
-    }
-  };
 
   const handleAddAlarm = () => {
     setShowAddModal(true);
@@ -302,11 +295,7 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
 
   return (
     <SafeAreaView style={styles.container}>
-      <HomeButton onPress={handleHomePress} headerOverlay={true} />
-      
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>⏰ Alarm Clock</Text>
-        
         {/* Add Custom Alarm Button */}
         <View style={styles.addCustomSection}>
           <TouchableOpacity style={styles.addCustomButton} onPress={handleAddAlarm}>
@@ -603,9 +592,9 @@ export default function AlarmClockScreen({ onNavigate }: AlarmClockScreenProps) 
                   </Text>
                 </TouchableOpacity>
               </View>
-          </ScrollView>
-        </View>
-      </Modal>
+            </ScrollView>
+          </View>
+        </Modal>
     </SafeAreaView>
   );
 }
