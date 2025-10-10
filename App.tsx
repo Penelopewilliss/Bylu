@@ -11,6 +11,7 @@ import { CalendarSyncProvider } from './app/context/CalendarSyncContext';
 import NotificationService from './app/services/NotificationService';
 
 // Import the actual screen components
+import HomeScreen from './app/screens/HomeScreen';
 import TasksScreen from './app/screens/TasksScreen';
 import DashboardScreen from './app/screens/DashboardScreen';
 import CalendarScreen from './app/screens/CalendarScreen';
@@ -23,7 +24,7 @@ import OnboardingScreen from './app/screens/OnboardingScreen';
 
 const { width, height } = Dimensions.get('window');
 
-type TabName = 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'BrainDump' | 'AlarmClock' | 'Settings';
+type TabName = 'Home' | 'Dashboard' | 'Tasks' | 'Calendar' | 'Goals' | 'BrainDump' | 'AlarmClock' | 'Settings';
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -91,10 +92,12 @@ function HamburgerMenu({
   isVisible: boolean;
   onClose: () => void;
 }) {
-  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
+  const tabs: TabName[] = ['Home', 'Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
 
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
+      case 'Home':
+        return '🏠';
       case 'Dashboard':
         return '🦋';
       case 'Tasks':
@@ -116,8 +119,10 @@ function HamburgerMenu({
 
   const getTabLabel = (tab: TabName): string => {
     switch (tab) {
-      case 'Dashboard':
+      case 'Home':
         return 'Home';
+      case 'Dashboard':
+        return 'Dashboard';
       default:
         return tab;
     }
@@ -182,6 +187,8 @@ function TopBar({
 }) {
   const getTabEmoji = (tab: TabName): string => {
     switch (tab) {
+      case 'Home':
+        return '🏠';
       case 'Dashboard':
         return '🦋';
       case 'Tasks':
@@ -203,8 +210,10 @@ function TopBar({
 
   const getTabLabel = (tab: TabName): string => {
     switch (tab) {
-      case 'Dashboard':
+      case 'Home':
         return 'Home';
+      case 'Dashboard':
+        return 'Dashboard';
       default:
         return tab;
     }
@@ -212,12 +221,12 @@ function TopBar({
 
   return (
     <View style={styles.topBar}>
-      {activeTab !== 'Dashboard' && (
+      {activeTab !== 'Home' && (
         <TouchableOpacity style={styles.homeButton} onPress={onHomePress}>
           <Text style={styles.homeIcon}>⌂</Text>
         </TouchableOpacity>
       )}
-      {activeTab === 'Dashboard' && <View style={styles.spacer} />}
+      {activeTab === 'Home' && <View style={styles.spacer} />}
       <View style={styles.currentTab}>
         <Text style={styles.currentTabLabel}>{getTabLabel(activeTab)}</Text>
       </View>
@@ -232,6 +241,8 @@ function TopBar({
 
 function Screen({ activeTab, onNavigate, deepLink, onClearDeepLink }: { activeTab: TabName; onNavigate: (tab: string) => void; deepLink?: any; onClearDeepLink?: () => void }) {
   switch (activeTab) {
+    case 'Home':
+      return <HomeScreen onNavigate={onNavigate} />;
     case 'Dashboard':
       return <DashboardScreen onNavigate={onNavigate} />;
     case 'Tasks':
@@ -252,7 +263,7 @@ function Screen({ activeTab, onNavigate, deepLink, onClearDeepLink }: { activeTa
 }
 
 function MainApp() {
-  const [activeTab, setActiveTab] = useState<TabName>('Dashboard');
+  const [activeTab, setActiveTab] = useState<TabName>('Home');
   const [deepLink, setDeepLink] = useState<any>(null);
   const [isSplashFinished, setIsSplashFinished] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -263,7 +274,7 @@ function MainApp() {
   const [showAlarmScreen, setShowAlarmScreen] = useState(false);
   const [activeAlarm, setActiveAlarm] = useState<any>(null);
   
-  const tabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
+  const tabs: TabName[] = ['Home', 'Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
 
   const navigateToTab = (direction: 'next' | 'prev') => {
     const currentIndex = tabs.indexOf(activeTab);
@@ -445,7 +456,7 @@ function MainApp() {
   console.log('📱 Showing main app');
 
   const handleNavigate = (tab: string) => {
-    const validTabs: TabName[] = ['Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
+    const validTabs: TabName[] = ['Home', 'Dashboard', 'Calendar', 'Tasks', 'Goals', 'BrainDump', 'AlarmClock', 'Settings'];
     if (validTabs.includes(tab as TabName)) {
       setActiveTab(tab as TabName);
     }
@@ -457,20 +468,20 @@ function MainApp() {
       <TopBar 
         activeTab={activeTab} 
         onMenuPress={() => setMenuVisible(true)}
-        onHomePress={() => setActiveTab('Dashboard')} 
+        onHomePress={() => setActiveTab('Home')} 
       />
       <View style={styles.content}>
         <Screen activeTab={activeTab} onNavigate={handleNavigate} deepLink={deepLink} onClearDeepLink={() => setDeepLink(null)} />
       </View>
       
       {/* Floating Home Button - Bottom Right */}
-      {activeTab !== 'Dashboard' && (
+      {activeTab !== 'Home' && (
         <TouchableOpacity 
           style={[
             styles.floatingHomeButton,
             activeTab === 'Tasks' && styles.floatingHomeButtonTasks
           ]} 
-          onPress={() => setActiveTab('Dashboard')}
+          onPress={() => setActiveTab('Home')}
           activeOpacity={0.8}
         >
           <Text style={styles.floatingHomeIcon}>⌂</Text>
