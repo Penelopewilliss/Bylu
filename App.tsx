@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
   },
   floatingHomeButtonTasks: {
     bottom: 120, // Higher position for Tasks page only
-    left: 20,    // Move to left side for Tasks page
+    right: 20,   // Keep on right side for Tasks page
   },
   floatingHomeIcon: {
     fontSize: 20,

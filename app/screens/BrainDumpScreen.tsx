@@ -31,6 +31,7 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
   const [isRecording, setIsRecording] = useState(false);
   const [playingSound, setPlayingSound] = useState<Audio.Sound | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const styles = createStyles(colors);
   const textInputRef = useRef<TextInput>(null);
 
@@ -142,10 +143,30 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
 
   const playVoiceMemo = async (entry: BrainDumpEntry) => {
     try {
+      // If this voice memo is already playing, pause it
+      if (playingSound && playingId === entry.id) {
+        const status = await playingSound.getStatusAsync();
+        if (status.isLoaded) {
+          if (status.isPlaying) {
+            await playingSound.pauseAsync();
+            setIsPlaying(false);
+            console.log('⏸️ Paused voice memo');
+            return;
+          } else {
+            await playingSound.playAsync();
+            setIsPlaying(true);
+            console.log('▶️ Resumed voice memo');
+            return;
+          }
+        }
+      }
+
+      // Stop any other playing sound
       if (playingSound) {
         await playingSound.unloadAsync();
         setPlayingSound(null);
         setPlayingId(null);
+        setIsPlaying(false);
       }
 
       if (entry.audioUri) {
@@ -162,6 +183,7 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
         const { sound } = await Audio.Sound.createAsync({ uri: entry.audioUri });
         setPlayingSound(sound);
         setPlayingId(entry.id);
+        setIsPlaying(true);
         
         await sound.playAsync();
         
@@ -170,6 +192,7 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
           if (status.isLoaded && status.didJustFinish) {
             setPlayingSound(null);
             setPlayingId(null);
+            setIsPlaying(false);
           }
         });
       }
@@ -333,7 +356,10 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
                     onPress={() => playVoiceMemo(entry)}
                   >
                     <Text style={styles.playButtonText}>
-                      {playingId === entry.id ? '⏸️ Playing...' : '▶️ Play'}
+                      {playingId === entry.id 
+                        ? (isPlaying ? '⏸️ Pause' : '▶️ Resume') 
+                        : '▶️ Play'
+                      }
                     </Text>
                   </TouchableOpacity>
                 </View>
