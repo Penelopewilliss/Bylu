@@ -448,7 +448,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.accent,
   },
   captureButtonText: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
@@ -574,7 +574,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   voiceButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#000000',
   },
   recordingIndicator: {
     fontSize: 14,
@@ -616,7 +616,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: '#FF6B9D',
   },
   playButtonText: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontWeight: '600',
     fontSize: 14,
   },

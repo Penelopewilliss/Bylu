@@ -491,10 +491,8 @@ class NotificationService {
           sound: this.settings.soundEnabled ? 'default' : false,
         },
         trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-          hour: time.hour,
-          minute: time.minute,
-          repeats: true,
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: scheduleTime,
         },
         identifier,
       });

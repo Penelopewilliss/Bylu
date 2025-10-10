@@ -33,7 +33,6 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
   const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
   const [modalVisible, setModalVisible] = useState(false);
-  const [showCompleted, setShowCompleted] = useState(false);
   const [viewAllTasks, setViewAllTasks] = useState(false);
   const [viewHighPriority, setViewHighPriority] = useState(false);
   const [scrollX, setScrollX] = useState(0);
@@ -75,7 +74,6 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
       setViewHighPriority(true);
       // Ensure other views are disabled
       setViewAllTasks(false);
-      setShowCompleted(false);
 
       // Clear deep link after handling so it doesn't re-trigger
       if (typeof onDeepLinkHandled === 'function') {
@@ -277,13 +275,9 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
 
   const toggleViewAllTasks = () => {
     setViewAllTasks(!viewAllTasks);
-    // If we're entering view all mode, show completed tasks
-    // If we're exiting view all mode, hide completed tasks
+    // If we're entering view all mode, disable high priority
     if (!viewAllTasks) {
-      setShowCompleted(true);
       setViewHighPriority(false); // Disable high priority when entering view all
-    } else {
-      setShowCompleted(false);
     }
   };
 
@@ -292,7 +286,6 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
     // If we're entering high priority mode, disable view all mode
     if (!viewHighPriority) {
       setViewAllTasks(false);
-      setShowCompleted(false); // Focus on active high priority tasks
     }
   };
 
@@ -925,10 +918,8 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
   const incompleteTasks = filteredTasks.filter(t => !t.completed);
   const completedTasks = filteredTasks.filter(t => t.completed);
   
-  // Combine tasks based on showCompleted state
-  const displayTasks = showCompleted 
-    ? [...incompleteTasks, ...completedTasks]
-    : incompleteTasks;
+  // Since completed tasks are automatically deleted, only show incomplete tasks
+  const displayTasks = incompleteTasks;
 
   const renderCategoryTab = (category: Category | 'all', index?: number) => {
     // Safety checks
@@ -1026,18 +1017,8 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
   const renderTaskItem = ({ item, index }: { item: typeof tasks[0], index: number }) => {
     const categoryData = TASK_CATEGORIES[item.category];
     
-    // Show section header for completed tasks when both sections are visible
-    const isFirstCompletedTask = showCompleted && 
-      index === incompleteTasks.length && 
-      completedTasks.length > 0;
-    
     return (
       <>
-        {isFirstCompletedTask && (
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionHeaderText}>Completed Tasks</Text>
-          </View>
-        )}
         <View style={[styles.taskItem, item.completed && styles.completedTaskItem]}>
           <View style={styles.taskContent}>
             <View style={styles.taskHeader}>
@@ -1098,9 +1079,7 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
           
           const incompleteTasks = categoryTasks.filter(t => !t.completed);
           const completedTasks = categoryTasks.filter(t => t.completed);
-          const displayTasks = showCompleted 
-            ? [...incompleteTasks, ...completedTasks]
-            : incompleteTasks;
+          const displayTasks = incompleteTasks; // Only show incomplete tasks since completed ones are auto-deleted
           
           // Don't render section if no tasks to display
           if (displayTasks.length === 0) return null;
@@ -1121,18 +1100,8 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
               {/* Tasks in this category */}
               <View style={styles.categoryTasksList}>
                 {displayTasks.map((task, taskIndex) => {
-                  // Show section header for completed tasks when both sections are visible
-                  const isFirstCompletedTask = showCompleted && 
-                    taskIndex === incompleteTasks.length && 
-                    completedTasks.length > 0;
-                  
                   return (
                     <View key={task.id}>
-                      {isFirstCompletedTask && (
-                        <View style={styles.sectionHeader}>
-                          <Text style={styles.sectionHeaderText}>Completed</Text>
-                        </View>
-                      )}
                       
                       <View style={[styles.taskItem, task.completed && { opacity: 0.6 }]}>
                         <View style={styles.taskContent}>
@@ -1192,30 +1161,6 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
         {/* Simplified Header */}
         <View style={styles.header}>
           <View style={styles.headerButtons}>
-            {/* Toggle Completed Tasks */}
-            <Pressable 
-              style={({ pressed }) => [
-                styles.viewAllButton,
-                showCompleted && styles.viewAllButtonActive,
-                { 
-                  transform: [{ scale: 1 }],
-                  // @ts-ignore
-                  transition: 'none !important',
-                  WebkitTransition: 'none !important',
-                  transitionProperty: 'none !important',
-                  transitionDuration: '0s !important'
-                }
-              ]}
-              onPress={() => setShowCompleted(!showCompleted)}
-            >
-              <Text style={[
-                styles.viewAllButtonText,
-                showCompleted && styles.viewAllButtonTextActive
-              ]}>
-                {showCompleted ? '✅ Hide Done' : 'Show Done'}
-              </Text>
-            </Pressable>
-            
             {/* Add Task Button */}
             <Pressable 
               style={({ pressed }) => [
