@@ -23,19 +23,18 @@ export const NOTIFICATION_SOUNDS = {
 };
 
 // Map of sound keys to their require() statements
-// When you download MP3 files from Pixabay and add them to /assets/sounds/, uncomment these:
+// ✅ ACTIVATED - Using your downloaded MP3 files!
 export const SOUND_FILES: { [key: string]: any } = {
-  // Uncomment when you add the MP3 files:
-  // [NOTIFICATION_SOUNDS.CLASSIC_BELL]: require('../../assets/sounds/classic_bell.mp3'),
-  // [NOTIFICATION_SOUNDS.DIGITAL_BEEP]: require('../../assets/sounds/digital_beep.mp3'),
-  // [NOTIFICATION_SOUNDS.ELECTRONIC_ALARM]: require('../../assets/sounds/electronic_alarm.mp3'),
-  // [NOTIFICATION_SOUNDS.GENTLE_CHIMES]: require('../../assets/sounds/gentle_chimes.mp3'),
-  // [NOTIFICATION_SOUNDS.PIANO_MELODY]: require('../../assets/sounds/piano_melody.mp3'),
-  // [NOTIFICATION_SOUNDS.SOFT_BELLS]: require('../../assets/sounds/soft_bells.mp3'),
-  // [NOTIFICATION_SOUNDS.BIRDS_CHIRPING]: require('../../assets/sounds/birds_chirping.mp3'),
-  // [NOTIFICATION_SOUNDS.OCEAN_WAVES]: require('../../assets/sounds/ocean_waves.mp3'),
-  // [NOTIFICATION_SOUNDS.FANFARE]: require('../../assets/sounds/fanfare.mp3'),
-  // [NOTIFICATION_SOUNDS.ROOSTER]: require('../../assets/sounds/rooster.mp3'),
+  [NOTIFICATION_SOUNDS.CLASSIC_BELL]: require('../../assets/sounds/classic_bell.mp3'),
+  [NOTIFICATION_SOUNDS.DIGITAL_BEEP]: require('../../assets/sounds/digital_beep.mp3'),
+  [NOTIFICATION_SOUNDS.ELECTRONIC_ALARM]: require('../../assets/sounds/electronic_alarm.mp3'),
+  [NOTIFICATION_SOUNDS.GENTLE_CHIMES]: require('../../assets/sounds/gentle_chimes.mp3'),
+  [NOTIFICATION_SOUNDS.PIANO_MELODY]: require('../../assets/sounds/piano_melody.mp3'),
+  [NOTIFICATION_SOUNDS.SOFT_BELLS]: require('../../assets/sounds/soft_bells.mp3'),
+  [NOTIFICATION_SOUNDS.BIRDS_CHIRPING]: require('../../assets/sounds/birds_chirping.mp3'),
+  [NOTIFICATION_SOUNDS.OCEAN_WAVES]: require('../../assets/sounds/ocean_waves.mp3'),
+  [NOTIFICATION_SOUNDS.FANFARE]: require('../../assets/sounds/fanfare.mp3'),
+  [NOTIFICATION_SOUNDS.ROOSTER]: require('../../assets/sounds/rooster.mp3'),
 };
 
 // Helper function to check if sound file exists
