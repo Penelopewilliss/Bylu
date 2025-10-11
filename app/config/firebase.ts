@@ -9,7 +9,7 @@ const firebaseConfig = {
   projectId: "glowgetter-199ce",
   storageBucket: "glowgetter-199ce.firebasestorage.app",
   messagingSenderId: "745487345733",
-  appId: "1:745487345733:android:914ff15cd038c8b4ee9b2c"
+  appId: "1:745487345733:android:d96c77d1d9599a72ee9b2c"
 };
 
 // Initialize Firebase
