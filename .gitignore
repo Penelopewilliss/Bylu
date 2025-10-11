@@ -1,4 +1,5 @@
 node_modules
-node_modules
-node_modules
 .expo/
+
+# Firebase secrets - DO NOT COMMIT
+google-services.json
