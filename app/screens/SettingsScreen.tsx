@@ -24,7 +24,7 @@ import Button3D from '../components/Button3D';
 
 export default function SettingsScreen() {
   const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime, formatTime } = useTheme();
-  const { user, signOut, syncDataToCloud } = useAuth();
+  const { user, signOut, syncDataToCloud, syncInProgress } = useAuth();
   const { 
     isConnected, 
     isAuthenticating, 
@@ -643,7 +643,8 @@ export default function SettingsScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.settingItem} 
+            style={[styles.settingItem, syncInProgress && styles.settingItemDisabled]} 
+            disabled={syncInProgress}
             onPress={async () => {
               Alert.alert(
                 'Sync Data',
@@ -658,9 +659,9 @@ export default function SettingsScreen() {
                     onPress: async () => {
                       try {
                         await syncDataToCloud();
-                        Alert.alert('Success', 'All data synced to cloud successfully!');
+                        Alert.alert('Success', '✅ All data synced to cloud successfully!');
                       } catch (error: any) {
-                        Alert.alert('Error', error.message);
+                        Alert.alert('Sync Error', error.message || 'Failed to sync data. Please try again.');
                       }
                     }
                   }
@@ -669,10 +670,12 @@ export default function SettingsScreen() {
             }}
           >
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>☁️ Sync to Cloud</Text>
+              <Text style={[styles.settingLabel, syncInProgress && styles.settingLabelDisabled]}>
+                {syncInProgress ? '☁️ Syncing...' : '☁️ Sync to Cloud'}
+              </Text>
               <Text style={styles.settingDescription}>Backup your data to Firebase</Text>
             </View>
-            <Text style={styles.chevron}>↑</Text>
+            <Text style={styles.chevron}>{syncInProgress ? '...' : '↑'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -880,6 +883,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
+  },
+  settingItemDisabled: {
+    opacity: 0.5,
+  },
+  settingLabelDisabled: {
+    color: colors.textSecondary,
   },
   infoItem: {
     flexDirection: 'row',

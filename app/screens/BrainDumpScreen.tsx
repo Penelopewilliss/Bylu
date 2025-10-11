@@ -52,6 +52,24 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
     cleanupBrokenVoiceMemos();
   }, []);
 
+  // Cleanup function to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      // Unload any playing sound when component unmounts
+      if (playingSound) {
+        playingSound.unloadAsync().catch(err => {
+          console.warn('Failed to unload sound on cleanup:', err);
+        });
+      }
+      // Stop recording if still active
+      if (recording) {
+        recording.stopAndUnloadAsync().catch(err => {
+          console.warn('Failed to stop recording on cleanup:', err);
+        });
+      }
+    };
+  }, [playingSound, recording]);
+
   const handleQuickCapture = () => {
     if (currentThought.trim()) {
       addBrainDumpEntry(currentThought.trim());

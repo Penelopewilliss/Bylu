@@ -42,6 +42,18 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
       onDeepLinkHandled?.();
     }
   }, [deepLink]);
+
+  // Cleanup function to prevent memory leaks from sound playback
+  useEffect(() => {
+    return () => {
+      // Unload any playing sound when component unmounts
+      if (currentPlayingSound) {
+        currentPlayingSound.unloadAsync().catch(err => {
+          console.warn('Failed to unload sound on cleanup:', err);
+        });
+      }
+    };
+  }, [currentPlayingSound]);
   
   // PanResponder for swipe to close modal (down swipe only, in header area)
   const panResponder = PanResponder.create({
