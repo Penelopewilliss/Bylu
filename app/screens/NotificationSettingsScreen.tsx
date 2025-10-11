@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NotificationService, { NotificationSettings, DailyAppointmentSettings } from '../services/NotificationService';
 import HomeButton from '../components/HomeButton';
+import Button3D from '../components/Button3D';
 import { useTheme } from '../context/ThemeContext';
 
 const TIMING_OPTIONS = [
@@ -375,9 +376,13 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
 
             {/* Test Notification */}
             <View style={styles.section}>
-              <TouchableOpacity style={styles.testButton} onPress={testNotification}>
-                <Text style={styles.testButtonText}>🧪 Send Test Notification</Text>
-              </TouchableOpacity>
+              <Button3D 
+                title="🧪 Send Test Notification"
+                onPress={testNotification}
+                backgroundColor="#E8B4C4"
+                textColor="#000000"
+                size="medium"
+              />
             </View>
           </>
         )}

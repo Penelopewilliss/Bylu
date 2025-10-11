@@ -15,6 +15,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import Button3D from '../components/Button3D';
 import type { CalendarEvent } from '../types';
 import NotificationService from '../services/NotificationService';
 
@@ -198,7 +199,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)', // Darker overlay for more drama
     justifyContent: 'flex-end',
   },
   dayModalContent: {
@@ -208,15 +209,43 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingTop: 24,
     paddingHorizontal: 20,
     maxHeight: '80%',
+    // Enhanced 3D shadow effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 15,
+    // 3D beveled borders
+    borderTopWidth: 3,
+    borderTopColor: '#FFFFFF',
+    borderLeftWidth: 2,
+    borderLeftColor: '#FFFFFF',
+    borderRightWidth: 2,
+    borderRightColor: '#E0E0E0',
+    // Slight 3D transform
+    transform: [
+      { perspective: 1000 },
+      { rotateX: '-2deg' },
+    ],
   },
   modalDragHandle: {
     width: 50,
     height: 5,
-    backgroundColor: colors.border,
+    backgroundColor: '#E8B4C4', // Use theme color
     borderRadius: 3,
     alignSelf: 'center',
     marginTop: 8,
     marginBottom: 20,
+    // 3D effects for drag handle
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+    borderTopWidth: 1,
+    borderTopColor: '#F0C7D1',
+    borderBottomWidth: 1,
+    borderBottomColor: '#D1A1B1',
   },
   dayModalTitle: {
     fontSize: 20,
@@ -1170,19 +1199,23 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
           </Text>
         </View>
         <View style={styles.monthNavigation}>
-          <TouchableOpacity 
-            style={styles.navButton} 
+          <Button3D
+            title="‹‹"
             onPress={() => navigateMonth('prev')}
-          >
-            <Text style={styles.navButtonText}>‹‹</Text>
-          </TouchableOpacity>
+            backgroundColor="#E8B4C4"
+            textColor="#000000"
+            size="small"
+            style={{ borderRadius: 20, width: 40, height: 40 }}
+          />
           
-          <TouchableOpacity 
-            style={styles.navButton} 
+          <Button3D
+            title="››"
             onPress={() => navigateMonth('next')}
-          >
-            <Text style={styles.navButtonText}>››</Text>
-          </TouchableOpacity>
+            backgroundColor="#E8B4C4"
+            textColor="#000000"
+            size="small"
+            style={{ borderRadius: 20, width: 40, height: 40 }}
+          />
         </View>
       </View>
 
@@ -1250,15 +1283,17 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
           </View>
         
         {/* Add Button underneath calendar */}
-        <TouchableOpacity 
-          style={styles.fab} 
+        <Button3D
+          title="+ Add Appointment"
           onPress={() => {
             setIsCreatingFromSpecificDay(false);
             handleAddAppointment();
           }}
-        >
-          <Text style={styles.fabText}>+ Add Appointment</Text>
-        </TouchableOpacity>
+          backgroundColor="#E8B4C4"
+          textColor="#000000"
+          size="large"
+          style={{ alignSelf: 'center', marginTop: 20, marginBottom: 20 }}
+        />
         </View>
       </ScrollView>
 
@@ -1317,15 +1352,16 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
             </ScrollView>
             
             <View style={[styles.dayModalButtons, { paddingBottom: Math.max(16, insets.bottom + 12) }]}>
-              <TouchableOpacity
-                style={styles.closeButton}
+              <Button3D
+                title="Close"
                 onPress={() => setShowDayModal(false)}
-              >
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
+                backgroundColor="#FFFFFF"
+                textColor="#000000"
+                style={{ flex: 1, marginRight: 6 }}
+              />
               
-              <TouchableOpacity
-                style={styles.addAppointmentButton}
+              <Button3D
+                title="+ Add"
                 onPress={() => {
                   setShowDayModal(false);
                   setIsCreatingFromSpecificDay(true);
@@ -1346,9 +1382,10 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
                   setEditingEvent(null);
                   setShowAddModal(true);
                 }}
-              >
-                <Text style={styles.addAppointmentButtonText}>+ Add</Text>
-              </TouchableOpacity>
+                backgroundColor="#E8B4C4"
+                textColor="#000000"
+                style={{ flex: 1, marginLeft: 6 }}
+              />
             </View>
           </View>
         </View>
@@ -1837,21 +1874,21 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
             
             {/* Button area outside ScrollView */}
             <View style={[styles.addModalButtons, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
-              <TouchableOpacity
-                style={styles.cancelButton}
+              <Button3D
+                title="Cancel"
                 onPress={() => setShowAddModal(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
+                backgroundColor="#FFFFFF"
+                textColor="#000000"
+                style={{ flex: 1, marginRight: 6 }}
+              />
               
-              <TouchableOpacity
-                style={styles.saveButton}
+              <Button3D
+                title={editingEvent ? 'Update' : 'Save'}
                 onPress={saveAppointment}
-              >
-                <Text style={styles.saveButtonText}>
-                  {editingEvent ? 'Update' : 'Save'}
-                </Text>
-              </TouchableOpacity>
+                backgroundColor="#E8B4C4"
+                textColor="#000000"
+                style={{ flex: 1, marginLeft: 6 }}
+              />
             </View>
           </View>
         </View>

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, PanResponder, Animated, Vibra
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
+import Button3D from '../components/Button3D';
 import type { Alarm } from '../types';
 
 interface AlarmActiveScreenProps {
@@ -334,9 +335,13 @@ export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible 
           <View style={styles.actionContainer}>
             <Text style={styles.actionIcon}>⬆️</Text>
             <Text style={styles.actionText}>Swipe up to dismiss</Text>
-            <TouchableOpacity style={styles.actionButton} onPress={handleDismiss}>
-              <Text style={styles.actionButtonText}>Dismiss</Text>
-            </TouchableOpacity>
+            <Button3D 
+              title="Dismiss"
+              onPress={handleDismiss}
+              backgroundColor="#FF6B6B"
+              textColor="#FFFFFF"
+              size="large"
+            />
           </View>
         </Animated.View>
 
@@ -351,9 +356,13 @@ export default function AlarmActiveScreen({ alarm, onDismiss, onSnooze, visible 
           {...snoozePanResponder.panHandlers}
         >
           <View style={styles.actionContainer}>
-            <TouchableOpacity style={[styles.actionButton, styles.snoozeButton]} onPress={handleSnooze}>
-              <Text style={styles.actionButtonText}>Snooze 5min</Text>
-            </TouchableOpacity>
+            <Button3D 
+              title="Snooze 5min"
+              onPress={handleSnooze}
+              backgroundColor="#4ECDC4"
+              textColor="#FFFFFF"
+              size="large"
+            />
             <Text style={styles.actionText}>Swipe down to snooze</Text>
             <Text style={styles.actionIcon}>⬇️</Text>
           </View>

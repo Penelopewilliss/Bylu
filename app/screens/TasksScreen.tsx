@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Category, Priority } from '../types';
 import NotificationService from '../services/NotificationService';
+import Button3D from '../components/Button3D';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CATEGORY_ITEM_WIDTH = 100;
@@ -660,20 +661,49 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
     // Modal Styles
     modalContainer: {
       flex: 1,
-      backgroundColor: colors.background,
+      backgroundColor: colors.background, // Use theme background like normal screens
+      // 3D enhancement
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -10 },
+      shadowOpacity: 0.4,
+      shadowRadius: 20,
+      elevation: 15,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      borderTopWidth: 1,
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderTopColor: '#F0C7D1',
+      borderLeftColor: '#F0C7D1',
+      borderRightColor: '#D1A1B1',
+      transform: [{ rotateX: '-2deg' }],
     },
     modalHeader: {
-      backgroundColor: colors.cardBackground,
+      backgroundColor: '#E8B4C4', // Use theme color consistently
       paddingVertical: 20,
       paddingHorizontal: 20,
       borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      borderBottomColor: '#D1A1B1',
       alignItems: 'center',
+      // 3D header effects
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      borderTopWidth: 1,
+      borderTopColor: '#F0C7D1',
     },
     modalTitle: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: colors.text,
+      color: '#000000', // Black text for consistency
+      // 3D text effects
+      textShadowColor: 'rgba(0,0,0,0.3)',
+      textShadowOffset: { width: 1, height: 2 },
+      textShadowRadius: 4,
     },
     modalContent: {
       flex: 1,
@@ -769,14 +799,27 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
       paddingVertical: 16,
       borderRadius: 12,
       alignItems: 'center',
+      // 3D button effects
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+      borderWidth: 1,
     },
     cancelButton: {
-      backgroundColor: colors.cardBackground,
-      borderWidth: 1,
-      borderColor: colors.border,
+      backgroundColor: '#FFFFFF',
+      borderTopColor: '#F0F0F0',
+      borderBottomColor: '#D0D0D0',
+      borderLeftColor: '#E0E0E0',
+      borderRightColor: '#E0E0E0',
     },
     createButton: {
-      backgroundColor: colors.primary,
+      backgroundColor: '#E8B4C4',
+      borderTopColor: '#F0C7D1',
+      borderBottomColor: '#D1A1B1',
+      borderLeftColor: '#E8B4C4',
+      borderRightColor: '#D1A1B1',
     },
     buttonText: {
       fontSize: 16,
@@ -1162,22 +1205,14 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
         <View style={styles.header}>
           <View style={styles.headerButtons}>
             {/* Add Task Button */}
-            <Pressable 
-              style={({ pressed }) => [
-                styles.addButton,
-                { 
-                  transform: [{ scale: 1 }],
-                  // @ts-ignore
-                  transition: 'none !important',
-                  WebkitTransition: 'none !important',
-                  transitionProperty: 'none !important',
-                  transitionDuration: '0s !important'
-                }
-              ]}
+            <Button3D
+              title="+ Add"
               onPress={openAddModal}
-            >
-              <Text style={styles.addButtonText}>+ Add</Text>
-            </Pressable>
+              backgroundColor="#FFFFFF"
+              textColor="#000000"
+              size="small"
+              style={{ width: 110 }}
+            />
           </View>
         </View>
 
@@ -1350,19 +1385,21 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
 
           {/* Modal Buttons */}
           <View style={[styles.modalButtons, { paddingBottom: Math.max(20, insets.bottom + 16) }]}>
-            <TouchableOpacity 
-              style={[styles.modalButton, styles.cancelButton]}
+            <Button3D 
+              title="Cancel"
               onPress={() => setModalVisible(false)}
-            >
-              <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
-            </TouchableOpacity>
+              backgroundColor="#FFFFFF"
+              textColor="#000000"
+              style={{ flex: 1, marginRight: 6 }}
+            />
             
-            <TouchableOpacity 
-              style={[styles.modalButton, styles.createButton]}
+            <Button3D 
+              title="Create Task"
               onPress={handleCreateTask}
-            >
-              <Text style={[styles.buttonText, styles.createButtonText]}>Create Task</Text>
-            </TouchableOpacity>
+              backgroundColor="#E8B4C4"
+              textColor="#000000"
+              style={{ flex: 1, marginLeft: 6 }}
+            />
           </View>
         </View>
         </KeyboardAvoidingView>

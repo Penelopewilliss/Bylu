@@ -18,6 +18,7 @@ import { useCalendarSync } from '../context/CalendarSyncContext';
 import OfflineIndicator from '../components/OfflineIndicator';
 import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
 import NotificationService, { PriorityReminderSettings, DailyAppointmentSettings } from '../services/NotificationService';
+import Button3D from '../components/Button3D';
 
 export default function SettingsScreen() {
   const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime, formatTime } = useTheme();
@@ -686,19 +687,21 @@ export default function SettingsScreen() {
             </View>
             
             <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+              <Button3D
+                title="Cancel"
                 onPress={cancelTimeSelection}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
+                backgroundColor="#FFFFFF"
+                textColor="#000000"
+                style={{ flex: 1, marginRight: 0.5, borderTopLeftRadius: 0, borderBottomLeftRadius: 20, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+              />
               
-              <TouchableOpacity
-                style={[styles.modalButton, styles.confirmButton]}
+              <Button3D
+                title="Set Time"
                 onPress={confirmTimeSelection}
-              >
-                <Text style={styles.confirmButtonText}>Set Time</Text>
-              </TouchableOpacity>
+                backgroundColor="#E8B4C4"
+                textColor="#000000"
+                style={{ flex: 1, marginLeft: 0.5, borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 20 }}
+              />
             </View>
           </View>
         </View>
@@ -825,34 +828,54 @@ const createStyles = (colors: any) => StyleSheet.create({
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)', // More dramatic overlay
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: colors.cardBackground,
+    backgroundColor: colors.cardBackground, // Use theme card background like normal screens
     borderRadius: 20,
     margin: 20,
     width: '90%',
     maxWidth: 400,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    // Enhanced 3D effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 15,
+    borderWidth: 1,
+    borderTopColor: '#F0C7D1',
+    borderBottomColor: '#D1A1B1',
+    borderLeftColor: '#F0C7D1',
+    borderRightColor: '#D1A1B1',
+    transform: [{ perspective: 1000 }, { rotateX: '2deg' }],
   },
   modalHeader: {
     paddingTop: 20,
     paddingHorizontal: 20,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: '#D1A1B1',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: '#E8B4C4', // Keep pink header
+    // 3D header effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: '#000000', // Black text for consistency
     textAlign: 'center',
+    // 3D text effects
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
   },
   timePickerContainer: {
     paddingVertical: 40,
@@ -964,14 +987,29 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: 15,
     alignItems: 'center',
     justifyContent: 'center',
+    // 3D button effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
   },
   cancelButton: {
     borderRightWidth: 1,
-    borderRightColor: colors.border,
+    borderRightColor: '#D1A1B1',
+    backgroundColor: '#FFFFFF',
+    borderBottomLeftRadius: 20,
+    borderTopColor: '#F0F0F0',
+    borderBottomColor: '#D0D0D0',
+    borderLeftColor: '#E0E0E0',
   },
   confirmButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#E8B4C4',
     borderBottomRightRadius: 20,
+    borderTopColor: '#F0C7D1',
+    borderBottomColor: '#D1A1B1',
+    borderRightColor: '#D1A1B1',
   },
   cancelButtonText: {
     fontSize: 16,

@@ -13,6 +13,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
+import Button3D from '../components/Button3D';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { BrainDumpEntry } from '../types';
@@ -302,25 +303,27 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
               onSubmitEditing={handleQuickCapture}
               returnKeyType="done"
             />
-            <TouchableOpacity
-              style={[styles.captureButton, currentThought.trim() ? styles.captureButtonActive : null]}
+            <Button3D
+              title="✨ Capture"
               onPress={handleQuickCapture}
               disabled={!currentThought.trim()}
-            >
-              <Text style={[styles.captureButtonText, currentThought.trim() ? styles.captureButtonTextActive : null]}>✨ Capture</Text>
-            </TouchableOpacity>
+              backgroundColor={currentThought.trim() ? "#E8B4C4" : "#cccccc"}
+              textColor="#000000"
+              size="medium"
+              style={{ alignSelf: 'center', marginTop: 10 }}
+            />
             
             {/* Voice Recording Controls */}
             <View style={styles.voiceSection}>
               <Text style={styles.voiceSectionTitle}>🎤 Voice Memo</Text>
-              <TouchableOpacity
-                style={[styles.voiceButton, isRecording ? styles.voiceButtonRecording : null]}
+              <Button3D
+                title={isRecording ? '⏹️ Stop Recording' : '🎤 Start Recording'}
                 onPress={isRecording ? stopRecording : startRecording}
-              >
-                <Text style={styles.voiceButtonText}>
-                  {isRecording ? '⏹️ Stop Recording' : '🎤 Start Recording'}
-                </Text>
-              </TouchableOpacity>
+                backgroundColor={isRecording ? "#ff6b6b" : "#E8B4C4"}
+                textColor="#000000"
+                size="medium"
+                style={{ alignSelf: 'center', marginTop: 10 }}
+              />
               {isRecording && (
                 <Text style={styles.recordingIndicator}>🔴 Recording...</Text>
               )}
@@ -351,17 +354,17 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
                       <Text style={styles.voiceDuration}>{formatDuration(entry.duration)}</Text>
                     )}
                   </View>
-                  <TouchableOpacity
-                    style={[styles.playButton, playingId === entry.id ? styles.playButtonActive : null]}
-                    onPress={() => playVoiceMemo(entry)}
-                  >
-                    <Text style={styles.playButtonText}>
-                      {playingId === entry.id 
+                  <Button3D
+                    title={playingId === entry.id 
                         ? (isPlaying ? '⏸️ Pause' : '▶️ Resume') 
                         : '▶️ Play'
                       }
-                    </Text>
-                  </TouchableOpacity>
+                    onPress={() => playVoiceMemo(entry)}
+                    backgroundColor={playingId === entry.id ? "#90EE90" : "#E8B4C4"}
+                    textColor="#000000"
+                    size="small"
+                    style={{ alignSelf: 'center', marginTop: 5 }}
+                  />
                 </View>
               ) : (
                 // Regular text thought display

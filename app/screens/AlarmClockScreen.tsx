@@ -5,6 +5,7 @@ import { Audio } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { AlarmNotificationService } from '../services/AlarmNotificationService';
+import Button3D from '../components/Button3D';
 import type { Alarm } from '../types';
 
 interface AlarmClockScreenProps {
@@ -463,59 +464,69 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Add Custom Alarm Button */}
         <View style={styles.addCustomSection}>
-          <TouchableOpacity style={styles.addCustomButton} onPress={handleAddAlarm}>
-            <Text style={styles.addCustomButtonText}>+ Add Custom Alarm</Text>
-          </TouchableOpacity>
+          <Button3D 
+            title="+ Add Custom Alarm"
+            onPress={handleAddAlarm}
+            backgroundColor="#E8B4C4"
+            textColor="#000000"
+            size="large"
+          />
         </View>
         
         {/* Quick Alarm Buttons */}
         <View style={styles.quickAlarmsSection}>
           <Text style={styles.sectionTitle}>Quick Alarms</Text>
           <View style={styles.quickAlarmsGrid}>
-            <TouchableOpacity 
-              style={styles.quickAlarmButton}
+            <Button3D
+              title={`${getQuickAlarmDisplayTime('07:00')}\nMorning`}
               onPress={() => createQuickAlarm('07:00', '🌅 Morning Routine')}
-            >
-              <Text style={styles.quickAlarmTime}>{getQuickAlarmDisplayTime('07:00')}</Text>
-              <Text style={styles.quickAlarmLabel}>Morning</Text>
-            </TouchableOpacity>
+              backgroundColor="#FFFFFF"
+              textColor="#000000"
+              size="medium"
+              style={{ flex: 1, marginRight: 8 }}
+            />
             
-            <TouchableOpacity 
-              style={styles.quickAlarmButton}
+            <Button3D
+              title={`${getQuickAlarmDisplayTime('08:00')}\nWork`}
               onPress={() => createQuickAlarm('08:00', '💼 Work Time')}
-            >
-              <Text style={styles.quickAlarmTime}>{getQuickAlarmDisplayTime('08:00')}</Text>
-              <Text style={styles.quickAlarmLabel}>Work</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.quickAlarmButton}
+              backgroundColor="#FFFFFF"
+              textColor="#000000"
+              size="medium"
+              style={{ flex: 1, marginLeft: 8 }}
+            />
+          </View>
+          
+          <View style={styles.quickAlarmsGrid}>
+            <Button3D
+              title={`${getQuickAlarmDisplayTime('12:00')}\nLunch`}
               onPress={() => createQuickAlarm('12:00', '🍽️ Lunch Break')}
-            >
-              <Text style={styles.quickAlarmTime}>{getQuickAlarmDisplayTime('12:00')}</Text>
-              <Text style={styles.quickAlarmLabel}>Lunch</Text>
-            </TouchableOpacity>
+              backgroundColor="#FFFFFF"
+              textColor="#000000"
+              size="medium"
+              style={{ flex: 1, marginRight: 8 }}
+            />
             
-            <TouchableOpacity 
-              style={styles.quickAlarmButton}
+            <Button3D
+              title={`${getQuickAlarmDisplayTime('22:00')}\nSleep`}
               onPress={() => createQuickAlarm('22:00', '🌙 Bedtime')}
-            >
-              <Text style={styles.quickAlarmTime}>{getQuickAlarmDisplayTime('22:00')}</Text>
-              <Text style={styles.quickAlarmLabel}>Sleep</Text>
-            </TouchableOpacity>
+              backgroundColor="#FFFFFF"
+              textColor="#000000"
+              size="medium"
+              style={{ flex: 1, marginLeft: 8 }}
+            />
           </View>
           
           {/* Sound Selector */}
           <View style={styles.soundSelectorContainer}>
             <Text style={styles.soundSelectorLabel}>Quick Alarm Sound:</Text>
-            <TouchableOpacity 
-              style={styles.soundSelectorButton}
+            <Button3D
+              title={getSoundDisplayName(quickAlarmSound)}
               onPress={() => setShowSoundSelector(true)}
-            >
-              <Text style={styles.soundSelectorText}>
-                {getSoundDisplayName(quickAlarmSound)}
-              </Text>
-            </TouchableOpacity>
+              backgroundColor="#FFFFFF"
+              textColor="#000000"
+              size="medium"
+              style={{ marginTop: 10 }}
+            />
           </View>
         </View>
 
@@ -790,15 +801,21 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
 
               {/* Modal Buttons */}
               <View style={[styles.modalButtons, { paddingBottom: Math.max(20, insets.bottom + 16) }]}>
-                <TouchableOpacity style={styles.cancelButton} onPress={handleCancelModal}>
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
+                <Button3D 
+                  title="Cancel"
+                  onPress={handleCancelModal}
+                  backgroundColor="#FFFFFF"
+                  textColor="#000000"
+                  style={{ flex: 1, marginRight: 6 }}
+                />
                 
-                <TouchableOpacity style={styles.saveButton} onPress={handleSaveCustomAlarm}>
-                  <Text style={styles.saveButtonText}>
-                    {editingAlarm ? 'Update Alarm' : 'Save Alarm'}
-                  </Text>
-                </TouchableOpacity>
+                <Button3D 
+                  title={editingAlarm ? 'Update Alarm' : 'Save Alarm'}
+                  onPress={handleSaveCustomAlarm}
+                  backgroundColor="#E8B4C4"
+                  textColor="#000000"
+                  style={{ flex: 1, marginLeft: 6 }}
+                />
               </View>
             </ScrollView>
           </View>
@@ -1082,36 +1099,75 @@ const createStyles = (colors: any) => StyleSheet.create({
   // Modal styles
   modalContainer: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background, // Use theme background like normal screens
+    // 3D enhancement
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 15,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderTopColor: '#F0C7D1',
+    borderLeftColor: '#F0C7D1',
+    borderRightColor: '#D1A1B1',
+    transform: [{ rotateX: '-2deg' }],
   },
   modalHeader: {
-    backgroundColor: colors.cardBackground,
+    backgroundColor: '#E8B4C4', // Keep pink header
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: '#D1A1B1',
     alignItems: 'center',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    // 3D header effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F0C7D1',
   },
   modalHandle: {
     width: 40,
     height: 4,
-    backgroundColor: colors.textSecondary,
+    backgroundColor: '#D1A1B1', // Use theme color
     borderRadius: 2,
-    opacity: 0.5,
+    opacity: 0.8,
     marginBottom: 15,
+    // 3D handle effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+    borderTopWidth: 1,
+    borderTopColor: '#F0C7D1',
+    borderBottomWidth: 1,
+    borderBottomColor: '#B8A1B1',
   },
   modalContent: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background, // Use theme background like normal screens
     padding: 20,
   },
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
+    color: '#000000', // Black text for consistency
     textAlign: 'center',
     marginBottom: 25,
+    // 3D text effects
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
   },
   // Time Picker Styles
   timePickerSection: {

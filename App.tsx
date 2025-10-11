@@ -622,16 +622,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F7D1DA', // Light pink
+    backgroundColor: '#E8B4C4', // Match the action card color
     paddingHorizontal: 16,
     paddingVertical: 12, // Increased back up for larger text
     paddingTop: 45, // Increased for larger text
-    borderBottomWidth: 0, // Remove border for cleaner look
+    // Enhanced 3D shadow effects like action cards
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 12,
+    // 3D beveled borders like action cards
+    borderBottomWidth: 3,
+    borderBottomColor: '#D1A1B1', // Darker bottom edge for 3D effect
   },
   currentTab: {
     flex: 1,
@@ -646,11 +649,15 @@ const styles = StyleSheet.create({
   },
   currentTabLabel: {
     fontSize: 28, // Increased from 18 to much bigger
-    fontWeight: '300', // Light weight for elegant look
-    color: '#2D2D2D',
+    fontWeight: '700', // Bolder weight for 3D effect
+    color: '#000000', // Black text like action cards
+    // Enhanced 3D text shadow effects
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
+    letterSpacing: 0.8, // Better spacing for 3D appearance
     fontFamily: 'serif', // Elegant serif font
     fontStyle: 'italic', // Add italic for handwritten feel
-    letterSpacing: 1,
     textAlign: 'center',
   },
   spacer: {
@@ -686,22 +693,31 @@ const styles = StyleSheet.create({
   // Modal and Dropdown Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)', // Darker overlay for more dramatic effect
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
   },
   dropdownMenu: {
-    backgroundColor: '#F7D1DA', // Match the pink header
+    backgroundColor: '#E8B4C4', // Match the action card color
     marginTop: 85, // Position perfectly below top bar
     marginRight: 0, // Align with screen edge
     minWidth: 180, // Slightly wider for better text spacing
-    shadowColor: '#C2185B', // Pink shadow
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
+    // Enhanced 3D shadow effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
     shadowRadius: 12,
-    elevation: 10,
-    borderWidth: 1,
-    borderColor: '#F0B7C4', // Subtle pink border
+    elevation: 12,
+    // 3D beveled borders
+    borderTopWidth: 2,
+    borderTopColor: '#F0C7D1',
+    borderLeftWidth: 2,
+    borderLeftColor: '#F0C7D1',
+    borderRightWidth: 2,
+    borderRightColor: '#D1A1B1',
+    borderBottomWidth: 2,
+    borderBottomColor: '#D1A1B1',
+    borderRadius: 12,
   },
   menuItem: {
     flexDirection: 'row',
@@ -709,12 +725,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, // More padding for better touch area
     paddingVertical: 16, // Increased vertical padding
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(194, 24, 91, 0.1)', // Very subtle pink separator
+    borderBottomColor: 'rgba(209, 161, 177, 0.3)', // Subtle pink separator
+    // Slight 3D effect
+    backgroundColor: 'transparent',
   },
   activeMenuItem: {
-    backgroundColor: '#F5A3B7', // Darker pink for active state
+    backgroundColor: '#D1A1B1', // Darker pink for active state
     marginHorizontal: 8, // Inset the active item
     marginVertical: 2, // Small margin for floating effect
+    borderRadius: 8,
+    // Enhanced 3D effect for active item
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   lastMenuItem: {
     borderBottomWidth: 0, // Remove border from last item
@@ -722,15 +747,20 @@ const styles = StyleSheet.create({
   menuEmoji: {
     fontSize: 18, // Slightly larger emoji
     marginRight: 14, // More space between emoji and text
-    textShadowColor: 'rgba(255, 255, 255, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
+    // Enhanced 3D text shadow
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   menuLabel: {
     fontSize: 15, // Slightly larger text
-    fontWeight: '600', // Bolder text
-    color: '#8E1538', // Darker pink for better contrast
-    letterSpacing: 0.3, // Slight letter spacing for elegance
+    fontWeight: '700', // Bolder text for 3D effect
+    color: '#000000', // Black text for better contrast
+    letterSpacing: 0.5, // Better spacing for 3D appearance
+    // Enhanced 3D text shadow
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   // Legacy tab bar styles (to be removed)
   tabBar: {
@@ -763,14 +793,24 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#F7D1DA', // Match the pink header color
+    backgroundColor: '#E8B4C4', // Match the action card color
     justifyContent: 'center',
     alignItems: 'center',
+    // Enhanced 3D shadow effects
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 12,
+    // 3D beveled borders
+    borderTopWidth: 2,
+    borderTopColor: '#F0C7D1',
+    borderLeftWidth: 2,
+    borderLeftColor: '#F0C7D1',
+    borderRightWidth: 2,
+    borderRightColor: '#D1A1B1',
+    borderBottomWidth: 2,
+    borderBottomColor: '#D1A1B1',
     borderWidth: 2,
     borderColor: '#fff', // White border for contrast
   },
@@ -780,7 +820,11 @@ const styles = StyleSheet.create({
   },
   floatingHomeIcon: {
     fontSize: 20,
-    color: '#2D2D2D', // Dark color to match header icons
+    color: '#000000', // Black color to match other elements
     fontWeight: 'bold',
+    // Enhanced 3D text shadow
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
   },
 });

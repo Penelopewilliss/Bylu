@@ -18,6 +18,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import Fonts from '../constants/fonts';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import Button3D from '../components/Button3D';
 import type { Goal, MicroTask } from '../types';
 
 const { width } = Dimensions.get('window');
@@ -177,12 +178,13 @@ export default function GoalsScreen({ deepLink, onDeepLinkHandled }: { deepLink?
         <>
           {/* Add Goal Button - At the top in empty state */}
           <View style={styles.addButtonContainer}>
-            <TouchableOpacity
-              style={styles.addButton}
+            <Button3D
+              title="+ Add Goal"
               onPress={openAddModal}
-            >
-              <Text style={styles.addButtonText}>+ Add Goal</Text>
-            </TouchableOpacity>
+              backgroundColor="#E8B4C4"
+              textColor="#000000"
+              size="medium"
+            />
           </View>
           
           <View style={styles.emptyState}>
@@ -201,12 +203,13 @@ export default function GoalsScreen({ deepLink, onDeepLinkHandled }: { deepLink?
         >
           {/* Add Goal Button - At the top when there are goals */}
           <View style={styles.addButtonContainer}>
-            <TouchableOpacity
-              style={styles.addButton}
+            <Button3D
+              title="+ Add Goal"
               onPress={openAddModal}
-            >
-              <Text style={styles.addButtonText}>+ Add Goal</Text>
-            </TouchableOpacity>
+              backgroundColor="#E8B4C4"
+              textColor="#000000"
+              size="medium"
+            />
           </View>
 
           {goals.map((goal) => {
@@ -257,25 +260,25 @@ export default function GoalsScreen({ deepLink, onDeepLinkHandled }: { deepLink?
 
               {/* Goal Actions - Edit and Delete buttons */}
               <View style={styles.goalActions}>
-                <TouchableOpacity
-                  style={styles.editButton}
+                <Button3D
+                  title="Edit"
                   onPress={() => editGoal(goal)}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
-                >
-                  <Text style={styles.editButtonText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.deleteButton}
+                  backgroundColor="#FFFFFF"
+                  textColor="#000000"
+                  size="small"
+                  style={{ flex: 1, marginRight: 6 }}
+                />
+                <Button3D
+                  title="🗑️"
                   onPress={() => {
                     console.log('Delete button pressed for goal:', goal.id);
                     handleDeleteGoal(goal.id, goal.title);
                   }}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Text style={styles.deleteIcon}>🗑️</Text>
-                </TouchableOpacity>
+                  backgroundColor="#FFFFFF"
+                  textColor="#000000"
+                  size="small"
+                  style={{ width: 44, marginLeft: 6 }}
+                />
               </View>
             </View>
           );
@@ -333,12 +336,14 @@ export default function GoalsScreen({ deepLink, onDeepLinkHandled }: { deepLink?
                   placeholderTextColor={colors.placeholderText}
                   onSubmitEditing={addTempMicroTask}
                 />
-                <TouchableOpacity
-                  style={styles.addTaskButton}
+                <Button3D
+                  title="Add"
                   onPress={addTempMicroTask}
-                >
-                  <Text style={styles.addTaskButtonText}>Add</Text>
-                </TouchableOpacity>
+                  backgroundColor="#E8B4C4"
+                  textColor="#000000"
+                  size="small"
+                  style={{ marginLeft: 8 }}
+                />
               </View>
 
               {tempMicroTasks.map((task, index) => (
@@ -388,18 +393,20 @@ export default function GoalsScreen({ deepLink, onDeepLinkHandled }: { deepLink?
           
           {/* Bottom Button Container */}
           <View style={[styles.modalButtonContainer, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
-            <TouchableOpacity
-              style={styles.cancelButton}
+            <Button3D
+              title="Cancel"
               onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.saveButton}
+              backgroundColor="#FFFFFF"
+              textColor="#000000"
+              style={{ flex: 1, marginRight: 4 }}
+            />
+            <Button3D
+              title="Save"
               onPress={saveGoal}
-            >
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
+              backgroundColor="#E8B4C4"
+              textColor="#000000"
+              style={{ flex: 1, marginLeft: 4 }}
+            />
           </View>
         </View>
         </KeyboardAvoidingView>
@@ -596,7 +603,22 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background, // Use theme background like normal screens
+    // 3D enhancement
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 15,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderTopColor: '#F0C7D1',
+    borderLeftColor: '#F0C7D1',
+    borderRightColor: '#D1A1B1',
+    transform: [{ rotateX: '-2deg' }],
   },
   modalHeader: {
     flexDirection: 'row',
@@ -605,23 +627,47 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: '#D1A1B1',
+    backgroundColor: '#E8B4C4', // Keep pink header
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    // 3D header effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F0C7D1',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
+    color: '#000000', // Black text for consistency
+    // 3D text effects
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
   },
   cancelButton: {
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginRight: 8,
-    backgroundColor: colors.cardBackground,
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     alignItems: 'center',
+    // 3D button effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderTopColor: '#F0F0F0',
+    borderBottomColor: '#D0D0D0',
+    borderLeftColor: '#E0E0E0',
+    borderRightColor: '#E0E0E0',
   },
   cancelButtonText: {
     color: colors.textSecondary,
@@ -633,9 +679,20 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginLeft: 8,
-    backgroundColor: colors.primary,
+    backgroundColor: '#E8B4C4',
     borderRadius: 8,
     alignItems: 'center',
+    // 3D button effects
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderTopColor: '#F0C7D1',
+    borderBottomColor: '#D1A1B1',
+    borderLeftColor: '#E8B4C4',
+    borderRightColor: '#D1A1B1',
   },
   saveButtonText: {
     color: colors.buttonText,

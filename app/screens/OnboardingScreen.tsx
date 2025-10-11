@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useCalendarSync } from '../context/CalendarSyncContext';
 import { useTheme } from '../context/ThemeContext';
+import Button3D from '../components/Button3D';
 import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
 
 const { width } = Dimensions.get('window');
@@ -310,22 +311,37 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
         <View style={styles.buttons}>
           {currentPage > 0 ? (
-            <TouchableOpacity style={styles.backButton} onPress={goToPrevious}>
-              <Text style={styles.backButtonText}>Back</Text>
-            </TouchableOpacity>
+            <Button3D 
+              title="Back"
+              onPress={goToPrevious}
+              backgroundColor="#FFFFFF"
+              textColor="#000000"
+              size="medium"
+              style={{ flex: 1, marginRight: 8 }}
+            />
           ) : (
             <View style={styles.spacer} />
           )}
           
           {currentPage === pages.length - 1 ? (
             // Last page - Get Started
-            <TouchableOpacity style={styles.nextButton} onPress={onComplete}>
-              <Text style={styles.nextButtonText}>Get Started</Text>
-            </TouchableOpacity>
+            <Button3D 
+              title="Get Started"
+              onPress={onComplete}
+              backgroundColor="#E8B4C4"
+              textColor="#000000"
+              size="medium"
+              style={{ flex: 1, marginLeft: 8 }}
+            />
           ) : (
-            <TouchableOpacity style={styles.nextButton} onPress={goToNext}>
-              <Text style={styles.nextButtonText}>Next</Text>
-            </TouchableOpacity>
+            <Button3D 
+              title="Next"
+              onPress={goToNext}
+              backgroundColor="#E8B4C4"
+              textColor="#000000"
+              size="medium"
+              style={{ flex: 1, marginLeft: 8 }}
+            />
           )}
         </View>
       </View>

@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useApp } from '../context/AppContext';
 import { useOffline } from '../context/OfflineContext';
 import { Category } from '../types';
+import Button3D from '../components/Button3D';
 
 // Category emoji mapping (matching TasksScreen)
 const TASK_CATEGORIES: Record<Category, { emoji: string; label: string; color: string }> = {
@@ -152,8 +153,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
         {/* Cloud and Pink Line Container */}
         <View style={styles.cloudLineContainer}>
           {/* Quick Thought Cloud Button - Positioned Right */}
-          <TouchableOpacity 
-            style={styles.quickThoughtCloud}
+          <TouchableOpacity
             onPress={async () => {
               if (showCloudTutorial) {
                 // First time clicking - save to storage and hide tutorial permanently
@@ -167,6 +167,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
               setShowDailyInspiration(!showDailyInspiration);
               onNavigate?.('BrainDump'); // Navigate to BrainDump page
             }}
+            style={styles.quickThoughtCloud}
           >
             <Text style={styles.cloudIcon}>💭</Text>
           </TouchableOpacity>
@@ -221,12 +222,13 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
           )}
           
           {/* Add Button - Bottom Right */}
-          <TouchableOpacity 
-            style={styles.addButton}
+          <Button3D
+            title="+ Add"
+            size="small"
+            backgroundColor="#E8B4C4"
             onPress={() => onNavigate?.('Calendar')}
-          >
-            <Text style={styles.addButtonText}>+ Add</Text>
-          </TouchableOpacity>
+            style={{ position: 'absolute', bottom: 16, right: 16 }}
+          />
         </View>
       </View>
 
@@ -292,12 +294,13 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
           )}
           
           {/* Add Button - Bottom Right */}
-          <TouchableOpacity 
-            style={styles.addButton}
+          <Button3D 
+            title="+ Add"
             onPress={() => onNavigate?.('Tasks')}
-          >
-            <Text style={styles.addButtonText}>+ Add</Text>
-          </TouchableOpacity>
+            backgroundColor="#E8B4C4"
+            textColor="#000000"
+            size="small"
+          />
         </View>
       </View>
 
@@ -349,12 +352,13 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
           )}
           
           {/* Add Button - Bottom Right */}
-          <TouchableOpacity 
-            style={styles.addButton}
+          <Button3D 
+            title="+ Add"
             onPress={() => onNavigate?.('Goals')}
-          >
-            <Text style={styles.addButtonText}>+ Add</Text>
-          </TouchableOpacity>
+            backgroundColor="#E8B4C4"
+            textColor="#000000"
+            size="small"
+          />
         </View>
       </View>
 

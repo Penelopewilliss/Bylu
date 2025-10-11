@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import LottieView from 'lottie-react-native';
+import ActionLottie from '../components/ActionLottie';
+import CalendarIcon from '../components/CalendarIcon';
 
 interface HomeScreenProps {
   onNavigate?: (screen: string) => void;
@@ -56,7 +58,7 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
     },
     {
       title: 'Add Appointment',
-      emoji: '📅',
+      customIcon: 'calendar',
       description: 'Create calendar event',
       action: () => navigateWithModal('Calendar', 'add-appointment'),
       color: '#4ECDC4'
@@ -107,73 +109,99 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Quick Actions Grid */}
-        <View style={styles.actionsGrid}>
-          {quickActions.map((action, index) => (
-            <TouchableOpacity 
-              key={index}
-              style={styles.actionCard}
-              onPress={action.action}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.actionEmoji}>{action.emoji}</Text>
-              <Text style={styles.actionTitle}>{action.title}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* 🎨 Lottie Floating Animation */}
+      {/* 🎨 Full Screen Lottie Background Animation */}
+      <View style={StyleSheet.absoluteFillObject}>
         <LottieView
           source={require('../../assets/lottie/floating-animation.json')}
           autoPlay
           loop
-          speed={0.6}
+          speed={0.3}
           style={{
-            position: 'absolute',
-            bottom: -50,
-            left: 0,
-            right: 0,
-            height: 150,
-            pointerEvents: 'none',
-            opacity: 0.8,
+            flex: 1,
+            opacity: 0.2,
           }}
           resizeMode="cover"
         />
-
-        {/* Original Particles Animation - Commented Out
-        <View style={styles.particlesContainer}>
-          {particles.map((particle) => (
-            <Animated.View
-              key={particle.id}
-              style={[
-                styles.particle,
+      </View>
+      
+      <ScrollView style={[styles.content, { zIndex: 10 }]} showsVerticalScrollIndicator={false}>
+        {/* Quick Actions Grid */}
+        <View style={styles.actionsGrid}>
+          {quickActions.map((action, index) => (
+            <Pressable 
+              key={index}
+              onPress={action.action}
+              style={({ pressed }) => [
+                styles.actionCard,
                 {
-                  left: particle.xPosition,
-                  opacity: particle.animatedValue.interpolate({
-                    inputRange: [0, 0.1, 0.9, 1],
-                    outputRange: [0, 0.8, 0.8, 0],
-                  }),
-                  transform: [
-                    {
-                      translateY: particle.animatedValue.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [150, -20], // Start from below, float gently upward
-                      }),
-                    },
-                    {
-                      scale: particle.animatedValue.interpolate({
-                        inputRange: [0, 0.5, 1],
-                        outputRange: [0.3, 1, 0.3],
-                      }),
-                    },
-                  ],
-                },
+                  // 3D Gradient Background Effect  
+                  backgroundColor: pressed ? '#D1A1B1' : '#E8B4C4', // Use theme primary color
+                  // Enhanced 3D Beveled Borders
+                  borderTopWidth: 4,
+                  borderTopColor: '#F0C7D1', // Lighter version of primary
+                  borderLeftWidth: 3,
+                  borderLeftColor: '#F0C7D1', // Lighter left edge 
+                  borderRightWidth: 2,
+                  borderRightColor: '#D1A1B1', // Darker right edge (shadow)
+                  borderBottomWidth: 2,
+                  borderBottomColor: '#D1A1B1', // Darker bottom edge (shadow)
+                  // 3D press effect with more dramatic transforms
+                  transform: pressed 
+                    ? [
+                        { perspective: 1200 },
+                        { rotateX: '8deg' },
+                        { rotateY: '2deg' },
+                        { scale: 0.92 },
+                        { translateY: 6 }
+                      ]
+                    : [
+                        { perspective: 1200 },
+                        { rotateX: '4deg' },
+                        { rotateY: '1deg' },
+                        { scale: 1 },
+                        { translateY: 0 }
+                      ],
+                  // More dramatic shadow changes
+                  shadowOffset: pressed 
+                    ? { width: 2, height: 8 }
+                    : { width: 0, height: 20 },
+                  shadowOpacity: pressed ? 0.2 : 0.4,
+                  shadowRadius: pressed ? 8 : 25,
+                  elevation: pressed ? 8 : 25,
+                }
               ]}
-            />
+            >
+              {/* Inner 3D Container for depth effect */}
+              <View style={{
+                flex: 1,
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 24,
+                // Inner highlight/shadow effect
+                borderTopWidth: 1,
+                borderTopColor: 'rgba(255, 255, 255, 0.4)', // Inner highlight
+                borderLeftWidth: 1,
+                borderLeftColor: 'rgba(255, 255, 255, 0.3)', // Inner left highlight
+                borderRightWidth: 1,
+                borderRightColor: 'rgba(0, 0, 0, 0.1)', // Inner right shadow
+                borderBottomWidth: 1,
+                borderBottomColor: 'rgba(0, 0, 0, 0.1)', // Inner bottom shadow
+                // Subtle inner gradient effect
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              }}>
+                {(action as any).animation ? (
+                  <ActionLottie source={(action as any).animation} size={36} speed={1} />
+                ) : (action as any).customIcon === 'calendar' ? (
+                  <CalendarIcon size={36} color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.actionEmoji}>{(action as any).emoji}</Text>
+                )}
+                <Text style={styles.actionTitle}>{action.title}</Text>
+              </View>
+            </Pressable>
           ))}
         </View>
-        */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -212,41 +240,74 @@ const createStyles = (colors: any) => StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
+    zIndex: 5, // Ensure grid is above background
   },
   actionCard: {
     backgroundColor: colors.cardBackground,
     width: '40%',
     aspectRatio: 1,
-    borderRadius: 100,
-    marginBottom: 12,
+    borderRadius: 28, // Even more rounded for modern 3D look
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: colors.border,
+    // Enhanced 3D Shadow Effects
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 15, // Much deeper shadow for 3D effect
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.35, // More pronounced shadow
+    shadowRadius: 20, // Softer, more spread out blur
+    elevation: 20, // Higher elevation for Android
+    // 3D Transform Effect
+    transform: [
+      { perspective: 1200 },
+      { rotateX: '3deg' }, // More pronounced 3D tilt
+      { rotateY: '1deg' }, // Slight Y rotation for depth
+    ],
+    // Gradient-like border effect for 3D appearance
+    borderTopWidth: 3,
+    borderTopColor: '#FFB6C1', // Light pink top border
+    borderLeftWidth: 2,
+    borderLeftColor: '#FFB6C160', // Semi-transparent light pink left border
+    borderRightWidth: 1,
+    borderRightColor: '#FFB6C130', // Even more subtle right border
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#FFB6C120', // Very subtle bottom border
+    // Inner content styling
     alignItems: 'center',
     justifyContent: 'center',
+    // Ensure cards are above background
+    zIndex: 10,
+    // Subtle background gradient effect
+    overflow: 'hidden',
   },
   actionHeader: {
     alignItems: 'center',
     marginBottom: 6,
   },
   actionEmoji: {
-    fontSize: 24,
-    marginBottom: 4,
+    fontSize: 36, // Even larger emoji for more impact
+    marginBottom: 10,
+    // Enhanced 3D text shadow effect
+    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowOffset: { width: 2, height: 4 },
+    textShadowRadius: 6,
+    // Enhanced transform for more depth
+    transform: [{ scale: 1.15 }],
   },
   actionTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.text,
+    fontSize: 14, // Slightly larger text for better readability
+    fontWeight: '700', // Bolder text
+    color: '#000000', // Black text for better contrast on pink cards
     fontFamily: 'Montserrat-SemiBold',
     textAlign: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
+    // Enhanced text shadow for stronger 3D effect
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
+    letterSpacing: 0.8, // Better spacing for 3D appearance
   },
   welcomeSection: {
     backgroundColor: colors.cardBackground,
