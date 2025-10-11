@@ -1,57 +1,41 @@
 // Sound configuration for notifications and alarms
 // Add your .wav or .mp3 files to /assets/sounds/ with these exact names
 
+// SIMPLIFIED - Just 10 alarm sounds
 export const NOTIFICATION_SOUNDS = {
-  // Epic & Motivational
-  COSMIC_AWAKENING: 'cosmic_awakening',
-  CHAMPION_RISE: 'champion_rise',
-  POWER_SURGE: 'power_surge',
-  
-  // Musical & Melodic
-  CRYSTAL_HARMONY: 'crystal_harmony',
-  ROYAL_FANFARE: 'royal_fanfare',
-  ZEN_BELLS: 'zen_bells',
-  
-  // Nature & Ambient
-  MYSTIC_FOREST: 'mystic_forest',
-  OCEAN_SUNRISE: 'ocean_sunrise',
-  MOUNTAIN_BREEZE: 'mountain_breeze',
-  
-  // Modern & Tech
-  FUTURE_PULSE: 'future_pulse',
-  DIGITAL_DAWN: 'digital_dawn',
-  QUANTUM_CHIME: 'quantum_chime',
-  
-  // Funny & Hilarious
-  ROOSTER_OPERA: 'rooster_opera',
-  ALIEN_INVASION: 'alien_invasion',
-  GRANDMOTHER_YELLING: 'grandmother_yelling',
-  CAT_PIANO: 'cat_piano',
-  RUBBER_DUCK: 'rubber_duck',
-  PIRATE_WAKE_UP: 'pirate_wake_up',
-  BABY_ELEPHANT: 'baby_elephant',
-  DISCO_CHICKEN: 'disco_chicken',
-  ROBOT_MALFUNCTION: 'robot_malfunction',
-  SNORING_BEAR: 'snoring_bear',
-  CHIPMUNK_CHAOS: 'chipmunk_chaos',
-  MOM_VOICE: 'mom_voice',
-  SCREAMING_GOAT: 'screaming_goat',
-  DRAMATIC_LLAMA: 'dramatic_llama',
-  SINGING_FROG: 'singing_frog',
-  
-  // Classic Options
-  GENTLE_CHIMES: 'gentle_chimes',
-  SOFT_PIANO: 'soft_piano',
+  // Loud Alarms
   CLASSIC_BELL: 'classic_bell',
+  DIGITAL_BEEP: 'digital_beep',
+  ELECTRONIC_ALARM: 'electronic_alarm',
+  
+  // Pleasant Alarms
+  GENTLE_CHIMES: 'gentle_chimes',
+  PIANO_MELODY: 'piano_melody',
+  SOFT_BELLS: 'soft_bells',
+  
+  // Nature Alarms
+  BIRDS_CHIRPING: 'birds_chirping',
+  OCEAN_WAVES: 'ocean_waves',
+  
+  // Fun Alarms
+  FANFARE: 'fanfare',
+  ROOSTER: 'rooster',
 };
 
 // Map of sound keys to their require() statements
-// Uncomment when you add the actual .wav files to /assets/sounds/
+// When you download MP3 files from Pixabay and add them to /assets/sounds/, uncomment these:
 export const SOUND_FILES: { [key: string]: any } = {
-  // When you add sound files, uncomment and update like this:
-  // [NOTIFICATION_SOUNDS.COSMIC_AWAKENING]: require('../../assets/sounds/cosmic_awakening.wav'),
-  // [NOTIFICATION_SOUNDS.GENTLE_CHIMES]: require('../../assets/sounds/gentle_chimes.wav'),
-  // ... add all your sounds here
+  // Uncomment when you add the MP3 files:
+  // [NOTIFICATION_SOUNDS.CLASSIC_BELL]: require('../../assets/sounds/classic_bell.mp3'),
+  // [NOTIFICATION_SOUNDS.DIGITAL_BEEP]: require('../../assets/sounds/digital_beep.mp3'),
+  // [NOTIFICATION_SOUNDS.ELECTRONIC_ALARM]: require('../../assets/sounds/electronic_alarm.mp3'),
+  // [NOTIFICATION_SOUNDS.GENTLE_CHIMES]: require('../../assets/sounds/gentle_chimes.mp3'),
+  // [NOTIFICATION_SOUNDS.PIANO_MELODY]: require('../../assets/sounds/piano_melody.mp3'),
+  // [NOTIFICATION_SOUNDS.SOFT_BELLS]: require('../../assets/sounds/soft_bells.mp3'),
+  // [NOTIFICATION_SOUNDS.BIRDS_CHIRPING]: require('../../assets/sounds/birds_chirping.mp3'),
+  // [NOTIFICATION_SOUNDS.OCEAN_WAVES]: require('../../assets/sounds/ocean_waves.mp3'),
+  // [NOTIFICATION_SOUNDS.FANFARE]: require('../../assets/sounds/fanfare.mp3'),
+  // [NOTIFICATION_SOUNDS.ROOSTER]: require('../../assets/sounds/rooster.mp3'),
 };
 
 // Helper function to check if sound file exists
