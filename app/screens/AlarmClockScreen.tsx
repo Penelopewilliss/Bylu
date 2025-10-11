@@ -117,7 +117,10 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
     { key: 'singing_frog', name: '🐸 Singing Frog', description: 'Frog attempting to sing opera (badly)', duration: 3500 },
   ];
 
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // Display days starting with Monday (but keep Sunday=0 indexing internally)
+  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S']; // Sun, Mon, Tue, Wed, Thu, Fri, Sat
+  const dayOrder = [1, 2, 3, 4, 5, 6, 0]; // Monday to Sunday display order
+  const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S']; // Single letters starting with Monday
   const snoozeOptions = [5, 10, 15, 20, 30];
 
   const handleAddAlarm = () => {
@@ -211,7 +214,7 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
     if (repeatDays.length === 0) return 'One time';
     if (repeatDays.length === 7) return 'Every day';
     
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     return repeatDays.map(day => dayNames[day]).join(', ');
   };
 
@@ -710,16 +713,34 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
               <View style={styles.daysSection}>
                 <Text style={styles.inputLabel}>Repeat Days</Text>
                 <View style={styles.daysGrid}>
-                  {dayNames.map((day, index) => (
-                    <Button3D
-                      key={index}
-                      title={day}
-                      onPress={() => toggleDay(index)}
-                      backgroundColor={selectedDays.includes(index) ? "#E8B4C4" : "#FFFFFF"}
-                      textColor="#000000"
-                      size="small"
-                      style={{ minWidth: 44, marginHorizontal: 2 }}
-                    />
+                  {dayOrder.map((dayIndex, displayIndex) => (
+                    <TouchableOpacity
+                      key={dayIndex}
+                      onPress={() => toggleDay(dayIndex)}
+                      style={{ 
+                        flex: 1,
+                        marginHorizontal: 3,
+                        height: 35,
+                        width: 35,
+                        backgroundColor: selectedDays.includes(dayIndex) ? "#E8B4C4" : "#FFFFFF",
+                        borderRadius: 18,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderWidth: 1.5,
+                        borderColor: selectedDays.includes(dayIndex) ? "#D8A4B4" : "#E0E0E0"
+                      }}
+                    >
+                      <Text style={{
+                        fontSize: 14,
+                        fontWeight: 'bold',
+                        color: '#000000',
+                        textAlign: 'center'
+                      }}
+                      numberOfLines={1}
+                      >
+                        {dayLabels[displayIndex]}
+                      </Text>
+                    </TouchableOpacity>
                   ))}
                 </View>
                 <Text style={styles.daysHint}>
@@ -746,15 +767,31 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
                     <Text style={styles.snoozeLabel}>Snooze interval (minutes)</Text>
                     <View style={styles.snoozeGrid}>
                       {snoozeOptions.map(interval => (
-                        <Button3D
+                        <TouchableOpacity
                           key={interval}
-                          title={interval.toString()}
                           onPress={() => setSnoozeInterval(interval)}
-                          backgroundColor={snoozeInterval === interval ? "#E8B4C4" : "#FFFFFF"}
-                          textColor="#000000"
-                          size="small"
-                          style={{ minWidth: 50, marginHorizontal: 4 }}
-                        />
+                          style={{ 
+                            marginHorizontal: 3,
+                            height: 35,
+                            minWidth: 45,
+                            paddingHorizontal: 8,
+                            backgroundColor: snoozeInterval === interval ? "#E8B4C4" : "#FFFFFF",
+                            borderRadius: 18,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderWidth: 1.5,
+                            borderColor: snoozeInterval === interval ? "#D8A4B4" : "#E0E0E0"
+                          }}
+                        >
+                          <Text style={{
+                            fontSize: 14,
+                            fontWeight: 'bold',
+                            color: '#000000',
+                            textAlign: 'center'
+                          }}>
+                            {interval.toString()}
+                          </Text>
+                        </TouchableOpacity>
                       ))}
                     </View>
                   </View>
@@ -1209,7 +1246,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 8,
     marginVertical: 2,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.cardBackground,
     // 3D effect
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -1237,7 +1274,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.text,
   },
   selectedTimeOptionText: {
-    color: colors.buttonText,
+    color: colors.text,
     fontWeight: 'bold',
   },
   timeColon: {
@@ -1271,9 +1308,11 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   daysGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexWrap: 'nowrap',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 10,
+    paddingHorizontal: 20,
   },
   dayButton: {
     width: '13%',
@@ -1328,8 +1367,10 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   snoozeGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexWrap: 'nowrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   snoozeButton: {
     width: '18%',
@@ -1398,23 +1439,23 @@ const createStyles = (colors: any) => StyleSheet.create({
   soundName: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: '#000000',
     marginBottom: 2,
   },
   selectedSoundName: {
-    color: colors.primary,
+    color: '#000000',
   },
   soundDescription: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: '#666666',
   },
   selectedSoundDescription: {
-    color: colors.primary,
-    opacity: 0.8,
+    color: '#000000',
+    opacity: 1,
   },
   soundCheckmark: {
     fontSize: 18,
-    color: colors.primary,
+    color: '#000000',
     fontWeight: 'bold',
   },
   // Preview Button Styles

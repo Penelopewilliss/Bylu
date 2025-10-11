@@ -9,6 +9,7 @@ interface Button3DProps {
   size?: 'small' | 'medium' | 'large';
   style?: ViewStyle;
   disabled?: boolean;
+  numberOfLines?: number;
 }
 
 export default function Button3D({ 
@@ -18,7 +19,8 @@ export default function Button3D({
   textColor = '#000000',
   size = 'medium',
   style,
-  disabled = false
+  disabled = false,
+  numberOfLines = undefined
 }: Button3DProps) {
   
   const getSizeStyles = () => {
@@ -141,7 +143,9 @@ export default function Button3D({
         },
         // Force text color for mobile compatibility
         Platform.OS !== 'web' && { color: textColor || '#000000' }
-      ]}>
+      ]}
+      numberOfLines={numberOfLines}
+      >
         {title}
       </Text>
     </Pressable>
@@ -166,15 +170,21 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: '700',
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: Platform.select({
+      ios: 'Montserrat-SemiBold',
+      android: 'Montserrat-SemiBold',
+      default: 'system font, -apple-system, BlinkMacSystemFont, sans-serif'
+    }),
     // Enhanced 3D text shadow - adjusted for better visibility
     textShadowColor: 'rgba(255, 255, 255, 0.1)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 1,
     letterSpacing: 0.5,
+    textAlign: 'center',
     // Enhanced web compatibility - removed white text shadow
     ...(Platform.OS === 'web' && {
       textShadow: '0px 1px 1px rgba(255, 255, 255, 0.1)',
+      fontFamily: 'Montserrat-SemiBold, system-ui, -apple-system, BlinkMacSystemFont, sans-serif'
     }),
   },
 });

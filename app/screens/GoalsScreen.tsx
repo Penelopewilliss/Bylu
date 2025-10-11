@@ -263,22 +263,39 @@ export default function GoalsScreen({ deepLink, onDeepLinkHandled }: { deepLink?
                 <Button3D
                   title="Edit"
                   onPress={() => editGoal(goal)}
-                  backgroundColor="#FFFFFF"
+                  backgroundColor="#E8B4C4"
                   textColor="#000000"
                   size="small"
                   style={{ flex: 1, marginRight: 6 }}
                 />
-                <Button3D
-                  title="🗑️"
+                <TouchableOpacity
                   onPress={() => {
                     console.log('Delete button pressed for goal:', goal.id);
                     handleDeleteGoal(goal.id, goal.title);
                   }}
-                  backgroundColor="#FFFFFF"
-                  textColor="#000000"
-                  size="small"
-                  style={{ width: 44, marginLeft: 6 }}
-                />
+                  style={{ 
+                    width: 44, 
+                    height: 44,
+                    marginLeft: 6,
+                    backgroundColor: "#E8B4C4",
+                    borderRadius: 12,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderWidth: 2,
+                    borderTopColor: '#F0C4D4',
+                    borderLeftColor: '#F0C4D4',
+                    borderRightColor: '#D8A4B4',
+                    borderBottomColor: '#D8A4B4',
+                  }}
+                >
+                  <Text style={{
+                    fontSize: 18,
+                    color: '#000000',
+                    textAlign: 'center'
+                  }}>
+                    🗑️
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           );

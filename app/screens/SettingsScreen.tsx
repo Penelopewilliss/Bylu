@@ -613,61 +613,60 @@ export default function SettingsScreen() {
             </View>
             
             <View style={styles.timePickerContainer}>
-              <View style={styles.customTimePickerContainer}>
-                <View style={styles.customTimePicker}>
-                  <Text style={styles.customTimePickerLabel}>Hour</Text>
-                  <ScrollView 
-                    style={styles.timeScrollView} 
-                    contentContainerStyle={styles.timeScrollContent}
-                    showsVerticalScrollIndicator={false}
-                    nestedScrollEnabled={true}
-                  >
-                    {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                      <TouchableOpacity
-                        key={hour}
-                        style={[
-                          styles.timeOption,
-                          tempTime.getHours() === hour && styles.selectedTimeOption
-                        ]}
-                        onPress={() => {
-                          const newTime = new Date(tempTime);
-                          newTime.setHours(hour);
-                          setTempTime(newTime);
-                        }}
-                      >
-                        <Text style={[
-                          styles.timeOptionText,
-                          tempTime.getHours() === hour && styles.selectedTimeOptionText
-                        ]}>
-                          {hour.toString().padStart(2, '0')}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-                
-                <View style={styles.customTimePicker}>
-                  <Text style={styles.customTimePickerLabel}>Minutes</Text>
-                  <ScrollView 
-                    style={styles.timeScrollView} 
-                    contentContainerStyle={styles.timeScrollContent}
-                    showsVerticalScrollIndicator={false}
-                    nestedScrollEnabled={true}
-                  >
-                    {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
-                      <TouchableOpacity
-                        key={minute}
-                        style={[
-                          styles.timeOption,
-                          tempTime.getMinutes() === minute && styles.selectedTimeOption
-                        ]}
-                        onPress={() => {
-                          const newTime = new Date(tempTime);
-                          newTime.setMinutes(minute);
-                          setTempTime(newTime);
-                        }}
-                      >
-                        <Text style={[
+              <View style={styles.customTimePicker}>
+                <Text style={styles.customTimePickerLabel}>Hour</Text>
+                <ScrollView 
+                  style={styles.timeScrollView} 
+                  contentContainerStyle={styles.timeScrollContent}
+                  showsVerticalScrollIndicator={false}
+                  nestedScrollEnabled={true}
+                >
+                  {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                    <TouchableOpacity
+                      key={hour}
+                      style={[
+                        styles.timeOption,
+                        tempTime.getHours() === hour && styles.selectedTimeOption
+                      ]}
+                      onPress={() => {
+                        const newTime = new Date(tempTime);
+                        newTime.setHours(hour);
+                        setTempTime(newTime);
+                      }}
+                    >
+                      <Text style={[
+                        styles.timeOptionText,
+                        tempTime.getHours() === hour && styles.selectedTimeOptionText
+                      ]}>
+                        {hour.toString().padStart(2, '0')}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              
+              <View style={styles.customTimePicker}>
+                <Text style={styles.customTimePickerLabel}>Minutes</Text>
+                <ScrollView 
+                  style={styles.timeScrollView} 
+                  contentContainerStyle={styles.timeScrollContent}
+                  showsVerticalScrollIndicator={false}
+                  nestedScrollEnabled={true}
+                >
+                  {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
+                    <TouchableOpacity
+                      key={minute}
+                      style={[
+                        styles.timeOption,
+                        tempTime.getMinutes() === minute && styles.selectedTimeOption
+                      ]}
+                      onPress={() => {
+                        const newTime = new Date(tempTime);
+                        newTime.setMinutes(minute);
+                        setTempTime(newTime);
+                      }}
+                    >
+                      <Text style={[
                           styles.timeOptionText,
                           tempTime.getMinutes() === minute && styles.selectedTimeOptionText
                         ]}>
@@ -677,7 +676,6 @@ export default function SettingsScreen() {
                     ))}
                   </ScrollView>
                 </View>
-              </View>
               
               {/* Current time display */}
               <Text style={styles.currentTimeText}>
@@ -887,6 +885,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 15,
     borderWidth: 1,
     borderColor: colors.border,
+    flexDirection: 'row',
+    gap: 16,
+    padding: 16,
   },
   timePicker: {
     width: '100%',
@@ -902,15 +903,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontFamily: 'monospace',
   },
   // Custom scrollable time picker styles (from CalendarScreen)
-  customTimePickerContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.background,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 16,
-    gap: 16,
-  },
   customTimePicker: {
     flex: 1,
     alignItems: 'center',
@@ -959,11 +951,11 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   timeOptionText: {
     fontSize: 16,
-    color: colors.text,
+    color: '#000000',
     fontWeight: '500',
   },
   selectedTimeOptionText: {
-    color: colors.buttonText,
+    color: '#000000',
     fontWeight: '600',
   },
   webTimeInputContainer: {

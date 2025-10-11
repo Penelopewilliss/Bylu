@@ -48,7 +48,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 12,
+    paddingHorizontal: 30, // Reduced slightly from 40 to move buttons a little back toward edges
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
   navButton: {
     width: 40,
@@ -738,6 +743,37 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+  // Custom navigation buttons for calendar
+  customNavButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#E8B4C4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 8,
+    // 3D effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+    borderWidth: 3,
+    borderTopColor: '#F0C7D1',
+    borderLeftColor: '#F0C7D1',
+    borderRightColor: '#D1A1B1',
+    borderBottomColor: '#D1A1B1',
+  },
+  customNavButtonText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000000',
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+    // Ensure consistent arrow rendering
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+  },
 });
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -1224,23 +1260,19 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
           </Text>
         </View>
         <View style={styles.monthNavigation}>
-          <Button3D
-            title="‹‹"
+          <TouchableOpacity
+            style={styles.customNavButton}
             onPress={() => navigateMonth('prev')}
-            backgroundColor="#E8B4C4"
-            textColor="#000000"
-            size="small"
-            style={{ borderRadius: 20, width: 40, height: 40 }}
-          />
+          >
+            <Text style={styles.customNavButtonText}>‹‹</Text>
+          </TouchableOpacity>
           
-          <Button3D
-            title="››"
+          <TouchableOpacity
+            style={styles.customNavButton}
             onPress={() => navigateMonth('next')}
-            backgroundColor="#E8B4C4"
-            textColor="#000000"
-            size="small"
-            style={{ borderRadius: 20, width: 40, height: 40 }}
-          />
+          >
+            <Text style={styles.customNavButtonText}>››</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -1316,7 +1348,7 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
           }}
           backgroundColor="#E8B4C4"
           textColor="#000000"
-          size="large"
+          size="medium"
           style={{ alignSelf: 'center', marginTop: 20, marginBottom: 20 }}
         />
         </View>

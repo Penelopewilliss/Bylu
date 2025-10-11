@@ -153,8 +153,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
         {/* Cloud and Pink Line Container */}
         <View style={styles.cloudLineContainer}>
           {/* Quick Thought Cloud Button - Positioned Right */}
-          <Button3D
-            title="💭"
+          <TouchableOpacity
             onPress={async () => {
               if (showCloudTutorial) {
                 // First time clicking - save to storage and hide tutorial permanently
@@ -168,11 +167,10 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
               setShowDailyInspiration(!showDailyInspiration);
               onNavigate?.('BrainDump'); // Navigate to BrainDump page
             }}
-            backgroundColor="#FFFFFF"
-            textColor="#FF69B4"
-            size="small"
             style={styles.quickThoughtCloud}
-          />
+          >
+            <Text style={styles.cloudIcon}>💭</Text>
+          </TouchableOpacity>
           
           {/* Tutorial Arrow for First-Time Users */}
           {showCloudTutorial && (
@@ -304,6 +302,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
             backgroundColor="#E8B4C4"
             textColor="#000000"
             size="small"
+            style={{ position: 'absolute', bottom: 16, right: 16 }}
           />
         </View>
       </View>
@@ -362,6 +361,7 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
             backgroundColor="#E8B4C4"
             textColor="#000000"
             size="small"
+            style={{ position: 'absolute', bottom: 16, right: 16 }}
           />
         </View>
       </View>

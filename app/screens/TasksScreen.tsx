@@ -1208,7 +1208,7 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
             <Button3D
               title="+ Add"
               onPress={openAddModal}
-              backgroundColor="#FFFFFF"
+              backgroundColor="#E8B4C4"
               textColor="#000000"
               size="small"
               style={{ width: 110 }}

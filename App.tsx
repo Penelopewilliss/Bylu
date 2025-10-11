@@ -8,6 +8,7 @@ import { AppProvider } from './app/context/AppContext';
 import { ThemeProvider } from './app/context/ThemeContext';
 import { OfflineProvider } from './app/context/OfflineContext';
 import { CalendarSyncProvider } from './app/context/CalendarSyncContext';
+import CalendarIcon from './app/components/CalendarIcon';
 import NotificationService from './app/services/NotificationService';
 
 // Import the actual screen components
@@ -103,7 +104,7 @@ function HamburgerMenu({
       case 'Tasks':
         return '🌺';
       case 'Calendar':
-        return '📅';
+        return '�️';
       case 'Goals':
         return '✨';
       case 'BrainDump':
@@ -156,12 +157,22 @@ function HamburgerMenu({
               ]}
               onPress={() => handleTabPress(tab)}
             >
-              <Text style={[
-                styles.menuEmoji,
-                { color: activeTab === tab ? '#8E1538' : '#A0416B' }
-              ]}>
-                {getTabEmoji(tab)}
-              </Text>
+              <View style={styles.menuEmoji}>
+                {tab === 'Calendar' ? (
+                  <CalendarIcon 
+                    size={20} 
+                    color={activeTab === tab ? '#8E1538' : '#A0416B'} 
+                    reduced3D={true}
+                  />
+                ) : (
+                  <Text style={[
+                    styles.menuEmojiText,
+                    { color: activeTab === tab ? '#8E1538' : '#A0416B' }
+                  ]}>
+                    {getTabEmoji(tab)}
+                  </Text>
+                )}
+              </View>
               <Text style={[
                 styles.menuLabel,
                 { color: activeTab === tab ? '#FFFFFF' : '#8E1538' }
@@ -194,7 +205,7 @@ function TopBar({
       case 'Tasks':
         return '🌺';
       case 'Calendar':
-        return '📅';
+        return '�️';
       case 'Goals':
         return '✨';
       case 'BrainDump':
@@ -745,8 +756,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0, // Remove border from last item
   },
   menuEmoji: {
-    fontSize: 18, // Slightly larger emoji
     marginRight: 14, // More space between emoji and text
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 18,
+    height: 18,
+  },
+  menuEmojiText: {
+    fontSize: 18, // Slightly larger emoji
     // Enhanced 3D text shadow
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 1, height: 1 },
