@@ -240,23 +240,15 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
               
               <View style={styles.timingGrid}>
                 {TIMING_OPTIONS.map((option) => (
-                  <TouchableOpacity
+                  <Button3D
                     key={option.value}
-                    style={[
-                      styles.timingOption,
-                      settings.timings.includes(option.value) && styles.timingOptionSelected,
-                    ]}
+                    title={option.label}
                     onPress={() => toggleTiming(option.value)}
-                  >
-                    <Text
-                      style={[
-                        styles.timingOptionText,
-                        settings.timings.includes(option.value) && styles.timingOptionTextSelected,
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
+                    backgroundColor={settings.timings.includes(option.value) ? "#E8B4C4" : "#FFFFFF"}
+                    textColor="#000000"
+                    size="small"
+                    style={{ flex: 1, marginHorizontal: 4, marginVertical: 3 }}
+                  />
                 ))}
               </View>
             </View>
@@ -333,15 +325,17 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
                   </View>
 
                   {dailySettings.morningEnabled && (
-                    <TouchableOpacity 
-                      style={styles.timePickerRow}
-                      onPress={() => showTimePickerModal('morning', dailySettings.morningTime)}
-                    >
+                    <View style={styles.timePickerRow}>
                       <Text style={styles.timePickerLabel}>Morning Time:</Text>
-                      <Text style={styles.timePickerValue}>
-                        {formatTime(dailySettings.morningTime.hour, dailySettings.morningTime.minute)}
-                      </Text>
-                    </TouchableOpacity>
+                      <Button3D
+                        title={formatTime(dailySettings.morningTime.hour, dailySettings.morningTime.minute)}
+                        onPress={() => showTimePickerModal('morning', dailySettings.morningTime)}
+                        backgroundColor="#FFFFFF"
+                        textColor="#000000"
+                        size="small"
+                        style={{ minWidth: 80 }}
+                      />
+                    </View>
                   )}
 
                   <View style={styles.settingRow}>
@@ -360,15 +354,17 @@ export default function NotificationSettingsScreen({ onNavigate }: { onNavigate?
                   </View>
 
                   {dailySettings.eveningEnabled && (
-                    <TouchableOpacity 
-                      style={styles.timePickerRow}
-                      onPress={() => showTimePickerModal('evening', dailySettings.eveningTime)}
-                    >
+                    <View style={styles.timePickerRow}>
                       <Text style={styles.timePickerLabel}>Evening Time:</Text>
-                      <Text style={styles.timePickerValue}>
-                        {formatTime(dailySettings.eveningTime.hour, dailySettings.eveningTime.minute)}
-                      </Text>
-                    </TouchableOpacity>
+                      <Button3D
+                        title={formatTime(dailySettings.eveningTime.hour, dailySettings.eveningTime.minute)}
+                        onPress={() => showTimePickerModal('evening', dailySettings.eveningTime)}
+                        backgroundColor="#FFFFFF"
+                        textColor="#000000"
+                        size="small"
+                        style={{ minWidth: 80 }}
+                      />
+                    </View>
                   )}
                 </>
               )}

@@ -407,24 +407,26 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: 8,
   },
   categoryButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '48%', // Two buttons per row, wider
-    minHeight: 40,
+    width: '46%',
+    marginHorizontal: 2,
+    marginVertical: 3,
+    minHeight: 44,
+    maxHeight: 44,
   },
   selectedCategory: {
     borderWidth: 2,
     borderColor: colors.text,
   },
   categoryText: {
-    fontSize: 12,
-    color: '#2C2C2C', // Dark color that works on all category backgrounds
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '600',
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   addModalButtons: {
     flexDirection: 'row',
@@ -712,6 +714,29 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   timingChipTextSelected: {
     color: colors.background,
+  },
+  // New appointment modal category buttons
+  newCategoryButton: {
+    width: '46%',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    marginHorizontal: 2,
+    marginVertical: 4,
+    minHeight: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  newCategoryText: {
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
 
@@ -1326,12 +1351,14 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
                 >
                   <View style={styles.eventHeader}>
                     <Text style={styles.eventTitle}>{event.title}</Text>
-                    <TouchableOpacity
-                      style={styles.deleteButton}
+                    <Button3D
+                      title="×"
                       onPress={() => handleDeleteAppointment(event.id)}
-                    >
-                      <Text style={styles.deleteButtonText}>×</Text>
-                    </TouchableOpacity>
+                      backgroundColor="#FFFFFF"
+                      textColor="#000000"
+                      size="small"
+                      style={{ width: 32, height: 32 }}
+                    />
                   </View>
                   <Text style={styles.eventTime}>
                     {formatTime(new Date(event.startDate).getHours(), new Date(event.startDate).getMinutes())}
@@ -1643,53 +1670,34 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
               
               {/* Whole Day Toggle */}
               <View style={styles.wholeDayContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.wholeDayToggle,
-                    formData.isWholeDay && styles.selectedWholeDayToggle
-                  ]}
+                <Button3D
+                  title={formData.isWholeDay ? '✓ Whole Day' : 'Whole Day'}
                   onPress={() => setFormData(prev => ({ ...prev, isWholeDay: !prev.isWholeDay }))}
-                >
-                  <Text style={[
-                    styles.wholeDayToggleText,
-                    formData.isWholeDay && styles.selectedWholeDayToggleText
-                  ]}>
-                    {formData.isWholeDay ? '✓ Whole Day' : 'Whole Day'}
-                  </Text>
-                </TouchableOpacity>
+                  backgroundColor={formData.isWholeDay ? "#E8B4C4" : "#FFFFFF"}
+                  textColor="#000000"
+                  size="small"
+                />
               </View>
               
               {!formData.isWholeDay && (
               <>
               <View style={styles.durationContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.durationToggle,
-                    formData.useDuration && styles.selectedDurationToggle
-                  ]}
+                <Button3D
+                  title="Duration"
                   onPress={() => setFormData(prev => ({ ...prev, useDuration: true }))}
-                >
-                  <Text style={[
-                    styles.durationToggleText,
-                    formData.useDuration && styles.selectedDurationToggleText
-                  ]}>
-                    Duration
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.durationToggle,
-                    !formData.useDuration && styles.selectedDurationToggle
-                  ]}
+                  backgroundColor={formData.useDuration ? "#E8B4C4" : "#FFFFFF"}
+                  textColor="#000000"
+                  size="small"
+                  style={{ flex: 1, marginRight: 4 }}
+                />
+                <Button3D
+                  title="End Time"
                   onPress={() => setFormData(prev => ({ ...prev, useDuration: false }))}
-                >
-                  <Text style={[
-                    styles.durationToggleText,
-                    !formData.useDuration && styles.selectedDurationToggleText
-                  ]}>
-                    End Time
-                  </Text>
-                </TouchableOpacity>
+                  backgroundColor={!formData.useDuration ? "#E8B4C4" : "#FFFFFF"}
+                  textColor="#000000"
+                  size="small"
+                  style={{ flex: 1, marginLeft: 4 }}
+                />
               </View>
               
               {formData.useDuration ? (
@@ -1697,21 +1705,15 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
                   <Text style={styles.durationLabel}>Duration: {Math.floor(formData.duration / 60)}h {formData.duration % 60}m</Text>
                   <View style={styles.durationOptions}>
                     {[15, 30, 45, 60, 90, 120, 180, 240].map((minutes) => (
-                      <TouchableOpacity
+                      <Button3D
                         key={minutes}
-                        style={[
-                          styles.durationOption,
-                          formData.duration === minutes && styles.selectedDurationOption
-                        ]}
+                        title={minutes < 60 ? `${minutes}m` : `${Math.floor(minutes / 60)}h${minutes % 60 > 0 ? ` ${minutes % 60}m` : ''}`}
                         onPress={() => setFormData(prev => ({ ...prev, duration: minutes }))}
-                      >
-                        <Text style={[
-                          styles.durationOptionText,
-                          formData.duration === minutes && styles.selectedDurationOptionText
-                        ]}>
-                          {minutes < 60 ? `${minutes}m` : `${Math.floor(minutes / 60)}h${minutes % 60 > 0 ? ` ${minutes % 60}m` : ''}`}
-                        </Text>
-                      </TouchableOpacity>
+                        backgroundColor={formData.duration === minutes ? "#E8B4C4" : "#FFFFFF"}
+                        textColor="#000000"
+                        size="small"
+                        style={{ minWidth: 55, marginHorizontal: 2, marginVertical: 2 }}
+                      />
                     ))}
                   </View>
                 </View>
@@ -1785,24 +1787,100 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
               
               <Text style={styles.label}>Category</Text>
               <View style={styles.categoryContainer}>
-                {Object.entries(CATEGORY_COLORS).map(([category, color]) => (
-                  <TouchableOpacity
-                    key={category}
-                    style={[
-                      styles.categoryButton,
-                      { backgroundColor: color },
-                      formData.category === category && styles.selectedCategory
-                    ]}
-                    onPress={() => setFormData(prev => ({ ...prev, category: category as any }))}
-                  >
-                    <Text style={styles.categoryText} numberOfLines={1}>
-                      {category === 'work' ? '💼 Work' :
-                       category === 'personal' ? '💖 Personal' :
-                       category === 'health' ? '✨ Health' :
-                       category === 'learning' ? '📚 Learning' : '📝 Other'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {/* Work Category */}
+                <TouchableOpacity
+                  style={[
+                    styles.newCategoryButton,
+                    {
+                      backgroundColor: formData.category === 'work' ? '#E8B4C4' : '#FFFFFF',
+                      borderColor: formData.category === 'work' ? '#E8B4C4' : '#E0E0E0',
+                    }
+                  ]}
+                  onPress={() => setFormData(prev => ({ ...prev, category: 'work' }))}
+                >
+                  <Text style={[
+                    styles.newCategoryText,
+                    { color: formData.category === 'work' ? '#FFFFFF' : '#000000' }
+                  ]}>
+                    💼 Business
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Personal Category */}
+                <TouchableOpacity
+                  style={[
+                    styles.newCategoryButton,
+                    {
+                      backgroundColor: formData.category === 'personal' ? '#B4D4E8' : '#FFFFFF',
+                      borderColor: formData.category === 'personal' ? '#B4D4E8' : '#E0E0E0',
+                    }
+                  ]}
+                  onPress={() => setFormData(prev => ({ ...prev, category: 'personal' }))}
+                >
+                  <Text style={[
+                    styles.newCategoryText,
+                    { color: formData.category === 'personal' ? '#FFFFFF' : '#000000' }
+                  ]}>
+                    💖 Personal
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Health Category */}
+                <TouchableOpacity
+                  style={[
+                    styles.newCategoryButton,
+                    {
+                      backgroundColor: formData.category === 'health' ? '#C4E8B4' : '#FFFFFF',
+                      borderColor: formData.category === 'health' ? '#C4E8B4' : '#E0E0E0',
+                    }
+                  ]}
+                  onPress={() => setFormData(prev => ({ ...prev, category: 'health' }))}
+                >
+                  <Text style={[
+                    styles.newCategoryText,
+                    { color: formData.category === 'health' ? '#FFFFFF' : '#000000' }
+                  ]}>
+                    ✨ Health
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Learning Category */}
+                <TouchableOpacity
+                  style={[
+                    styles.newCategoryButton,
+                    {
+                      backgroundColor: formData.category === 'learning' ? '#E8C4B4' : '#FFFFFF',
+                      borderColor: formData.category === 'learning' ? '#E8C4B4' : '#E0E0E0',
+                    }
+                  ]}
+                  onPress={() => setFormData(prev => ({ ...prev, category: 'learning' }))}
+                >
+                  <Text style={[
+                    styles.newCategoryText,
+                    { color: formData.category === 'learning' ? '#FFFFFF' : '#000000' }
+                  ]}>
+                    📚 Learning
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Other Category */}
+                <TouchableOpacity
+                  style={[
+                    styles.newCategoryButton,
+                    {
+                      backgroundColor: formData.category === 'other' ? '#D4B4E8' : '#FFFFFF',
+                      borderColor: formData.category === 'other' ? '#D4B4E8' : '#E0E0E0',
+                    }
+                  ]}
+                  onPress={() => setFormData(prev => ({ ...prev, category: 'other' }))}
+                >
+                  <Text style={[
+                    styles.newCategoryText,
+                    { color: formData.category === 'other' ? '#FFFFFF' : '#000000' }
+                  ]}>
+                    📝 Other
+                  </Text>
+                </TouchableOpacity>
               </View>
               
               <Text style={styles.label}>Notes</Text>
@@ -1822,14 +1900,14 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
                 {/* Enable/Disable Notifications */}
                 <View style={styles.notificationToggle}>
                   <Text style={styles.toggleLabel}>Enable notifications for this appointment</Text>
-                  <TouchableOpacity
-                    style={[styles.toggle, formData.notificationsEnabled && styles.toggleActive]}
+                  <Button3D
+                    title={formData.notificationsEnabled ? 'ON' : 'OFF'}
                     onPress={() => setFormData(prev => ({ ...prev, notificationsEnabled: !prev.notificationsEnabled }))}
-                  >
-                    <Text style={[styles.toggleText, formData.notificationsEnabled && styles.toggleTextActive]}>
-                      {formData.notificationsEnabled ? 'ON' : 'OFF'}
-                    </Text>
-                  </TouchableOpacity>
+                    backgroundColor={formData.notificationsEnabled ? "#E8B4C4" : "#FFFFFF"}
+                    textColor="#000000"
+                    size="small"
+                    style={{ minWidth: 60 }}
+                  />
                 </View>
 
                 {/* Notification Timing Options */}
@@ -1845,26 +1923,20 @@ export default function CalendarScreen({ deepLink, onDeepLinkHandled }: { deepLi
                         { value: 120, label: '2 hours' },
                         { value: 1440, label: '1 day' }
                       ].map((option) => (
-                        <TouchableOpacity
+                        <Button3D
                           key={option.value}
-                          style={[
-                            styles.timingChip,
-                            formData.notificationTimings.includes(option.value) && styles.timingChipSelected
-                          ]}
+                          title={option.label}
                           onPress={() => {
                             const newTimings = formData.notificationTimings.includes(option.value)
                               ? formData.notificationTimings.filter(t => t !== option.value)
                               : [...formData.notificationTimings, option.value].sort((a, b) => a - b);
                             setFormData(prev => ({ ...prev, notificationTimings: newTimings }));
                           }}
-                        >
-                          <Text style={[
-                            styles.timingChipText,
-                            formData.notificationTimings.includes(option.value) && styles.timingChipTextSelected
-                          ]}>
-                            {option.label}
-                          </Text>
-                        </TouchableOpacity>
+                          backgroundColor={formData.notificationTimings.includes(option.value) ? "#E8B4C4" : "#FFFFFF"}
+                          textColor="#000000"
+                          size="small"
+                          style={{ minWidth: 70, marginHorizontal: 2, marginVertical: 2 }}
+                        />
                       ))}
                     </View>
                   </View>

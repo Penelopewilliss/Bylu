@@ -565,19 +565,23 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
                 </View>
                 
                 <View style={styles.alarmActions}>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
+                  <Button3D 
+                    title="✏️ Edit"
                     onPress={() => handleEditAlarm(alarm)}
-                  >
-                    <Text style={styles.actionButtonText}>✏️ Edit</Text>
-                  </TouchableOpacity>
+                    backgroundColor="#FFFFFF"
+                    textColor="#000000"
+                    size="small"
+                    style={{ flex: 1, marginRight: 8 }}
+                  />
                   
-                  <TouchableOpacity 
-                    style={[styles.actionButton, styles.deleteButton]}
+                  <Button3D 
+                    title="🗑️ Delete"
                     onPress={() => handleDeleteAlarm(alarm)}
-                  >
-                    <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
-                  </TouchableOpacity>
+                    backgroundColor="#FFE6E6"
+                    textColor="#8B0000"
+                    size="small"
+                    style={{ flex: 1, marginLeft: 8 }}
+                  />
                 </View>
               </View>
             ))
@@ -707,15 +711,15 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
                 <Text style={styles.inputLabel}>Repeat Days</Text>
                 <View style={styles.daysGrid}>
                   {dayNames.map((day, index) => (
-                    <TouchableOpacity
+                    <Button3D
                       key={index}
-                      style={[styles.dayButton, selectedDays.includes(index) && styles.selectedDayButton]}
+                      title={day}
                       onPress={() => toggleDay(index)}
-                    >
-                      <Text style={[styles.dayButtonText, selectedDays.includes(index) && styles.selectedDayButtonText]}>
-                        {day}
-                      </Text>
-                    </TouchableOpacity>
+                      backgroundColor={selectedDays.includes(index) ? "#E8B4C4" : "#FFFFFF"}
+                      textColor="#000000"
+                      size="small"
+                      style={{ minWidth: 44, marginHorizontal: 2 }}
+                    />
                   ))}
                 </View>
                 <Text style={styles.daysHint}>
@@ -742,15 +746,15 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
                     <Text style={styles.snoozeLabel}>Snooze interval (minutes)</Text>
                     <View style={styles.snoozeGrid}>
                       {snoozeOptions.map(interval => (
-                        <TouchableOpacity
+                        <Button3D
                           key={interval}
-                          style={[styles.snoozeButton, snoozeInterval === interval && styles.selectedSnoozeButton]}
+                          title={interval.toString()}
                           onPress={() => setSnoozeInterval(interval)}
-                        >
-                          <Text style={[styles.snoozeButtonText, snoozeInterval === interval && styles.selectedSnoozeButtonText]}>
-                            {interval}
-                          </Text>
-                        </TouchableOpacity>
+                          backgroundColor={snoozeInterval === interval ? "#E8B4C4" : "#FFFFFF"}
+                          textColor="#000000"
+                          size="small"
+                          style={{ minWidth: 50, marginHorizontal: 4 }}
+                        />
                       ))}
                     </View>
                   </View>
@@ -1205,9 +1209,27 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 8,
     marginVertical: 2,
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    // 3D effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1.5,
+    borderTopColor: '#F0F0F0',
+    borderLeftColor: '#F0F0F0',
+    borderRightColor: '#D0D0D0',
+    borderBottomColor: '#D0D0D0',
   },
   selectedTimeOption: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#E8B4C4',
+    borderTopColor: '#F0C7D1',
+    borderLeftColor: '#F0C7D1',
+    borderRightColor: '#D1A1B1',
+    borderBottomColor: '#D1A1B1',
+    shadowColor: '#FF69B4',
+    shadowOpacity: 0.2,
   },
   timeOptionText: {
     fontSize: 18,
@@ -1351,9 +1373,24 @@ const createStyles = (colors: any) => StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    backgroundColor: '#FFFFFF',
+    // 3D effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderLeftColor: '#F0F0F0',
+    borderRightColor: '#D0D0D0',
   },
   selectedSoundOption: {
-    backgroundColor: colors.primary + '20',
+    backgroundColor: '#E8B4C4',
+    borderLeftColor: '#F0C7D1',
+    borderRightColor: '#D1A1B1',
+    shadowColor: '#FF69B4',
+    shadowOpacity: 0.1,
   },
   soundInfo: {
     flex: 1,
@@ -1393,22 +1430,36 @@ const createStyles = (colors: any) => StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.primary + '20',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.primary + '40',
+    // 3D effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 1.5,
+    borderTopColor: '#F0F0F0',
+    borderLeftColor: '#F0F0F0',
+    borderRightColor: '#D0D0D0',
+    borderBottomColor: '#D0D0D0',
   },
   previewButtonPlaying: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: '#E8B4C4',
+    borderTopColor: '#F0C7D1',
+    borderLeftColor: '#F0C7D1',
+    borderRightColor: '#D1A1B1',
+    borderBottomColor: '#D1A1B1',
+    shadowColor: '#FF69B4',
+    shadowOpacity: 0.2,
   },
   previewButtonText: {
     fontSize: 12,
-    color: colors.primary,
+    color: '#000000',
   },
   previewButtonTextPlaying: {
-    color: colors.buttonText,
+    color: '#000000',
   },
   modalButtons: {
     flexDirection: 'row',

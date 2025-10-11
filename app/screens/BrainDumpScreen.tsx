@@ -372,14 +372,14 @@ export default function BrainDumpScreen({ deepLink, onDeepLinkHandled }: { deepL
               )}
               <View style={styles.thoughtFooter}>
                 <Text style={styles.thoughtDate}>{formatDate(entry.createdAt)}</Text>
-                <TouchableOpacity
-                  style={styles.deleteButton}
+                <Button3D
+                  title="🗑️"
                   onPress={() => handleDeleteThought(entry.id, entry.content)}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Text style={styles.deleteButtonText}>🗑️</Text>
-                </TouchableOpacity>
+                  backgroundColor="#FFE6E6"
+                  textColor="#8B0000"
+                  size="small"
+                  style={{ minWidth: 40, minHeight: 40, borderRadius: 20 }}
+                />
               </View>
             </View>
               ))

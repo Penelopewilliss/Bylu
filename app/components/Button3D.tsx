@@ -136,9 +136,11 @@ export default function Button3D({
       <Text style={[
         styles.buttonText,
         {
-          color: textColor,
+          color: textColor || '#000000',
           fontSize: sizeStyles.fontSize,
-        }
+        },
+        // Force text color for mobile compatibility
+        Platform.OS !== 'web' && { color: textColor || '#000000' }
       ]}>
         {title}
       </Text>
@@ -165,14 +167,14 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: '700',
     fontFamily: 'Montserrat-SemiBold',
-    // Enhanced 3D text shadow
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 1, height: 2 },
-    textShadowRadius: 4,
+    // Enhanced 3D text shadow - adjusted for better visibility
+    textShadowColor: 'rgba(255, 255, 255, 0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
     letterSpacing: 0.5,
-    // Enhanced web compatibility
+    // Enhanced web compatibility - removed white text shadow
     ...(Platform.OS === 'web' && {
-      textShadow: '1px 2px 4px rgba(0, 0, 0, 0.2), 0px 1px 2px rgba(255, 255, 255, 0.1)',
+      textShadow: '0px 1px 1px rgba(255, 255, 255, 0.1)',
     }),
   },
 });
