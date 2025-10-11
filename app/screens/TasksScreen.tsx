@@ -333,7 +333,7 @@ export default function TasksScreen({ deepLink, onDeepLinkHandled }: { deepLink?
       paddingHorizontal: 16,
     },
     header: {
-      paddingTop: 20,
+      paddingTop: 8,
       paddingBottom: 16,
       flexDirection: 'row',
       justifyContent: 'center',
