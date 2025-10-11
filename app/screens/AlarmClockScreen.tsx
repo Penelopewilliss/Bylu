@@ -290,6 +290,13 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
     
     if (success && success.length > 0) {
       addAlarm(newAlarm);
+      
+      // Show confirmation popup
+      Alert.alert(
+        '✅ Quick Alarm Set!',
+        `${title} has been added to your alarms for ${getQuickAlarmDisplayTime(time)}`,
+        [{ text: 'OK', style: 'default' }]
+      );
     }
   };
 
