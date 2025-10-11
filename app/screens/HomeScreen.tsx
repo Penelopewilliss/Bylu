@@ -109,6 +109,9 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
+      {/* Theme-aware background */}
+      <View style={[StyleSheet.absoluteFillObject, { backgroundColor: colors.background }]} />
+      
       {/* 🎨 Full Screen Lottie Background Animation */}
       <View style={StyleSheet.absoluteFillObject}>
         <LottieView
@@ -134,7 +137,6 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
               style={({ pressed }) => [
                 styles.actionCard,
                 {
-                  backgroundColor: pressed ? '#D1A1B1' : '#E8B4C4',
                   // Subtle press effect
                   transform: pressed 
                     ? [{ scale: 0.95 }]
@@ -213,7 +215,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     zIndex: 5, // Ensure grid is above background
   },
   actionCard: {
-    backgroundColor: colors.cardBackground,
+    backgroundColor: '#E8B4C4',
     width: '40%',
     aspectRatio: 1,
     borderRadius: 28,
@@ -247,7 +249,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   actionTitle: {
     fontSize: 14, // Slightly larger text for better readability
     fontWeight: '700', // Bolder text
-    color: '#000000', // Black text for better contrast on pink cards
+    color: '#FFFFFF', // White text for contrast on pink cards
     fontFamily: 'Montserrat-SemiBold',
     textAlign: 'center',
     paddingHorizontal: 6,
