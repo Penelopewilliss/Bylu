@@ -35,7 +35,8 @@
       "permissions": [
         "NOTIFICATIONS",
         "WAKE_LOCK"
-      ]
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -51,7 +52,10 @@
           "defaultChannel": "default"
         }
       ],
-      "expo-router"
+      "expo-router",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-firebase/firestore"
     ],
     "extra": {
       "eas": {

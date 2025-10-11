@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "745487345733",
+    "project_id": "glowgetter-199ce",
+    "storage_bucket": "glowgetter-199ce.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:745487345733:android:914ff15cd038c8b4ee9b2c",
+        "android_client_info": {
+          "package_name": "com.penelopewilliss.bylu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrJLBrJnaJm5C-EDU6mwv3I-3deW3I-QQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

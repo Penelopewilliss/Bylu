@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 import { useCalendarSync } from '../context/CalendarSyncContext';
+import { useAuth } from '../context/AuthContext';
 import OfflineIndicator from '../components/OfflineIndicator';
 import { GOOGLE_CALENDAR_CONFIG } from '../config/googleCalendar';
 import NotificationService, { PriorityReminderSettings, DailyAppointmentSettings } from '../services/NotificationService';
@@ -23,6 +24,7 @@ import Button3D from '../components/Button3D';
 
 export default function SettingsScreen() {
   const { isDarkMode, isMilitaryTime, colors, toggleDarkMode, toggleMilitaryTime, formatTime } = useTheme();
+  const { user, signOut, syncDataToCloud } = useAuth();
   const { 
     isConnected, 
     isAuthenticating, 
@@ -583,6 +585,95 @@ export default function SettingsScreen() {
               )}
             </>
           )}
+        </View>
+
+        {/* Account Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>👤 Signed in as</Text>
+              <Text style={styles.settingDescription}>{user?.email}</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.settingItem} 
+            onPress={async () => {
+              Alert.alert(
+                'Sync & Sign Out',
+                'Do you want to sync your data to the cloud before signing out?',
+                [
+                  {
+                    text: 'Cancel',
+                    style: 'cancel'
+                  },
+                  {
+                    text: 'Sign Out Without Sync',
+                    style: 'destructive',
+                    onPress: async () => {
+                      try {
+                        await signOut();
+                      } catch (error: any) {
+                        Alert.alert('Error', error.message);
+                      }
+                    }
+                  },
+                  {
+                    text: 'Sync & Sign Out',
+                    onPress: async () => {
+                      try {
+                        await syncDataToCloud();
+                        await signOut();
+                      } catch (error: any) {
+                        Alert.alert('Error', error.message);
+                      }
+                    }
+                  }
+                ]
+              );
+            }}
+          >
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>🚪 Sign Out</Text>
+              <Text style={styles.settingDescription}>Sign out of your account</Text>
+            </View>
+            <Text style={styles.chevron}>→</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.settingItem} 
+            onPress={async () => {
+              Alert.alert(
+                'Sync Data',
+                'Sync all your data (alarms, tasks, goals) to the cloud?',
+                [
+                  {
+                    text: 'Cancel',
+                    style: 'cancel'
+                  },
+                  {
+                    text: 'Sync Now',
+                    onPress: async () => {
+                      try {
+                        await syncDataToCloud();
+                        Alert.alert('Success', 'All data synced to cloud successfully!');
+                      } catch (error: any) {
+                        Alert.alert('Error', error.message);
+                      }
+                    }
+                  }
+                ]
+              );
+            }}
+          >
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>☁️ Sync to Cloud</Text>
+              <Text style={styles.settingDescription}>Backup your data to Firebase</Text>
+            </View>
+            <Text style={styles.chevron}>↑</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Developer Section */}

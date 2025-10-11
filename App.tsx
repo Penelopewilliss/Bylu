@@ -8,6 +8,7 @@ import { AppProvider } from './app/context/AppContext';
 import { ThemeProvider } from './app/context/ThemeContext';
 import { OfflineProvider } from './app/context/OfflineContext';
 import { CalendarSyncProvider } from './app/context/CalendarSyncContext';
+import { AuthProvider, useAuth } from './app/context/AuthContext';
 import CalendarIcon from './app/components/CalendarIcon';
 import NotificationService from './app/services/NotificationService';
 
@@ -22,6 +23,7 @@ import SettingsScreen from './app/screens/SettingsScreen';
 import AlarmClockScreen from './app/screens/AlarmClockScreen';
 import AlarmActiveScreen from './app/screens/AlarmActiveScreen';
 import OnboardingScreen from './app/screens/OnboardingScreen';
+import { AuthScreen } from './app/screens/AuthScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -274,6 +276,7 @@ function Screen({ activeTab, onNavigate, deepLink, onClearDeepLink, onSetDeepLin
 }
 
 function MainApp() {
+  const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<TabName>('Home');
   const [deepLink, setDeepLink] = useState<any>(null);
   const [isSplashFinished, setIsSplashFinished] = useState(false);
@@ -454,8 +457,14 @@ function MainApp() {
 
   console.log('🎯 App render - isSplashFinished:', isSplashFinished, 'fontsLoaded:', fontsLoaded, 'isOnboardingCompleted:', isOnboardingCompleted);
 
-  if (!isSplashFinished || !fontsLoaded || isOnboardingCompleted === null) {
+  if (!isSplashFinished || !fontsLoaded || isOnboardingCompleted === null || authLoading) {
     return <SplashScreen onFinish={() => setIsSplashFinished(true)} />;
+  }
+
+  // Show auth screen if user is not logged in
+  if (!user) {
+    console.log('🔐 Showing auth screen');
+    return <AuthScreen />;
   }
 
   // Show onboarding for first-time users
@@ -539,13 +548,15 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <AppProvider>
-          <OfflineProvider>
-            <CalendarSyncProvider>
-              <MainApp />
-            </CalendarSyncProvider>
-          </OfflineProvider>
-        </AppProvider>
+        <AuthProvider>
+          <AppProvider>
+            <OfflineProvider>
+              <CalendarSyncProvider>
+                <MainApp />
+              </CalendarSyncProvider>
+            </OfflineProvider>
+          </AppProvider>
+        </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );
