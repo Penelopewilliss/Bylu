@@ -77,22 +77,22 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
 
   const alarmSounds = [
     // 🚨 LOUD ALARMS - Classic alarm clock sounds
-    { key: 'classic_bell', name: '🔔 Classic Bell', description: 'Traditional alarm bell ring', duration: 5000 },
-    { key: 'digital_beep', name: '📟 Digital Beep', description: 'BEEP BEEP BEEP alarm', duration: 5000 },
-    { key: 'electronic_alarm', name: '⚡ Electronic', description: 'Modern electronic alarm', duration: 5000 },
+    { key: 'classic_bell', name: '🔔 Jingle Bells', description: 'Festive jingle bells sound', duration: 5000 },
+    { key: 'digital_beep', name: '🐓 Crazy Rooster', description: 'Hilarious rooster alarm', duration: 5000 },
+    { key: 'electronic_alarm', name: '🎸 Acoustic Music', description: 'Electronic acoustic melody', duration: 5000 },
     
     // 🎵 PLEASANT ALARMS - Gentle wake up sounds
     { key: 'gentle_chimes', name: '🎐 Gentle Chimes', description: 'Soft peaceful chimes', duration: 4000 },
-    { key: 'piano_melody', name: '🎹 Piano', description: 'Calming piano melody', duration: 4000 },
-    { key: 'soft_bells', name: '🔔 Soft Bells', description: 'Gentle bell sounds', duration: 4000 },
+    { key: 'piano_melody', name: '🎤 Hip Hop', description: 'Upbeat hip hop beats', duration: 4000 },
+    { key: 'soft_bells', name: '🎭 Mystery', description: 'Mysterious melody', duration: 4000 },
     
-    // � NATURE ALARMS - Natural wake up sounds
+    // 🌅 NATURE ALARMS - Natural wake up sounds
     { key: 'birds_chirping', name: '🐦 Birds', description: 'Morning birds chirping', duration: 5000 },
-    { key: 'ocean_waves', name: '� Ocean', description: 'Peaceful ocean waves', duration: 5000 },
+    { key: 'ocean_waves', name: '💨 Wind', description: 'Gentle wind sounds', duration: 5000 },
     
-    // � FUN ALARMS - Unique sounds
-    { key: 'fanfare', name: '� Fanfare', description: 'Victory trumpet fanfare', duration: 4000 },
-    { key: 'rooster', name: '� Rooster', description: 'Rooster crow alarm', duration: 4000 },
+    // 🏝️ CHILL VIBES
+    { key: 'fanfare', name: '🎹 Piano Relax', description: 'Relaxing piano melody', duration: 4000 },
+    { key: 'rooster', name: '🏝️ Happy Island', description: 'Tropical island vibes', duration: 4000 },
   ];
 
   // Display days starting with Monday (but keep Sunday=0 indexing internally)
@@ -322,17 +322,26 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
 
   const playPreviewSound = async (soundKey: string) => {
     try {
+      // If the same sound is already playing, stop it immediately
+      if (playingSound === soundKey) {
+        setPlayingSound(null);
+        if (currentPlayingSound) {
+          await currentPlayingSound.stopAsync();
+          await currentPlayingSound.unloadAsync();
+          setCurrentPlayingSound(null);
+        }
+        return;
+      }
+
       // Stop any currently playing sound
       if (currentPlayingSound) {
+        await currentPlayingSound.stopAsync();
         await currentPlayingSound.unloadAsync();
         setCurrentPlayingSound(null);
       }
 
-      // If the same sound is already playing, just stop it
-      if (playingSound === soundKey) {
-        setPlayingSound(null);
-        return;
-      }
+      // Set playing state immediately for better responsiveness
+      setPlayingSound(soundKey);
 
       // Set audio mode for better mobile compatibility
       await Audio.setAudioModeAsync({
@@ -570,6 +579,7 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
             style={styles.modalContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled={true}
           >
               {/* Time Picker */}
               <View style={styles.timePickerSection}>
@@ -782,9 +792,10 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
                           <TouchableOpacity
                             style={[styles.previewButton, playingSound === sound.key && styles.previewButtonPlaying]}
                             onPress={() => playPreviewSound(sound.key)}
+                            activeOpacity={0.7}
                           >
                             <Text style={[styles.previewButtonText, playingSound === sound.key && styles.previewButtonTextPlaying]}>
-                              {playingSound === sound.key ? '⏹️' : '▶️'}
+                              {playingSound === sound.key ? '⏸' : '▶'}
                             </Text>
                           </TouchableOpacity>
                           {selectedSound === sound.key && (
@@ -835,46 +846,29 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
               </View>
 
               {/* Sound Options */}
-              <ScrollView style={styles.soundsList}>
+              <ScrollView 
+                style={styles.soundsList}
+                nestedScrollEnabled={true}
+                showsVerticalScrollIndicator={true}
+              >
                 {[
-                  // Epic & Motivational
-                  { key: 'cosmic_awakening', name: '🌌 Cosmic Awakening', description: 'Ethereal space sounds building to inspiration' },
-                  { key: 'champion_rise', name: '🏆 Champion Rise', description: 'Heroic orchestral theme for ambitious mornings' },
-                  { key: 'power_surge', name: '⚡ Power Surge', description: 'Energizing electronic beats with uplifting melody' },
+                  // 🎉 FUN & ENERGETIC
+                  { key: 'digital_beep', name: '🐓 Crazy Rooster', description: 'Hilarious rooster alarm' },
+                  { key: 'electronic_alarm', name: '🎸 Acoustic Music', description: 'Electronic acoustic melody' },
+                  { key: 'rooster', name: '🏝️ Happy Island', description: 'Tropical island vibes' },
                   
-                  // Musical & Melodic
-                  { key: 'crystal_harmony', name: '💎 Crystal Harmony', description: 'Beautiful crystal bowl harmonics' },
-                  { key: 'royal_fanfare', name: '👑 Royal Fanfare', description: 'Majestic brass fanfare fit for royalty' },
-                  { key: 'zen_bells', name: '🧘 Zen Bells', description: 'Peaceful temple bells with reverb' },
+                  // 🎵 PLEASANT & UPBEAT
+                  { key: 'gentle_chimes', name: '🎐 Gentle Chimes', description: 'Soft peaceful chimes' },
+                  { key: 'piano_melody', name: '🎤 Hip Hop', description: 'Upbeat hip hop beats' },
+                  { key: 'soft_bells', name: '🎭 Mystery', description: 'Mysterious melody' },
                   
-                  // Nature & Ambient
-                  { key: 'mystic_forest', name: '🧚 Mystic Forest', description: 'Enchanted forest with magical undertones' },
-                  { key: 'ocean_sunrise', name: '🌅 Ocean Sunrise', description: 'Gentle waves with morning birds' },
+                  // 🌅 NATURE & RELAXING
+                  { key: 'birds_chirping', name: '🐦 Birds', description: 'Morning birds chirping' },
+                  { key: 'ocean_waves', name: '💨 Wind', description: 'Gentle wind sounds' },
+                  { key: 'fanfare', name: '🎹 Piano Relax', description: 'Relaxing piano melody' },
                   
-                  // Modern & Tech
-                  { key: 'future_pulse', name: '🚀 Future Pulse', description: 'Futuristic sci-fi awakening sequence' },
-                  { key: 'digital_dawn', name: '💻 Digital Dawn', description: 'Clean modern tones with building energy' },
-                  
-                  // Classic favorites
-                  { key: 'gentle_chimes', name: '🎐 Gentle Chimes', description: 'Soft and peaceful traditional' },
-                  { key: 'classic_bell', name: '🔔 Classic Bell', description: 'Traditional alarm bell' },
-                  
-                  // Funny & Hilarious
-                  { key: 'rooster_opera', name: '🐓 Rooster Opera', description: 'Dramatic rooster awakening performance' },
-                  { key: 'alien_invasion', name: '👽 Alien Invasion', description: 'Sci-fi wake up call from space' },
-                  { key: 'grandmother_yelling', name: '👵 Grandmother Yelling', description: 'Classic wake up technique' },
-                  { key: 'cat_piano', name: '🐱 Cat Piano', description: 'Musical feline surprise' },
-                  { key: 'rubber_duck', name: '🦆 Rubber Duck', description: 'Squeaky morning greeting' },
-                  { key: 'pirate_wake_up', name: '🏴‍☠️ Pirate Wake Up', description: 'Arrr, time to rise matey!' },
-                  { key: 'baby_elephant', name: '🐘 Baby Elephant', description: 'Adorable trumpet call' },
-                  { key: 'disco_chicken', name: '🐔 Disco Chicken', description: 'Funky clucking beats' },
-                  { key: 'robot_malfunction', name: '🤖 Robot Malfunction', description: 'Glitchy morning beeps' },
-                  { key: 'snoring_bear', name: '🐻 Snoring Bear', description: 'From sleep to growl' },
-                  { key: 'chipmunk_chaos', name: '🐿️ Chipmunk Chaos', description: 'Hyperactive chatter' },
-                  { key: 'mom_voice', name: '👩 Mom Voice', description: 'The ultimate wake up call' },
-                  { key: 'screaming_goat', name: '🐐 Screaming Goat', description: 'Internet famous wake up' },
-                  { key: 'dramatic_llama', name: '🦙 Dramatic Llama', description: 'Theatrical morning call' },
-                  { key: 'singing_frog', name: '🐸 Singing Frog', description: 'Croaky morning serenade' },
+                  // 🎄 FESTIVE
+                  { key: 'classic_bell', name: '� Jingle Bells', description: 'Festive jingle bells sound' },
                 ].map((sound) => (
                   <View key={sound.key} style={styles.soundOptionContainer}>
                     <TouchableOpacity
@@ -896,9 +890,10 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
                         <TouchableOpacity
                           style={[styles.previewButton, playingSound === sound.key && styles.previewButtonPlaying]}
                           onPress={() => playPreviewSound(sound.key)}
+                          activeOpacity={0.7}
                         >
                           <Text style={[styles.previewButtonText, playingSound === sound.key && styles.previewButtonTextPlaying]}>
-                            {playingSound === sound.key ? '⏹️' : '▶️'}
+                            {playingSound === sound.key ? '⏸' : '▶'}
                           </Text>
                         </TouchableOpacity>
                         {quickAlarmSound === sound.key && (
@@ -1357,12 +1352,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: 25,
   },
   soundScrollView: {
-    maxHeight: 200,
+    maxHeight: 300,
     backgroundColor: colors.cardBackground,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.border,
-    flex: 1,
   },
   soundOption: {
     flexDirection: 'row',
@@ -1425,39 +1419,30 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: 10,
   },
   previewButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FF69B4',
     justifyContent: 'center',
     alignItems: 'center',
-    // 3D effect
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-    borderWidth: 1.5,
-    borderTopColor: '#F0F0F0',
-    borderLeftColor: '#F0F0F0',
-    borderRightColor: '#D0D0D0',
-    borderBottomColor: '#D0D0D0',
+    shadowColor: '#FF69B4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
   },
   previewButtonPlaying: {
-    backgroundColor: '#E8B4C4',
-    borderTopColor: '#F0C7D1',
-    borderLeftColor: '#F0C7D1',
-    borderRightColor: '#D1A1B1',
-    borderBottomColor: '#D1A1B1',
-    shadowColor: '#FF69B4',
-    shadowOpacity: 0.2,
+    backgroundColor: '#E91E63',
+    shadowColor: '#E91E63',
+    shadowOpacity: 0.5,
+    transform: [{ scale: 0.95 }],
   },
   previewButtonText: {
-    fontSize: 12,
-    color: '#000000',
+    fontSize: 16,
+    color: '#FFFFFF',
   },
   previewButtonTextPlaying: {
-    color: '#000000',
+    color: '#FFFFFF',
   },
   modalButtons: {
     flexDirection: 'row',
