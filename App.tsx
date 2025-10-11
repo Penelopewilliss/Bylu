@@ -56,7 +56,7 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
         duration: 800,
         useNativeDriver: true,
       }).start(() => onFinish());
-    }, Platform.OS === 'web' ? 3500 : 5000); // 5 seconds for mobile, 3.5 seconds for web
+    }, Platform.OS === 'web' ? 2000 : 2500); // 2.5 seconds for mobile, 2 seconds for web
     return () => clearTimeout(timer);
   }, [fadeAnim, scaleAnim, rotateAnim, onFinish]);
 
