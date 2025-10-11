@@ -7,6 +7,7 @@ import { useApp } from '../context/AppContext';
 import { AlarmNotificationService } from '../services/AlarmNotificationService';
 import Button3D from '../components/Button3D';
 import type { Alarm } from '../types';
+import { SOUND_FILES, getSoundFile } from '../config/sounds';
 
 interface AlarmClockScreenProps {
   onNavigate?: (screen: string) => void;
@@ -364,7 +365,23 @@ export default function AlarmClockScreen({ onNavigate, deepLink, onDeepLinkHandl
         staysActiveInBackground: false,
       });
 
-      // Local asset sounds with online fallbacks for preview
+      // Try to use local sound file first
+      const localSound = getSoundFile(soundKey);
+      if (localSound) {
+        const { sound } = await Audio.Sound.createAsync(
+          localSound,
+          {
+            shouldPlay: true,
+            volume: 0.4,
+            isLooping: false,
+          }
+        );
+        setCurrentPlayingSound(sound);
+        setPlayingSound(soundKey);
+        return;
+      }
+
+      // Fallback to online URLs for preview (when local files not available)
       const soundUrls: { [key: string]: string } = {
         // Epic & Motivational
         'cosmic_awakening': 'https://www.soundjay.com/misc/sounds/magic-chime-02.wav',
