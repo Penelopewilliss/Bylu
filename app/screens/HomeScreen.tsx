@@ -108,7 +108,7 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
       {/* 🎨 Full Screen Lottie Background Animation */}
       <View style={StyleSheet.absoluteFillObject}>
         <LottieView
@@ -134,61 +134,29 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
               style={({ pressed }) => [
                 styles.actionCard,
                 {
-                  // 3D Gradient Background Effect  
-                  backgroundColor: pressed ? '#D1A1B1' : '#E8B4C4', // Use theme primary color
-                  // Enhanced 3D Beveled Borders
-                  borderTopWidth: 4,
-                  borderTopColor: '#F0C7D1', // Lighter version of primary
-                  borderLeftWidth: 3,
-                  borderLeftColor: '#F0C7D1', // Lighter left edge 
-                  borderRightWidth: 2,
-                  borderRightColor: '#D1A1B1', // Darker right edge (shadow)
-                  borderBottomWidth: 2,
-                  borderBottomColor: '#D1A1B1', // Darker bottom edge (shadow)
-                  // 3D press effect with more dramatic transforms
+                  backgroundColor: pressed ? '#D1A1B1' : '#E8B4C4',
+                  // Subtle press effect
                   transform: pressed 
-                    ? [
-                        { perspective: 1200 },
-                        { rotateX: '8deg' },
-                        { rotateY: '2deg' },
-                        { scale: 0.92 },
-                        { translateY: 6 }
-                      ]
-                    : [
-                        { perspective: 1200 },
-                        { rotateX: '4deg' },
-                        { rotateY: '1deg' },
-                        { scale: 1 },
-                        { translateY: 0 }
-                      ],
-                  // More dramatic shadow changes
+                    ? [{ scale: 0.95 }]
+                    : [{ scale: 1 }],
+                  // Clean shadow for depth
+                  shadowColor: '#000',
                   shadowOffset: pressed 
-                    ? { width: 2, height: 8 }
-                    : { width: 0, height: 20 },
-                  shadowOpacity: pressed ? 0.2 : 0.4,
-                  shadowRadius: pressed ? 8 : 25,
-                  elevation: pressed ? 8 : 25,
+                    ? { width: 0, height: 4 }
+                    : { width: 0, height: 8 },
+                  shadowOpacity: pressed ? 0.15 : 0.25,
+                  shadowRadius: pressed ? 6 : 12,
+                  elevation: pressed ? 4 : 8,
                 }
               ]}
             >
-              {/* Inner 3D Container for depth effect */}
+              {/* Inner Container */}
               <View style={{
                 flex: 1,
                 width: '100%',
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: 24,
-                // Inner highlight/shadow effect
-                borderTopWidth: 1,
-                borderTopColor: 'rgba(255, 255, 255, 0.4)', // Inner highlight
-                borderLeftWidth: 1,
-                borderLeftColor: 'rgba(255, 255, 255, 0.3)', // Inner left highlight
-                borderRightWidth: 1,
-                borderRightColor: 'rgba(0, 0, 0, 0.1)', // Inner right shadow
-                borderBottomWidth: 1,
-                borderBottomColor: 'rgba(0, 0, 0, 0.1)', // Inner bottom shadow
-                // Subtle inner gradient effect
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
               }}>
                 {(action as any).animation ? (
                   <ActionLottie source={(action as any).animation} size={36} speed={1} />
@@ -210,11 +178,13 @@ export default function HomeScreen({ onNavigate, onSetDeepLink }: HomeScreenProp
 const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   content: {
     flex: 1,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingTop: 16,
+    paddingBottom: 12,
   },
   header: {
     marginBottom: 30,
@@ -236,7 +206,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   actionsGrid: {
     marginBottom: 30,
-    marginTop: 20,
+    marginTop: 4,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
@@ -246,40 +216,20 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.cardBackground,
     width: '40%',
     aspectRatio: 1,
-    borderRadius: 28, // Even more rounded for modern 3D look
+    borderRadius: 28,
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-    // Enhanced 3D Shadow Effects
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 15, // Much deeper shadow for 3D effect
-    },
-    shadowOpacity: 0.35, // More pronounced shadow
-    shadowRadius: 20, // Softer, more spread out blur
-    elevation: 20, // Higher elevation for Android
-    // 3D Transform Effect
-    transform: [
-      { perspective: 1200 },
-      { rotateX: '3deg' }, // More pronounced 3D tilt
-      { rotateY: '1deg' }, // Slight Y rotation for depth
-    ],
-    // Gradient-like border effect for 3D appearance
-    borderTopWidth: 3,
-    borderTopColor: '#FFB6C1', // Light pink top border
-    borderLeftWidth: 2,
-    borderLeftColor: '#FFB6C160', // Semi-transparent light pink left border
+    // Subtle 3D border effect
+    borderTopWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 0.4)',
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(255, 255, 255, 0.3)',
     borderRightWidth: 1,
-    borderRightColor: '#FFB6C130', // Even more subtle right border
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#FFB6C120', // Very subtle bottom border
-    // Inner content styling
+    borderRightColor: 'rgba(0, 0, 0, 0.1)',
+    borderBottomWidth: 2,
+    borderBottomColor: 'rgba(0, 0, 0, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    // Ensure cards are above background
     zIndex: 10,
-    // Subtle background gradient effect
     overflow: 'hidden',
   },
   actionHeader: {
@@ -287,14 +237,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: 6,
   },
   actionEmoji: {
-    fontSize: 36, // Even larger emoji for more impact
+    fontSize: 36,
     marginBottom: 10,
-    // Enhanced 3D text shadow effect
-    textShadowColor: 'rgba(0, 0, 0, 0.25)',
-    textShadowOffset: { width: 2, height: 4 },
-    textShadowRadius: 6,
-    // Enhanced transform for more depth
-    transform: [{ scale: 1.15 }],
+    // Subtle shadow for depth
+    textShadowColor: 'rgba(0, 0, 0, 0.15)',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 3,
   },
   actionTitle: {
     fontSize: 14, // Slightly larger text for better readability

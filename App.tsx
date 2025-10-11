@@ -759,8 +759,8 @@ const styles = StyleSheet.create({
     marginRight: 14, // More space between emoji and text
     alignItems: 'center',
     justifyContent: 'center',
-    width: 18,
-    height: 18,
+    width: 24,
+    height: 24,
   },
   menuEmojiText: {
     fontSize: 18, // Slightly larger emoji

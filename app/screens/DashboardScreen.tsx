@@ -98,12 +98,22 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
   // Get high priority tasks
   const highPriorityTasks = tasks.filter(task => !task.completed && task.priority === 'high').slice(0, 3);
   
-  // Get today's appointments (filter events for today)
+  // Get today's appointments (filter events for today and only show upcoming/current)
   const today = new Date();
   const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
   const todayAppointments = events.filter(event => {
     const eventDate = new Date(event.startDate).toISOString().split('T')[0];
-    return eventDate === todayString;
+    if (eventDate !== todayString) return false;
+    
+    // Check if the event has ended
+    if (event.endDate) {
+      const eventEndTime = new Date(event.endDate);
+      const now = new Date();
+      // Only show if the event hasn't ended yet
+      return eventEndTime > now;
+    }
+    
+    return true;
   }).slice(0, 3);
 
   // Get tomorrow's appointments
@@ -276,14 +286,17 @@ export default function DashboardScreen({ onNavigate }: { onNavigate?: (tab: str
                       <Text style={styles.categoryEmoji}>{categoryData.emoji}</Text>
                     </View>
                     
-                    <Button3D 
-                      title="🤍"
+                    <TouchableOpacity 
                       onPress={() => handleTaskToggle(task.id)}
-                      backgroundColor="#FFFFFF"
-                      textColor="#FF69B4"
-                      size="small"
-                      style={{ minWidth: 40, minHeight: 40 }}
-                    />
+                      style={{ 
+                        minWidth: 40, 
+                        minHeight: 40,
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <Text style={{ fontSize: 24 }}>🤍</Text>
+                    </TouchableOpacity>
                   </View>
                 );
               })}

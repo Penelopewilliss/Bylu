@@ -727,9 +727,10 @@ const createStyles = (colors: any) => StyleSheet.create({
   settingsContainer: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 0,
   },
   section: {
-    marginTop: 32,
+    marginTop: 12,
   },
   sectionTitle: {
     fontSize: 18,
